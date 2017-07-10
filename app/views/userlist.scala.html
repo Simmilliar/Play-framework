@@ -1,0 +1,22 @@
+@import models.data.User
+@(registeredUsers: List[User])
+@main("Registered users") {
+    <h1>Registered users</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>E-mail</th>
+            </tr>
+        </thead>
+        <tbody>
+        @for(registeredUser <- registeredUsers) {
+            <tr>
+                <td>@registeredUser.name</td>
+                <td>@registeredUser.email</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <a href="@routes.AuthorizationController.logout()" class="btn btn-default">Logout</a>
+}
