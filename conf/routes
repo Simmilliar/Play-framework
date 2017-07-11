@@ -1,17 +1,17 @@
 GET     /                           controllers.HomeController.index
 
 GET     /registration               controllers.RegistrationController.registration
-+ nocsrf
++nocsrf
 POST    /registration               controllers.RegistrationController.register
 
 GET     /login                      controllers.AuthorizationController.authorization
-+ nocsrf
++nocsrf
 POST    /login                      controllers.AuthorizationController.authorize
 
 GET     /logout                     controllers.AuthorizationController.logout
 
 GET     /editprofile                controllers.ProfileEditorController.profileEditor
-+ nocsrf
++nocsrf
 POST    /editprofile                controllers.ProfileEditorController.edit
 
 
@@ -20,8 +20,11 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 
 
-GET    /api/authorize              controllers.ApiController.authorize(email,password)
-
-GET    /api/unauthorize            controllers.ApiController.unauthorize(session_token)
++nocsrf
+POST   /api/authorize              controllers.ApiController.authorize(email,password)
++nocsrf
+POST   /api/unauthorize            controllers.ApiController.unauthorize(session_token)
 
 GET    /api/userslist              controllers.ApiController.userlist(session_token)
++nocsrf
+POST   /api/editprofile            controllers.ApiController.editProfile(new_name,new_password,session_token)
