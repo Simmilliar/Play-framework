@@ -11,6 +11,8 @@ POST    /login                      controllers.AuthorizationController.authoriz
 GET     /logout                     controllers.AuthorizationController.logout
 
 GET     /editprofile                controllers.ProfileEditorController.profileEditor
++ nocsrf
+POST    /editprofile                controllers.ProfileEditorController.edit
 
 
 

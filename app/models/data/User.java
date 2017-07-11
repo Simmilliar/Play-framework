@@ -1,7 +1,6 @@
 package models.data;
 
 import io.ebean.Model;
-import play.data.validation.Constraints;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

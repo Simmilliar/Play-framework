@@ -1,0 +1,14 @@
+@(userForm: Form[forms.ProfileEditorForm])
+@import b3.vertical.fieldConstructor
+
+@main("Registration") {
+    <h1>Edit profile</h1>
+    @b3.form(routes.ProfileEditorController.edit) {
+        @b3.text(userForm("name"), '_label -> "Name")
+        @b3.email(userForm("email"), '_label -> "E-mail", 'readonly -> "readonly")
+        @b3.password(userForm("password"), '_label -> "New password")
+        @b3.password(userForm("passwordConfirm"), '_label -> "Confirm new password")
+        @b3.submit('class -> "btn btn-primary"){ Submit }
+        <a href="@routes.HomeController.index()" class="btn btn-default">Go back</a>
+    }
+}
