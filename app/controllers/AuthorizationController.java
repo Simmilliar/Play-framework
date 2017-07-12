@@ -10,6 +10,8 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.time.Duration;
 
+import static controllers.SessionsManager.userAuthorized;
+
 public class AuthorizationController extends Controller {
 
 	private final FormFactory formFactory;
@@ -29,8 +31,7 @@ public class AuthorizationController extends Controller {
 	}
 
 	public Result authorize() {
-		if (request().cookies().get("session_token") == null ||
-				!SessionsManager.checkSession(request().cookies().get("session_token").value())) {
+		if (!userAuthorized(request())) {
 			Form<AuthorizationForm> loginForm = formFactory.form(AuthorizationForm.class).bindFromRequest();
 			if (loginForm.hasErrors()) {
 				return badRequest(views.html.authorization.render(loginForm));
@@ -52,8 +53,7 @@ public class AuthorizationController extends Controller {
 	}
 
 	public Result logout() {
-		if (request().cookies().get("session_token") != null &&
-				SessionsManager.checkSession(request().cookies().get("session_token").value())) {
+		if (userAuthorized(request())) {
 			SessionsManager.unregisterSession(request().cookies().get("session_token").value());
 			response().discardCookie("session_token");
 		}

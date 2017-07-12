@@ -3,12 +3,18 @@ package controllers;
 import io.ebean.Ebean;
 import models.data.Sessions;
 import models.data.User;
+import play.mvc.Http;
 
 import java.util.concurrent.TimeUnit;
 
 public class SessionsManager {
 
 	static final long TOKEN_LIFETIME = TimeUnit.DAYS.toSeconds(30);
+
+	static boolean userAuthorized(Http.Request request) {
+		return request.cookies().get("session_token") != null &&
+				SessionsManager.checkSession(request.cookies().get("session_token").value());
+	}
 
 	static String registerSession(String userAgent, String email) {
 		long timestamp = System.currentTimeMillis() / 1000L + TOKEN_LIFETIME;

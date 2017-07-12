@@ -15,11 +15,12 @@ import javax.inject.Inject;
 import java.time.Duration;
 import java.util.List;
 
+import static controllers.SessionsManager.userAuthorized;
+
 public class HomeController extends Controller {
 
 	public Result index() {
-		if (request().cookies().get("session_token") != null &&
-				SessionsManager.checkSession(request().cookies().get("session_token").value())){
+		if (userAuthorized(request())){
 			List<User> users = Ebean.find(User.class).findList();
 			return ok(views.html.userlist.render(users));
 		} else {

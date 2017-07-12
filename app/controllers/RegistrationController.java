@@ -13,6 +13,8 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.time.Duration;
 
+import static controllers.SessionsManager.userAuthorized;
+
 public class RegistrationController extends Controller {
 
 	final private FormFactory formFactory;
@@ -25,8 +27,7 @@ public class RegistrationController extends Controller {
 	}
 
 	public Result registration() {
-		if (request().cookies().get("session_token") != null &&
-				SessionsManager.checkSession(request().cookies().get("session_token").value())) {
+		if (userAuthorized(request())) {
 			return redirect(routes.HomeController.index());
 		} else {
 			return ok(views.html.registration.render(formFactory.form(RegistrationForm.class)));
@@ -34,8 +35,7 @@ public class RegistrationController extends Controller {
 	}
 
 	public Result register() {
-		if (request().cookies().get("session_token") == null ||
-				!SessionsManager.checkSession(request().cookies().get("session_token").value())) {
+		if (!userAuthorized(request())) {
 			Form<RegistrationForm> registrationForm = formFactory.form(RegistrationForm.class).bindFromRequest();
 			if (registrationForm.hasErrors()) {
 				return badRequest(views.html.registration.render(registrationForm));
@@ -45,7 +45,7 @@ public class RegistrationController extends Controller {
 				user.email = registrationForm.get().email;
 				user.confirmed = false;
 				user.passwordHash = Utils.hashString(registrationForm.get().password);
-				user.confirmationKey = Utils.hashString(user.passwordHash);
+				user.confirmationKey = Utils.hashString(user.passwordHash  + System.currentTimeMillis());
 				user.save();
 
 				String confirmationBodyText = "To complete your registration you need to confirm your e-mail address " +

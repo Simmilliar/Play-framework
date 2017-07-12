@@ -15,6 +15,8 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static controllers.SessionsManager.userAuthorized;
+
 public class ProfileEditorController extends Controller {
 
 	private final FormFactory formFactory;
@@ -25,8 +27,7 @@ public class ProfileEditorController extends Controller {
 	}
 
 	public Result profileEditor() {
-		if (request().cookies().get("session_token") != null &&
-				SessionsManager.checkSession(request().cookies().get("session_token").value())) {
+		if (userAuthorized(request())) {
 			SqlQuery sqlQuery = Ebean.createSqlQuery(
 					"SELECT User.name, User.email " +
 							"FROM User JOIN Sessions ON User.email = Sessions.user_email " +
@@ -51,8 +52,7 @@ public class ProfileEditorController extends Controller {
 		Form<ProfileEditorForm> form = formFactory.form(ProfileEditorForm.class).bindFromRequest();
 		if (form.hasErrors()) {
 			return badRequest(views.html.editprofile.render(form));
-		} else if (request().cookies().get("session_token") != null &&
-				SessionsManager.checkSession(request().cookies().get("session_token").value()) &&
+		} else if (userAuthorized(request()) &&
 				Ebean.find(Sessions.class, request().cookies().get("session_token").value()).user.email.equals(form.get().email)) {
 			ProfileEditorForm profileEditorForm = form.get();
 			User user = Ebean.find(User.class, profileEditorForm.email);

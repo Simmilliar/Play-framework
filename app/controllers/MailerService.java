@@ -16,7 +16,7 @@ public class MailerService {
 	public void sendEmail(String recipient, String subject, String bodyText) {
 		Email email = new Email()
 				.setSubject(subject)
-				.setFrom("play.framework@meta.ua")
+				.setFrom("Play! <play.framework@meta.ua>")
 				.addTo(recipient)
 				.setBodyText(bodyText);
 		mailerClient.send(email);

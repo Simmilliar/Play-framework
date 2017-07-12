@@ -16,6 +16,14 @@ POST    /editprofile                controllers.ProfileEditorController.edit
 
 GET     /emailconfirm               controllers.RegistrationController.confirmEmail(key)
 
+GET     /forgottpassword            controllers.ForgottPasswordController.forgottPassword
++nocsrf
+POST    /forgottpassword            controllers.ForgottPasswordController.sendForgottMail
+
+GET     /changepassword             controllers.ForgottPasswordController.changingPassword(key)
++nocsrf
+POST    /changepassword             controllers.ForgottPasswordController.changePassword(key)
+
 
 
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
