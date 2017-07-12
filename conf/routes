@@ -21,10 +21,10 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 
 +nocsrf
-POST   /api/authorize              controllers.ApiController.authorize(email,password)
+POST   /api/authorize               controllers.ApiController.authorize(email,password)
 +nocsrf
-POST   /api/unauthorize            controllers.ApiController.unauthorize(session_token)
+POST   /api/unauthorize             controllers.ApiController.unauthorize(session_token)
 
-GET    /api/userslist              controllers.ApiController.userlist(session_token)
+GET    /api/userslist               controllers.ApiController.userlist(session_token)
 +nocsrf
-POST   /api/editprofile            controllers.ApiController.editProfile(new_name,new_password,session_token)
+POST   /api/editprofile             controllers.ApiController.editProfile(new_name,new_password,session_token)
