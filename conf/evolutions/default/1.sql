@@ -12,6 +12,8 @@ create table sessions (
 
 create table user (
   email                         varchar(255) not null,
+  confirmed                     boolean default false not null,
+  confirmation_key              varchar(255) not null,
   name                          varchar(255) not null,
   password_hash                 varchar(255) not null,
   constraint pk_user primary key (email)
