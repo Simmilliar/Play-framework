@@ -19,7 +19,6 @@ import java.util.Map;
 
 public class ApiController extends Controller
 {
-
 	private final FormFactory formFactory;
 
 	@Inject

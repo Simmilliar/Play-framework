@@ -11,7 +11,6 @@ import static controllers.utils.SessionsManager.userAuthorized;
 
 public class HomeController extends Controller
 {
-
 	public Result index()
 	{
 		if (userAuthorized(request()))
