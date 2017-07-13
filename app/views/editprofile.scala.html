@@ -1,7 +1,7 @@
 @(userForm: Form[forms.ProfileEditorForm])
 @import b3.vertical.fieldConstructor
 
-@main("Registration") {
+@main("Edit profile") {
     <h1>Edit profile</h1>
     @b3.form(routes.ProfileEditorController.edit) {
         @b3.text(userForm("name"), '_label -> "Name")
