@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
-import javafx.util.Pair;
 import models.data.Session;
 import models.data.User;
 import models.forms.AuthorizationForm;
@@ -17,9 +16,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ApiController extends Controller
