@@ -81,7 +81,7 @@ public class RegistrationController extends Controller
 	{
 		User user = Ebean.find(User.class).where()
 				.eq("confirmation_key", key)
-				.eq("confirmed", true)
+				.eq("confirmed", false)
 				.findOne();
 		if (user != null)
 		{
