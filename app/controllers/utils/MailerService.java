@@ -1,19 +1,22 @@
-package controllers;
+package controllers.utils;
 
 import play.libs.mailer.Email;
 import play.libs.mailer.MailerClient;
 
 import javax.inject.Inject;
 
-public class MailerService {
+public class MailerService
+{
 	private MailerClient mailerClient;
 
 	@Inject
-	public MailerService(MailerClient mailerClient) {
+	public MailerService(MailerClient mailerClient)
+	{
 		this.mailerClient = mailerClient;
 	}
 
-	public void sendEmail(String recipient, String subject, String bodyText) {
+	public void sendEmail(String recipient, String subject, String bodyText)
+	{
 		Email email = new Email()
 				.setSubject(subject)
 				.setFrom("Play! <play.framework@meta.ua>")

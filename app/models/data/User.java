@@ -7,7 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class User extends Model {
+public class User extends Model
+{
 	@Id
 	public String email;
 	@Column(nullable = false)

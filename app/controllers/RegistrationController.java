@@ -1,5 +1,8 @@
 package controllers;
 
+import controllers.utils.MailerService;
+import controllers.utils.SessionsManager;
+import controllers.utils.Utils;
 import io.ebean.Ebean;
 import models.data.User;
 import models.forms.RegistrationForm;
@@ -13,52 +16,75 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.time.Duration;
 
-import static controllers.SessionsManager.userAuthorized;
+import static controllers.utils.SessionsManager.userAuthorized;
 
-public class RegistrationController extends Controller {
-
+public class RegistrationController extends Controller
+{
 	final private FormFactory formFactory;
 	final private MailerClient mailerClient;
 
 	@Inject
-	public RegistrationController(FormFactory formFactory, MailerClient mailerClient) {
+	public RegistrationController(FormFactory formFactory, MailerClient mailerClient)
+	{
 		this.formFactory = formFactory;
 		this.mailerClient = mailerClient;
 	}
 
-	public Result registration() {
-		if (userAuthorized(request())) {
+	public Result registration()
+	{
+		if (userAuthorized(request()))
+		{
 			return redirect(routes.HomeController.index());
-		} else {
+		}
+		else
+		{
 			return ok(views.html.registration.render(formFactory.form(RegistrationForm.class)));
 		}
 	}
 
-	public Result register() {
-		if (!userAuthorized(request())) {
-			Form<RegistrationForm> registrationForm = formFactory.form(RegistrationForm.class).bindFromRequest();
-			if (registrationForm.hasErrors()) {
-				return badRequest(views.html.registration.render(registrationForm));
-			} else {
+	public Result register()
+	{
+		if (!userAuthorized(request()))
+		{
+			Form<RegistrationForm> form = formFactory.form(RegistrationForm.class).bindFromRequest();
+			if (form.hasErrors())
+			{
+				return badRequest(views.html.registration.render(form));
+			}
+			else
+			{
 				User user = new User();
-				user.name = registrationForm.get().name;
-				user.email = registrationForm.get().email;
+				user.name = form.get().name;
+				user.email = form.get().email;
 				user.confirmed = false;
-				user.passwordHash = Utils.hashString(registrationForm.get().password);
-				user.confirmationKey = Utils.hashString(user.passwordHash  + System.currentTimeMillis());
-				user.save();
+				user.passwordHash = Utils.hashString(form.get().password);
+				user.confirmationKey = Utils.hashString(user.email + System.currentTimeMillis());
 
-				String confirmationBodyText = "To complete your registration you need to confirm your e-mail address " +
-						"by following this link: http://localhost:9000/emailconfirm?key=" + user.confirmationKey;
-				new MailerService(mailerClient).sendEmail(user.email, "Email confirmation", confirmationBodyText);
+				try
+				{
+					String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION, user.confirmationKey);
+					new MailerService(mailerClient)
+							.sendEmail(user.email, "Registration confirmation.", confirmationBodyText);
+				}
+				catch (Exception e)
+				{
+					return internalServerError(views.html.registration.render(form));
+				}
+
+				user.save();
 			}
 		}
 		return redirect(routes.HomeController.index());
 	}
 
-	public Result confirmEmail(String key) {
-		User user = Ebean.find(User.class).where().eq("confirmation_key", key).findOne();
-		if (user != null && !user.confirmed) {
+	public Result confirmEmail(String key)
+	{
+		User user = Ebean.find(User.class).where()
+				.eq("confirmation_key", key)
+				.eq("confirmed", true)
+				.findOne();
+		if (user != null)
+		{
 			user.confirmed = true;
 			user.save();
 			String sessionToken = SessionsManager.registerSession(

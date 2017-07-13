@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Constraints.Validate
-public class AuthorizationForm implements Constraints.Validatable<List<ValidationError>>
+public class ForgotPasswordForm implements Constraints.Validatable<List<ValidationError>>
 {
+
+	@Constraints.Required
 	public String email;
-	public String password;
 
 	@Override
 	public List<ValidationError> validate()
@@ -23,16 +24,9 @@ public class AuthorizationForm implements Constraints.Validatable<List<Validatio
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
-
-		if (Ebean.find(User.class).where()
-				.and()
-				.eq("email", email)
-				.eq("password_hash", Utils.hashString(password))
-				.eq("confirmed", true)
-				.endAnd()
-				.findList().isEmpty())
+		else if (Ebean.find(User.class, email) == null)
 		{
-			errors.add(new ValidationError("password", "Invalid e-mail or password."));
+			errors.add(new ValidationError("email", "No registered user with this e-mail."));
 		}
 
 		return errors.isEmpty() ? null : errors;

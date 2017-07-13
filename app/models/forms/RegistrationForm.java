@@ -1,7 +1,7 @@
 package models.forms;
 
+import controllers.utils.Utils;
 import io.ebean.Ebean;
-import io.ebean.SqlQuery;
 import models.data.User;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Constraints.Validate
-public class RegistrationForm implements Constraints.Validatable<List<ValidationError>> {
-
+public class RegistrationForm implements Constraints.Validatable<List<ValidationError>>
+{
 	@Constraints.Required
 	public String name;
 
@@ -21,20 +21,34 @@ public class RegistrationForm implements Constraints.Validatable<List<Validation
 	@Constraints.Required
 	public String password;
 
+	public String passwordConfirm;
+
 	@Override
-	public List<ValidationError> validate() {
-		List<ValidationError> errors = new ArrayList<ValidationError>();
-		if (!name.matches("[a-zA-Z\\s]+")) {
+	public List<ValidationError> validate()
+	{
+		List<ValidationError> errors = new ArrayList<>();
+		if (!name.matches(Utils.REGEX_NAME))
+		{
 			errors.add(new ValidationError("name", "Invalid name."));
 		}
-		if (!email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")) {
+		if (!email.matches(Utils.REGEX_EMAIL))
+		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
-		if (Ebean.find(User.class, email) != null) {
+		if (Ebean.find(User.class).where()
+				.eq("email", email)
+				.eq("confirmed", true)
+				.findOne() != null)
+		{
 			errors.add(new ValidationError("email", "This e-mail is already registered."));
 		}
-		if (password.length() < 8) {
+		if (password.length() < 8)
+		{
 			errors.add(new ValidationError("password", "Password must be at least 8 symbols long."));
+		}
+		if (!password.equals(passwordConfirm))
+		{
+			errors.add(new ValidationError("passwordConfirm", "Passwords does not match."));
 		}
 		return errors.isEmpty() ? null : errors;
 	}

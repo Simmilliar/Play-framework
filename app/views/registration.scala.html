@@ -7,6 +7,7 @@
         @b3.text(userForm("name"), '_label -> "Name")
         @b3.email(userForm("email"), '_label -> "E-mail")
         @b3.password(userForm("password"), '_label -> "Password")
+        @b3.password(userForm("passwordConfirm"), '_label -> "Confirm password")
         @b3.submit('class -> "btn btn-primary"){ Register }
         <a href="@routes.HomeController.index()" class="btn btn-default">Go back</a>
     }

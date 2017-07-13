@@ -16,13 +16,13 @@ POST    /editprofile                controllers.ProfileEditorController.edit
 
 GET     /emailconfirm               controllers.RegistrationController.confirmEmail(key)
 
-GET     /forgottpassword            controllers.ForgottPasswordController.forgottPassword
+GET     /forgotpassword            controllers.ForgotPasswordController.forgotPassword
 +nocsrf
-POST    /forgottpassword            controllers.ForgottPasswordController.sendForgottMail
+POST    /forgotpassword            controllers.ForgotPasswordController.sendForgotMail
 
-GET     /changepassword             controllers.ForgottPasswordController.changingPassword(key)
+GET     /changepassword             controllers.ForgotPasswordController.changingPassword(key)
 +nocsrf
-POST    /changepassword             controllers.ForgottPasswordController.changePassword(key)
+POST    /changepassword             controllers.ForgotPasswordController.changePassword(key)
 
 
 

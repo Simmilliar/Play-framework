@@ -3,11 +3,11 @@
 
 # --- !Ups
 
-create table sessions (
+create table session (
   token                         varchar(255) not null,
   user_email                    varchar(255) not null,
   expiration_date               bigint not null,
-  constraint pk_sessions primary key (token)
+  constraint pk_session primary key (token)
 );
 
 create table user (
@@ -19,16 +19,16 @@ create table user (
   constraint pk_user primary key (email)
 );
 
-alter table sessions add constraint fk_sessions_user_email foreign key (user_email) references user (email) on delete restrict on update restrict;
-create index ix_sessions_user_email on sessions (user_email);
+alter table session add constraint fk_session_user_email foreign key (user_email) references user (email) on delete restrict on update restrict;
+create index ix_session_user_email on session (user_email);
 
 
 # --- !Downs
 
-alter table sessions drop constraint if exists fk_sessions_user_email;
-drop index if exists ix_sessions_user_email;
+alter table session drop constraint if exists fk_session_user_email;
+drop index if exists ix_session_user_email;
 
-drop table if exists sessions;
+drop table if exists session;
 
 drop table if exists user;
 
