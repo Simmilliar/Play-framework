@@ -1,8 +1,11 @@
 package controllers;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
+import javafx.util.Pair;
 import models.data.Session;
 import models.data.User;
 import models.forms.AuthorizationForm;
@@ -14,12 +17,15 @@ import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ApiController extends Controller
 {
 	private final FormFactory formFactory;
+	private Multimap<String, String> errors = ArrayListMultimap.create();
 
 	@Inject
 	public ApiController(FormFactory formFactory)
@@ -35,13 +41,13 @@ public class ApiController extends Controller
 		Form<AuthorizationForm> loginForm = formFactory.form(AuthorizationForm.class).bind(authorizationData);
 		if (loginForm.hasErrors())
 		{
-			return badRequest("{\"type\":\"request_errors\",\"errors\":" + loginForm.errorsAsJson() + "}");
+			return badRequest(loginForm.errorsAsJson());
 		}
 		else
 		{
 			String sessionToken = SessionsManager.registerSession(
 					request().getHeader("User-Agent"), loginForm.get().email);
-			return ok("{\"type\":\"session_token\",\"token\":\"" + sessionToken + "\"}");
+			return ok(sessionToken);
 		}
 	}
 
@@ -50,11 +56,13 @@ public class ApiController extends Controller
 		if (SessionsManager.checkSession(sessionToken))
 		{
 			SessionsManager.unregisterSession(sessionToken);
-			return ok("{\"type\":\"response\",\"response\":\"OK\"}");
+			return ok("");
 		}
 		else
 		{
-			return badRequest("{\"type\":\"request_errors\",\"errors\":{\"session_token\":[\"Invalid session token.\"]}}");
+			errors.clear();
+			errors.put("session_token", "Invalid session token.");
+			return badRequest(Json.toJson(errors.asMap()));
 		}
 	}
 
@@ -62,11 +70,13 @@ public class ApiController extends Controller
 	{
 		if (SessionsManager.checkSession(sessionToken))
 		{
-			return ok("{\"type\":\"list_user\",\"list\":" + Json.toJson(Ebean.createSqlQuery("SELECT name, email FROM User").findList()) + "}");
+			return ok(Json.toJson(Ebean.createSqlQuery("SELECT name, email FROM User").findList()));
 		}
 		else
 		{
-			return badRequest("{\"type\":\"request_errors\",\"errors\":{\"session_token\":[\"Invalid session token.\"]}}");
+			errors.clear();
+			errors.put("session_token", "Invalid session token.");
+			return badRequest(Json.toJson(errors.asMap()));
 		}
 	}
 
@@ -81,7 +91,7 @@ public class ApiController extends Controller
 			Form<ProfileEditorForm> form = formFactory.form(ProfileEditorForm.class).bind(data);
 			if (form.hasErrors())
 			{
-				return badRequest("{\"type\":\"request_errors\",\"errors\":" + form.errorsAsJson() + "}");
+				return badRequest(form.errorsAsJson());
 			}
 			else
 			{
@@ -101,12 +111,14 @@ public class ApiController extends Controller
 				{
 					user.save();
 				}
-				return ok("{\"type\":\"response\",\"response\":\"OK\"}");
+				return ok("");
 			}
 		}
 		else
 		{
-			return badRequest("{\"type\":\"request_errors\",\"errors\":{\"session_token\":[\"Invalid session token.\"]}}");
+			errors.clear();
+			errors.put("session_token", "Invalid session token.");
+			return badRequest(Json.toJson(errors.asMap()));
 		}
 	}
 }
