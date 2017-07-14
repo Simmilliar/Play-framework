@@ -2,6 +2,7 @@ package controllers;
 
 import controllers.utils.MailerService;
 import controllers.utils.SessionsManager;
+import controllers.utils.Switches;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
 import models.data.User;
@@ -49,6 +50,10 @@ public class RegistrationController extends Controller
 			Form<RegistrationForm> form = formFactory.form(RegistrationForm.class).bindFromRequest();
 			if (form.hasErrors())
 			{
+				if (Switches.PRINT_FORMS_ERRORS)
+				{
+					System.out.println(form.errorsAsJson());
+				}
 				return badRequest(views.html.registration.render(form));
 			}
 			else
@@ -56,19 +61,25 @@ public class RegistrationController extends Controller
 				User user = new User();
 				user.name = form.get().name;
 				user.email = form.get().email;
-				user.confirmed = false;
 				user.passwordHash = Utils.hashString(form.get().password);
 				user.confirmationKey = Utils.hashString(user.email + System.currentTimeMillis());
 
-				try
+				if (Switches.EMAIL_CONFIRMATION_REQUIRED)
 				{
-					String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION, user.confirmationKey);
-					new MailerService(mailerClient)
-							.sendEmail(user.email, "Registration confirmation.", confirmationBodyText);
-				}
-				catch (Exception e)
-				{
-					return internalServerError(views.html.registration.render(form));
+					user.confirmed = false;
+					try
+					{
+						String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION, user.confirmationKey);
+						new MailerService(mailerClient)
+								.sendEmail(user.email, "Registration confirmation.", confirmationBodyText);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+						return internalServerError(views.html.registration.render(form));
+					}
+				} else {
+					user.confirmed = true;
 				}
 
 				User oldUser = Ebean.find(User.class, user.email);

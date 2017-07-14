@@ -6,13 +6,16 @@ import models.data.User;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
+import javax.validation.Constraint;
 import java.util.ArrayList;
 import java.util.List;
 
 @Constraints.Validate
 public class AuthorizationForm implements Constraints.Validatable<List<ValidationError>>
 {
+	@Constraints.Required
 	public String email;
+	@Constraints.Required
 	public String password;
 
 	@Override
