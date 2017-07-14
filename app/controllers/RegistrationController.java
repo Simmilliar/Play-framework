@@ -71,6 +71,12 @@ public class RegistrationController extends Controller
 					return internalServerError(views.html.registration.render(form));
 				}
 
+				User oldUser = Ebean.find(User.class, user.email);
+				if (oldUser != null)
+				{
+					Ebean.delete(oldUser);
+				}
+
 				user.save();
 			}
 		}
