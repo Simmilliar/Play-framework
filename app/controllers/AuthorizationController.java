@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.utils.SessionsManager;
+import controllers.utils.Utils;
 import models.forms.AuthorizationForm;
 import play.data.Form;
 import play.data.FormFactory;
@@ -25,14 +26,17 @@ public class AuthorizationController extends Controller
 
 	public Result authorization()
 	{
+		Result result;
 		if (userAuthorized(request()))
 		{
-			return redirect(routes.HomeController.index());
+			result = redirect(routes.HomeController.index());
 		}
 		else
 		{
-			return ok(views.html.authorization.render(formFactory.form(AuthorizationForm.class)));
+			result = ok(views.html.authorization.render(formFactory.form(AuthorizationForm.class)));
 		}
+		Utils.setNotification(response(), "");
+		return result;
 	}
 
 	public Result authorize()

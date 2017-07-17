@@ -3,15 +3,19 @@ package controllers;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
 import models.data.User;
+import models.forms.RegistrationForm;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.Application;
+import play.data.Form;
+import play.data.FormFactory;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.WithApplication;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,11 +55,6 @@ public class RegistrationTest extends WithApplication
 	}
 
 	@Test
-	public void testFormValidation()
-	{
-	}
-
-	@Test
 	public void testRegisteredConfirmed()
 	{
 		Result result;
@@ -66,11 +65,10 @@ public class RegistrationTest extends WithApplication
 		formBody.put("email", "confirmed-user@example.com");
 		formBody.put("password", "4lrxrJsYww");
 		formBody.put("passwordConfirm", "4lrxrJsYww");
-		result = route(app,
-				new Http.RequestBuilder()
-						.method(POST)
-						.uri("/registration")
-						.bodyForm(formBody)
+		result = route(app, new Http.RequestBuilder()
+				.method(POST)
+				.uri("/registration")
+				.bodyForm(formBody)
 		);
 		assertEquals(BAD_REQUEST, result.status());
 	}
@@ -103,7 +101,7 @@ public class RegistrationTest extends WithApplication
 
 		formBody.clear();
 		formBody.put("name", "Test Not Registered");
-		formBody.put("email", "pTEDWIeAbp@meta.ua");
+		formBody.put("email", "not-registered-user@meta.ua");
 		formBody.put("password", "4lrxrJsYww");
 		formBody.put("passwordConfirm", "4lrxrJsYww");
 		result = route(app,

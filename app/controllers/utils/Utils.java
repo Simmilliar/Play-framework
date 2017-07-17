@@ -1,6 +1,10 @@
 package controllers.utils;
 
+import org.apache.commons.codec.binary.Base64;
+import play.mvc.Http;
+
 import java.security.MessageDigest;
+import java.time.Duration;
 
 public class Utils
 {
@@ -27,5 +31,35 @@ public class Utils
 			e.printStackTrace();
 		}
 		return hash;
+	}
+
+	public static String toBase64(String str) {
+		return new String(Base64.encodeBase64(str.getBytes()));
+	}
+
+	public static String fromBase64(String str) {
+		return new String(java.util.Base64.getDecoder().decode(str));
+	}
+
+	public static void setNotification(Http.Response response, String notification) {
+		response.setCookie(Http.Cookie.builder("notif", Utils.toBase64(notification))
+				.withMaxAge(Duration.ofSeconds(60))
+				.withPath("/")
+				.withDomain("localhost")
+				.withSecure(false)
+				.withHttpOnly(true)
+				.withSameSite(Http.Cookie.SameSite.STRICT)
+				.build()
+		);
+	}
+
+	public static String getNotification(Http.Request request) {
+		Http.Cookie notif = request.cookies().get("notif");
+		String notification = "";
+		if (notif != null)
+		{
+			notification = Utils.fromBase64(notif.value());
+		}
+		return notification;
 	}
 }

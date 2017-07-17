@@ -19,13 +19,13 @@ import static controllers.utils.SessionsManager.userAuthorized;
 public class ForgotPasswordController extends Controller
 {
 	private final FormFactory formFactory;
-	private final MailerClient mailerClient;
+	private final MailerService mailerService;
 
 	@Inject
-	public ForgotPasswordController(FormFactory formFactory, MailerClient mailerClient)
+	public ForgotPasswordController(FormFactory formFactory, MailerService mailerService)
 	{
 		this.formFactory = formFactory;
-		this.mailerClient = mailerClient;
+		this.mailerService = mailerService;
 	}
 
 	public Result forgotPassword()
@@ -55,8 +55,8 @@ public class ForgotPasswordController extends Controller
 				user.confirmationKey = Utils.hashString(user.confirmationKey + System.currentTimeMillis());
 				user.save();
 				String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE, user.confirmationKey);
-				new MailerService(mailerClient)
-						.sendEmail(form.get().email, "Change password.", confirmationBodyText);
+				mailerService.sendEmail(form.get().email, "Change password.", confirmationBodyText);
+				Utils.setNotification(response(), "We'll sen you an e-mail to change your password.");
 			}
 		}
 		return redirect(routes.HomeController.index());
@@ -89,6 +89,7 @@ public class ForgotPasswordController extends Controller
 			{
 				user.passwordHash = Utils.hashString(form.get().password);
 				user.save();
+				Utils.setNotification(response(), "Password had been changed successfully.");
 				return redirect(routes.AuthorizationController.authorization());
 			}
 		}

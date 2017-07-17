@@ -72,6 +72,7 @@ public class ProfileEditorController extends Controller
 				if (needToSave)
 				{
 					user.save();
+					Utils.setNotification(response(), "Your profile info successfully changed.");
 				}
 			}
 		}

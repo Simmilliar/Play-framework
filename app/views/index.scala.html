@@ -1,5 +1,9 @@
+@(notification: String)
 @main("Welcome to Play") {
     <h1>Welcome to Play!</h1>
+    @if(!notification.equals("")){
+        <p class="bg-success">@notification</p>
+    }
     <a href="@routes.AuthorizationController.authorization()" class="btn btn-primary">Login</a>
     <a href="@routes.RegistrationController.registration()" class="btn btn-default">Registration</a>
 }
