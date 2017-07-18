@@ -4,7 +4,7 @@ import akka.actor.Props;
 import akka.actor.UntypedAbstractActor;
 import io.ebean.Ebean;
 import models.data.Session;
-import models.data.User;
+import models.data.Users;
 
 public class SessionsCleaner extends UntypedAbstractActor
 {
@@ -24,7 +24,7 @@ public class SessionsCleaner extends UntypedAbstractActor
 							.findList()
 			);
 			Ebean.deleteAll(
-					Ebean.find(User.class).where()
+					Ebean.find(Users.class).where()
 							.eq("confirmed", false)
 							.findList()
 			);

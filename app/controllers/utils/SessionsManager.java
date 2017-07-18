@@ -2,7 +2,7 @@ package controllers.utils;
 
 import io.ebean.Ebean;
 import models.data.Session;
-import models.data.User;
+import models.data.Users;
 import play.mvc.Http;
 
 import java.util.concurrent.TimeUnit;
@@ -24,7 +24,7 @@ public class SessionsManager
 		String token = Utils.hashString(userAgent + email + timestamp);
 
 		Session session = new Session();
-		session.user = Ebean.find(User.class, email);
+		session.user = Ebean.find(Users.class, email);
 		session.expirationDate = timestamp;
 		session.token = token;
 		session.save();

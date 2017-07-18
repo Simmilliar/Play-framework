@@ -6,7 +6,7 @@ import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
 import models.data.Session;
-import models.data.User;
+import models.data.Users;
 import models.forms.AuthorizationForm;
 import models.forms.ProfileEditorForm;
 import play.data.Form;
@@ -67,7 +67,7 @@ public class ApiController extends Controller
 	{
 		if (SessionsManager.checkSession(sessionToken))
 		{
-			return ok(Json.toJson(Ebean.createSqlQuery("SELECT name, email FROM User").findList()));
+			return ok(Json.toJson(Ebean.createSqlQuery("SELECT name, email FROM Users").findList()));
 		}
 		else
 		{
@@ -92,7 +92,7 @@ public class ApiController extends Controller
 			}
 			else
 			{
-				User user = Ebean.find(User.class, Ebean.find(Session.class, sessionToken).user.email);
+				Users user = Ebean.find(Users.class, Ebean.find(Session.class, sessionToken).user.email);
 				boolean needToSave = false;
 				if (!user.name.equals(newName))
 				{

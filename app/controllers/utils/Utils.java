@@ -16,7 +16,7 @@ public class Utils
 	public static final String EMAIL_PASSWORD_CHANGE = "You can change your password by following this link: " +
 			"http://localhost:9000/changepassword?key=%s\nIf you don't want to do this, just ignore this e-mail.";
 
-	public static final String COOKIE_DOMAIN = "thor.simmilliar.com";
+	public static final String COOKIE_DOMAIN = "localhost";
 
 	public static String hashString(String str)
 	{

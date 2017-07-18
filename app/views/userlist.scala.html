@@ -1,5 +1,5 @@
-@import models.data.User
-@(registeredUsers: List[User])(notification: String)
+@import models.data.Users
+@(registeredUsers: List[Users])(notification: String)
 @main("Registered users") {
     <h1>Registered users</h1>
     @if(!notification.equals("")){

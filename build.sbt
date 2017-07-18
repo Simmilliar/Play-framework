@@ -12,6 +12,7 @@ scalaVersion := "2.12.2"
 libraryDependencies += guice
 libraryDependencies += jdbc
 libraryDependencies += "com.h2database" % "h2" % "1.4.194"
+libraryDependencies += "org.postgresql" % "postgresql" % "9.4-1206-jdbc42"
 
 libraryDependencies += "org.awaitility" % "awaitility" % "2.0.0" % Test
 libraryDependencies += "org.assertj" % "assertj-core" % "3.6.2" % Test

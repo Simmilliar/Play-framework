@@ -13,7 +13,7 @@ public class Session extends Model
 	@Id
 	public String token;
 	@ManyToOne(optional = false)
-	public User user;
+	public Users user;
 	@Column(nullable = false)
 	public long expirationDate;
 }

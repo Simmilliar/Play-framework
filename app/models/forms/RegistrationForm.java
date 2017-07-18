@@ -2,7 +2,7 @@ package models.forms;
 
 import controllers.utils.Utils;
 import io.ebean.Ebean;
-import models.data.User;
+import models.data.Users;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -35,7 +35,7 @@ public class RegistrationForm implements Constraints.Validatable<List<Validation
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
-		if (Ebean.find(User.class).where()
+		if (Ebean.find(Users.class).where()
 				.eq("email", email)
 				.eq("confirmed", true)
 				.findOne() != null)

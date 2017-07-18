@@ -2,25 +2,20 @@ package controllers;
 
 import controllers.utils.Utils;
 import io.ebean.Ebean;
-import models.data.User;
-import models.forms.RegistrationForm;
+import models.data.Users;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.Application;
-import play.data.Form;
-import play.data.FormFactory;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.WithApplication;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static play.mvc.Http.Status.OK;
 import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.SEE_OTHER;
 import static play.test.Helpers.POST;
@@ -37,7 +32,7 @@ public class RegistrationTest extends WithApplication
 	@Before
 	public void setupRegistration()
 	{
-		User confirmedUser = new User();
+		Users confirmedUser = new Users();
 		confirmedUser.name = "Confirmed user";
 		confirmedUser.email = "confirmed-user@example.com";
 		confirmedUser.passwordHash = Utils.hashString("yZybgWmeWl");
@@ -45,7 +40,7 @@ public class RegistrationTest extends WithApplication
 		confirmedUser.confirmed = true;
 		confirmedUser.save();
 
-		User unconfirmedUser = new User();
+		Users unconfirmedUser = new Users();
 		unconfirmedUser.name = "Unconfirmed user";
 		unconfirmedUser.email = "unconfirmed-user@example.com";
 		unconfirmedUser.passwordHash = Utils.hashString("BGfnAaoLIw");
@@ -116,6 +111,6 @@ public class RegistrationTest extends WithApplication
 	@After
 	public void clearRegistration()
 	{
-		Ebean.deleteAll(Ebean.find(User.class).findList());
+		Ebean.deleteAll(Ebean.find(Users.class).findList());
 	}
 }

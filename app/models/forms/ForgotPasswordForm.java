@@ -2,7 +2,7 @@ package models.forms;
 
 import controllers.utils.Utils;
 import io.ebean.Ebean;
-import models.data.User;
+import models.data.Users;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -24,7 +24,7 @@ public class ForgotPasswordForm implements Constraints.Validatable<List<Validati
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
-		else if (Ebean.find(User.class, email) == null)
+		else if (Ebean.find(Users.class, email) == null)
 		{
 			errors.add(new ValidationError("email", "No registered user with this e-mail."));
 		}

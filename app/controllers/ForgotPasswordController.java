@@ -3,7 +3,7 @@ package controllers;
 import controllers.utils.MailerService;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
-import models.data.User;
+import models.data.Users;
 import models.forms.ChangePasswordForm;
 import models.forms.ForgotPasswordForm;
 import play.data.Form;
@@ -52,7 +52,7 @@ public class ForgotPasswordController extends Controller
 			}
 			else
 			{
-				User user = Ebean.find(User.class, form.get().email);
+				Users user = Ebean.find(Users.class, form.get().email);
 				user.confirmationKey = Utils.hashString(user.confirmationKey + System.currentTimeMillis());
 				user.save();
 				String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE, user.confirmationKey);
@@ -66,7 +66,7 @@ public class ForgotPasswordController extends Controller
 	public Result changingPassword(String key)
 	{
 		if (!userAuthorized(request()) &&
-				Ebean.find(User.class).where().eq("confirmation_key", key).findOne() != null)
+				Ebean.find(Users.class).where().eq("confirmation_key", key).findOne() != null)
 		{
 			return ok(views.html.changepassword.render(formFactory.form(ChangePasswordForm.class), key));
 		}
@@ -78,7 +78,7 @@ public class ForgotPasswordController extends Controller
 
 	public Result changePassword(String key)
 	{
-		User user = Ebean.find(User.class).where().eq("confirmation_key", key).findOne();
+		Users user = Ebean.find(Users.class).where().eq("confirmation_key", key).findOne();
 		if (!userAuthorized(request()) && user != null)
 		{
 			Form<ChangePasswordForm> form = formFactory.form(ChangePasswordForm.class).bindFromRequest();

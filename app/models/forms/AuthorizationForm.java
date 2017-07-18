@@ -2,11 +2,10 @@ package models.forms;
 
 import controllers.utils.Utils;
 import io.ebean.Ebean;
-import models.data.User;
+import models.data.Users;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
-import javax.validation.Constraint;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class AuthorizationForm implements Constraints.Validatable<List<Validatio
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
 
-		if (Ebean.find(User.class).where()
+		if (Ebean.find(Users.class).where()
 				.and()
 				.eq("email", email)
 				.eq("password_hash", Utils.hashString(password))

@@ -5,7 +5,7 @@ import controllers.utils.SessionsManager;
 import controllers.utils.Switches;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
-import models.data.User;
+import models.data.Users;
 import models.forms.RegistrationForm;
 import play.data.Form;
 import play.data.FormFactory;
@@ -60,7 +60,7 @@ public class RegistrationController extends Controller
 			}
 			else
 			{
-				User user = new User();
+				Users user = new Users();
 				user.name = form.get().name;
 				user.email = form.get().email;
 				user.passwordHash = Utils.hashString(form.get().password);
@@ -84,7 +84,7 @@ public class RegistrationController extends Controller
 					user.confirmed = true;
 				}
 
-				User oldUser = Ebean.find(User.class, user.email);
+				Users oldUser = Ebean.find(Users.class, user.email);
 				if (oldUser != null)
 				{
 					Ebean.delete(oldUser);
@@ -100,7 +100,7 @@ public class RegistrationController extends Controller
 
 	public Result confirmEmail(String key)
 	{
-		User user = Ebean.find(User.class).where()
+		Users user = Ebean.find(Users.class).where()
 				.eq("confirmation_key", key)
 				.eq("confirmed", false)
 				.findOne();

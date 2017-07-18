@@ -3,7 +3,7 @@ package controllers;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
 import models.data.Session;
-import models.data.User;
+import models.data.Users;
 import models.forms.ProfileEditorForm;
 import play.data.Form;
 import play.data.FormFactory;
@@ -57,7 +57,7 @@ public class ProfileEditorController extends Controller
 			}
 			else
 			{
-				User user = Ebean.find(Session.class).where()
+				Users user = Ebean.find(Session.class).where()
 						.eq("token", request().cookies().get("session_token").value())
 						.findOne().user;
 				boolean needToSave = false;

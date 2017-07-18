@@ -3,7 +3,7 @@ package controllers;
 import akka.actor.ActorSystem;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
-import models.data.User;
+import models.data.Users;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -36,7 +36,7 @@ public class HomeController extends Controller
 		Result result;
 		if (userAuthorized(request()))
 		{
-			List<User> users = Ebean.find(User.class).findList();
+			List<Users> users = Ebean.find(Users.class).findList();
 			result = ok(views.html.userlist.render(users, utils.getNotification(request())));
 		}
 		else
