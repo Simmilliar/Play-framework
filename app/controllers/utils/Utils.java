@@ -16,6 +16,8 @@ public class Utils
 	public static final String EMAIL_PASSWORD_CHANGE = "You can change your password by following this link: " +
 			"http://localhost:9000/changepassword?key=%s\nIf you don't want to do this, just ignore this e-mail.";
 
+	public static final String COOKIE_DOMAIN = "thor.simmilliar.com";
+
 	public static String hashString(String str)
 	{
 		String hash = "";
@@ -37,7 +39,7 @@ public class Utils
 		response.setCookie(Http.Cookie.builder("notif", new String(Base64.encodeBase64(notification.getBytes())))
 				.withMaxAge(Duration.ofSeconds(60))
 				.withPath("/")
-				.withDomain("localhost")
+				.withDomain(COOKIE_DOMAIN)
 				.withSecure(false)
 				.withHttpOnly(true)
 				.withSameSite(Http.Cookie.SameSite.STRICT)

@@ -57,7 +57,7 @@ public class AuthorizationController extends Controller
 				response().setCookie(Http.Cookie.builder("session_token", sessionToken)
 						.withMaxAge(Duration.ofSeconds(SessionsManager.TOKEN_LIFETIME))
 						.withPath("/")
-						.withDomain("localhost")
+						.withDomain(Utils.COOKIE_DOMAIN)
 						.withSecure(false)
 						.withHttpOnly(true)
 						.withSameSite(Http.Cookie.SameSite.STRICT)
