@@ -7,7 +7,6 @@ import controllers.utils.Utils;
 import io.ebean.Ebean;
 import models.data.User;
 import models.forms.RegistrationForm;
-import org.apache.commons.codec.binary.Base64;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.mailer.MailerClient;
@@ -24,12 +23,14 @@ public class RegistrationController extends Controller
 {
 	final private FormFactory formFactory;
 	final private MailerClient mailerClient;
+	private final Utils utils;
 
 	@Inject
-	public RegistrationController(FormFactory formFactory, MailerClient mailerClient)
+	public RegistrationController(FormFactory formFactory, MailerClient mailerClient, Utils utils)
 	{
 		this.formFactory = formFactory;
 		this.mailerClient = mailerClient;
+		this.utils = utils;
 	}
 
 	public Result registration()
@@ -91,7 +92,7 @@ public class RegistrationController extends Controller
 
 				user.save();
 
-				Utils.setNotification(response(), "We'll send you an e-mail to confirm your registration.");
+				utils.setNotification(response(), "We'll send you an e-mail to confirm your registration.");
 			}
 		}
 		return redirect(routes.HomeController.index());
@@ -107,7 +108,7 @@ public class RegistrationController extends Controller
 		{
 			user.confirmed = true;
 			user.save();
-			Utils.setNotification(response(), "You were successfully registered!");
+			utils.setNotification(response(), "You were successfully registered!");
 			String sessionToken = SessionsManager.registerSession(
 					request().getHeader("User-Agent"), user.email);
 			response().setCookie(Http.Cookie.builder("session_token", sessionToken)

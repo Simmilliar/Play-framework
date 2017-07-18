@@ -49,7 +49,6 @@ public class SessionsManager
 		}
 		else if (session.expirationDate <= System.currentTimeMillis() / 1000L)
 		{
-			Ebean.delete(session);
 			return false;
 		}
 		else

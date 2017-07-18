@@ -19,11 +19,13 @@ import static controllers.utils.SessionsManager.userAuthorized;
 public class ProfileEditorController extends Controller
 {
 	private final FormFactory formFactory;
+	private final Utils utils;
 
 	@Inject
-	public ProfileEditorController(FormFactory formFactory)
+	public ProfileEditorController(FormFactory formFactory, Utils utils)
 	{
 		this.formFactory = formFactory;
+		this.utils = utils;
 	}
 
 	public Result profileEditor()
@@ -72,7 +74,7 @@ public class ProfileEditorController extends Controller
 				if (needToSave)
 				{
 					user.save();
-					Utils.setNotification(response(), "Your profile info successfully changed.");
+					utils.setNotification(response(), "Your profile info successfully changed.");
 				}
 			}
 		}

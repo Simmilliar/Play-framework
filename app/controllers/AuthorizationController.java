@@ -17,11 +17,13 @@ import static controllers.utils.SessionsManager.userAuthorized;
 public class AuthorizationController extends Controller
 {
 	private final FormFactory formFactory;
+	private final Utils utils;
 
 	@Inject
-	public AuthorizationController(FormFactory formFactory)
+	public AuthorizationController(FormFactory formFactory, Utils utils)
 	{
 		this.formFactory = formFactory;
+		this.utils = utils;
 	}
 
 	public Result authorization()
@@ -35,7 +37,7 @@ public class AuthorizationController extends Controller
 		{
 			result = ok(views.html.authorization.render(formFactory.form(AuthorizationForm.class)));
 		}
-		Utils.setNotification(response(), "");
+		utils.setNotification(response(), "");
 		return result;
 	}
 

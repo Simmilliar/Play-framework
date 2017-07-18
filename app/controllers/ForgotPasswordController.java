@@ -8,7 +8,6 @@ import models.forms.ChangePasswordForm;
 import models.forms.ForgotPasswordForm;
 import play.data.Form;
 import play.data.FormFactory;
-import play.libs.mailer.MailerClient;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -20,12 +19,14 @@ public class ForgotPasswordController extends Controller
 {
 	private final FormFactory formFactory;
 	private final MailerService mailerService;
+	private final Utils utils;
 
 	@Inject
-	public ForgotPasswordController(FormFactory formFactory, MailerService mailerService)
+	public ForgotPasswordController(FormFactory formFactory, MailerService mailerService, Utils utils)
 	{
 		this.formFactory = formFactory;
 		this.mailerService = mailerService;
+		this.utils = utils;
 	}
 
 	public Result forgotPassword()
@@ -56,7 +57,7 @@ public class ForgotPasswordController extends Controller
 				user.save();
 				String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE, user.confirmationKey);
 				mailerService.sendEmail(form.get().email, "Change password.", confirmationBodyText);
-				Utils.setNotification(response(), "We'll sen you an e-mail to change your password.");
+				utils.setNotification(response(), "We'll sen you an e-mail to change your password.");
 			}
 		}
 		return redirect(routes.HomeController.index());
@@ -89,7 +90,7 @@ public class ForgotPasswordController extends Controller
 			{
 				user.passwordHash = Utils.hashString(form.get().password);
 				user.save();
-				Utils.setNotification(response(), "Password had been changed successfully.");
+				utils.setNotification(response(), "Password had been changed successfully.");
 				return redirect(routes.AuthorizationController.authorization());
 			}
 		}

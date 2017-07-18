@@ -14,8 +14,10 @@ import static controllers.utils.SessionsManager.userAuthorized;
 
 public class HomeController extends Controller
 {
+	private final Utils utils;
+
 	@Inject
-	public HomeController(ActorSystem system)
+	public HomeController(ActorSystem system, Utils utils)
 	{
 		/*ActorRef sessionsCleaner = system.actorOf(SessionsCleaner.getProps());
 		system.scheduler().schedule(
@@ -26,6 +28,7 @@ public class HomeController extends Controller
 				system.dispatcher(),
 				sessionsCleaner
 		);*/
+		this.utils = utils;
 	}
 
 	public Result index()
@@ -34,13 +37,13 @@ public class HomeController extends Controller
 		if (userAuthorized(request()))
 		{
 			List<User> users = Ebean.find(User.class).findList();
-			result = ok(views.html.userlist.render(users, Utils.getNotification(request())));
+			result = ok(views.html.userlist.render(users, utils.getNotification(request())));
 		}
 		else
 		{
-			result = ok(views.html.index.render(Utils.getNotification(request())));
+			result = ok(views.html.index.render(utils.getNotification(request())));
 		}
-		Utils.setNotification(response(), "");
+		utils.setNotification(response(), "");
 		return result;
 	}
 }
