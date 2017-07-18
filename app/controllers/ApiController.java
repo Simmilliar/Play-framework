@@ -36,15 +36,15 @@ public class ApiController extends Controller
 		authorizationData.put("email", email);
 		authorizationData.put("password", password);
 		Form<AuthorizationForm> loginForm = formFactory.form(AuthorizationForm.class).bind(authorizationData);
-		if (loginForm.hasErrors())
+		if (!loginForm.hasErrors() && request().header("User-Agent").isPresent())
 		{
-			return badRequest(loginForm.errorsAsJson());
+			String sessionToken = SessionsManager.registerSession(
+					request().header("User-Agent").get(), loginForm.get().email);
+			return ok(sessionToken);
 		}
 		else
 		{
-			String sessionToken = SessionsManager.registerSession(
-					request().getHeader("User-Agent"), loginForm.get().email);
-			return ok(sessionToken);
+			return badRequest(loginForm.errorsAsJson());
 		}
 	}
 

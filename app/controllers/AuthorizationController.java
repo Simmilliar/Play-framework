@@ -50,10 +50,10 @@ public class AuthorizationController extends Controller
 			{
 				return badRequest(views.html.authorization.render(form));
 			}
-			else
+			else if (request().header("User-Agent").isPresent())
 			{
 				String sessionToken = SessionsManager.registerSession(
-						request().getHeader("User-Agent"), form.get().email);
+						request().header("User-Agent").get(), form.get().email);
 				response().setCookie(Http.Cookie.builder("session_token", sessionToken)
 						.withMaxAge(Duration.ofSeconds(SessionsManager.TOKEN_LIFETIME))
 						.withPath("/")

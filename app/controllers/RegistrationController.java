@@ -80,7 +80,9 @@ public class RegistrationController extends Controller
 						e.printStackTrace();
 						return internalServerError(views.html.registration.render(form));
 					}
-				} else {
+				}
+				else
+				{
 					user.confirmed = true;
 				}
 
@@ -104,13 +106,13 @@ public class RegistrationController extends Controller
 				.eq("confirmation_key", key)
 				.eq("confirmed", false)
 				.findOne();
-		if (user != null)
+		if (user != null && request().header("User-Agent").isPresent())
 		{
 			user.confirmed = true;
 			user.save();
 			utils.setNotification(response(), "You were successfully registered!");
 			String sessionToken = SessionsManager.registerSession(
-					request().getHeader("User-Agent"), user.email);
+					request().header("User-Agent").get(), user.email);
 			response().setCookie(Http.Cookie.builder("session_token", sessionToken)
 					.withMaxAge(Duration.ofSeconds(SessionsManager.TOKEN_LIFETIME))
 					.withPath("/")

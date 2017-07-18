@@ -35,7 +35,8 @@ public class Utils
 		return hash;
 	}
 
-	public void setNotification(Http.Response response, String notification) {
+	public void setNotification(Http.Response response, String notification)
+	{
 		response.setCookie(Http.Cookie.builder("notif", new String(Base64.encodeBase64(notification.getBytes())))
 				.withMaxAge(Duration.ofSeconds(60))
 				.withPath("/")
@@ -47,7 +48,8 @@ public class Utils
 		);
 	}
 
-	public String getNotification(Http.Request request) {
+	public String getNotification(Http.Request request)
+	{
 		Http.Cookie notif = request.cookies().get("notif");
 		String notification = "";
 		if (notif != null)
