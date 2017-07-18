@@ -19,15 +19,6 @@ public class HomeController extends Controller
 	@Inject
 	public HomeController(ActorSystem system, Utils utils)
 	{
-		/*ActorRef sessionsCleaner = system.actorOf(SessionsCleaner.getProps());
-		system.scheduler().schedule(
-				Duration.create(0, TimeUnit.MILLISECONDS),
-				Duration.create(7, TimeUnit.DAYS),
-				sessionsCleaner,
-				new SessionsCleanerProtocol.SayClear(),
-				system.dispatcher(),
-				sessionsCleaner
-		);*/
 		this.utils = utils;
 	}
 
