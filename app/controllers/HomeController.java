@@ -1,6 +1,5 @@
 package controllers;
 
-import akka.actor.ActorSystem;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
 import models.data.Users;
@@ -17,7 +16,7 @@ public class HomeController extends Controller
 	private final Utils utils;
 
 	@Inject
-	public HomeController(ActorSystem system, Utils utils)
+	public HomeController(Utils utils)
 	{
 		this.utils = utils;
 	}
