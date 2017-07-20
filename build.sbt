@@ -20,4 +20,9 @@ libraryDependencies += "org.mockito" % "mockito-core" % "2.1.0" % Test
 libraryDependencies += "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B3-RC2"
 libraryDependencies += "com.typesafe.play" %% "play-mailer" % "6.0.0"
 libraryDependencies += "com.typesafe.play" %% "play-mailer-guice" % "6.0.0"
+
+libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.11.82"
+
+libraryDependencies += "org.im4java" % "im4java" % "1.4.0"
+
 testOptions in Test += Tests.Argument(TestFrameworks.JUnit, "-a", "-v")

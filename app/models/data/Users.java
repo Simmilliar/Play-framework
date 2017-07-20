@@ -19,4 +19,6 @@ public class Users extends Model
 	public String name;
 	@Column(nullable = false)
 	public String passwordHash;
+	@Column(nullable = false)
+	public String avatarUrl;
 }

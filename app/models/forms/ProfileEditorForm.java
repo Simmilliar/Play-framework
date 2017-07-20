@@ -4,6 +4,7 @@ import controllers.utils.Utils;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,12 @@ public class ProfileEditorForm implements Constraints.Validatable<List<Validatio
 
 	public String passwordConfirm = "";
 
+	public File avatarFile;
+
+	public String avatarUrl;
+
+	public boolean avatarFileIsValid;
+
 	@Override
 	public List<ValidationError> validate()
 	{
@@ -35,6 +42,10 @@ public class ProfileEditorForm implements Constraints.Validatable<List<Validatio
 		if (!passwordConfirm.equals(password))
 		{
 			errors.add(new ValidationError("passwordConfirm", "Passwords does not match."));
+		}
+		if (avatarFile != null && !avatarFileIsValid)
+		{
+			errors.add(new ValidationError("avatarFile", "Unable to read file as image."));
 		}
 		return errors.isEmpty() ? null : errors;
 	}

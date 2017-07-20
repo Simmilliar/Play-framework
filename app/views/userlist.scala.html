@@ -8,6 +8,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
+                <th style="white-space:nowrap;width:1px;"></th>
                 <th>Name</th>
                 <th>E-mail</th>
             </tr>
@@ -15,8 +16,10 @@
         <tbody>
             @for(registeredUser : Users <- registeredUsers) {
                 <tr>
-                    <td>@registeredUser.name</td>
-                    <td>@registeredUser.email</td>
+                    <td><img src="@registeredUser.avatarUrl" alt="User avatar"
+                        style="width:50px;height:50px;border-radius:25px"></td>
+                    <td style="vertical-align:middle;">@registeredUser.name</td>
+                    <td style="vertical-align:middle;">@registeredUser.email</td>
                 </tr>
             }
         </tbody>

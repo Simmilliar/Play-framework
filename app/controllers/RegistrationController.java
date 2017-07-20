@@ -1,8 +1,8 @@
 package controllers;
 
+import com.typesafe.config.ConfigFactory;
 import controllers.utils.MailerService;
 import controllers.utils.SessionsManager;
-import controllers.utils.Switches;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
 import models.data.Users;
@@ -52,10 +52,6 @@ public class RegistrationController extends Controller
 			Form<RegistrationForm> form = formFactory.form(RegistrationForm.class).bindFromRequest();
 			if (form.hasErrors())
 			{
-				if (Switches.PRINT_FORMS_ERRORS)
-				{
-					System.out.println(form.errorsAsJson());
-				}
 				return badRequest(views.html.registration.render(form));
 			}
 			else
@@ -65,8 +61,9 @@ public class RegistrationController extends Controller
 				user.email = form.get().email;
 				user.passwordHash = Utils.hashString(form.get().password);
 				user.confirmationKey = Utils.hashString(user.email + System.currentTimeMillis());
+				user.avatarUrl = "https://lelakisihat.com/wp-content/uploads/2016/09/avatar.jpg";
 
-				if (Switches.EMAIL_CONFIRMATION_REQUIRED)
+				if (ConfigFactory.load().getBoolean("EMAIL_CONFIRMATION_REQUIRED"))
 				{
 					user.confirmed = false;
 					try
@@ -116,7 +113,7 @@ public class RegistrationController extends Controller
 			response().setCookie(Http.Cookie.builder("session_token", sessionToken)
 					.withMaxAge(Duration.ofSeconds(SessionsManager.TOKEN_LIFETIME))
 					.withPath("/")
-					.withDomain(Utils.COOKIE_DOMAIN)
+					.withDomain(ConfigFactory.load().getString("COOKIE_DOMAIN"))
 					.withSecure(false)
 					.withHttpOnly(true)
 					.withSameSite(Http.Cookie.SameSite.STRICT)
