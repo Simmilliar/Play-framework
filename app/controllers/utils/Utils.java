@@ -1,5 +1,6 @@
 package controllers.utils;
 
+import com.typesafe.config.ConfigFactory;
 import org.apache.commons.codec.binary.Base64;
 import play.mvc.Http;
 
@@ -15,8 +16,6 @@ public class Utils
 			"address by following this link: http://localhost:9000/emailconfirm?key=%s";
 	public static final String EMAIL_PASSWORD_CHANGE = "You can change your password by following this link: " +
 			"http://localhost:9000/changepassword?key=%s\nIf you don't want to do this, just ignore this e-mail.";
-
-	public static final String COOKIE_DOMAIN = "localhost";
 
 	public static String hashString(String str)
 	{
@@ -40,7 +39,7 @@ public class Utils
 		response.setCookie(Http.Cookie.builder("notif", new String(Base64.encodeBase64(notification.getBytes())))
 				.withMaxAge(Duration.ofSeconds(60))
 				.withPath("/")
-				.withDomain(COOKIE_DOMAIN)
+				.withDomain(ConfigFactory.load().getString("COOKIE_DOMAIN"))
 				.withSecure(false)
 				.withHttpOnly(true)
 				.withSameSite(Http.Cookie.SameSite.STRICT)

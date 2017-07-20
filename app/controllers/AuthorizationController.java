@@ -1,5 +1,6 @@
 package controllers;
 
+import com.typesafe.config.ConfigFactory;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import models.forms.AuthorizationForm;
@@ -57,7 +58,7 @@ public class AuthorizationController extends Controller
 				response().setCookie(Http.Cookie.builder("session_token", sessionToken)
 						.withMaxAge(Duration.ofSeconds(SessionsManager.TOKEN_LIFETIME))
 						.withPath("/")
-						.withDomain(Utils.COOKIE_DOMAIN)
+						.withDomain(ConfigFactory.load().getString("COOKIE_DOMAIN"))
 						.withSecure(false)
 						.withHttpOnly(true)
 						.withSameSite(Http.Cookie.SameSite.STRICT)
