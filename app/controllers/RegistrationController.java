@@ -92,6 +92,7 @@ public class RegistrationController extends Controller
 
 				user.save();
 
+				// todo move to where you actually send notiifcation
 				utils.setNotification(response(), "We'll send you an e-mail to confirm your registration.");
 			}
 		}
