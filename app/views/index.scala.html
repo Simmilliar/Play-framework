@@ -1,6 +1,8 @@
 @(notification: String)
 @main("Welcome to Play") {
     <h1>Welcome to Play!</h1>
+
+    <!--todo this logic can be moved to separate html layout and included where you need -->
     @if(!notification.equals("")){
         <p class="bg-success">@notification</p>
     }

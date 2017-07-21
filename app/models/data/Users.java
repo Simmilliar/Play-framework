@@ -6,6 +6,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+//todo where are getters and setters?
+
 @Entity
 public class Users extends Model
 {

@@ -26,6 +26,7 @@ public class ChangePasswordForm implements Constraints.Validatable<List<Validati
 		{
 			errors.add(new ValidationError("password", "Passwords does not match."));
 		}
+		// todo are you sure it's not enough just ti return errors ?
 		return errors.isEmpty() ? null : errors;
 	}
 }

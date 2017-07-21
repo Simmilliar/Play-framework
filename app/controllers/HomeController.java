@@ -31,8 +31,10 @@ public class HomeController extends Controller
 		}
 		else
 		{
+			// todo it's better to redirect to login screen from here
 			result = ok(views.html.index.render(utils.getNotification(request())));
 		}
+		// todo why to set up empty message here?
 		utils.setNotification(response(), "");
 		return result;
 	}

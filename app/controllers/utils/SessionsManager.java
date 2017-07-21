@@ -11,6 +11,7 @@ public class SessionsManager
 {
 	public static final long TOKEN_LIFETIME = TimeUnit.DAYS.toSeconds(30);
 
+	//todo instead of using this method everywhere I'd create global listener that check if user authorized or not, with list of pages that are allowed for non authorized user
 	public static boolean userAuthorized(Http.Request request)
 	{
 		return request.cookies().get("session_token") != null &&
@@ -19,6 +20,7 @@ public class SessionsManager
 
 	public static String registerSession(String userAgent, String email)
 	{
+		// todo why convert to seconds?
 		long timestamp = System.currentTimeMillis() / 1000L + TOKEN_LIFETIME;
 
 		String token = Utils.hashString(userAgent + email + timestamp);
