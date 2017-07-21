@@ -42,7 +42,7 @@ public class Utils
 		response.setCookie(Http.Cookie.builder("notif", new String(Base64.encodeBase64(notification.getBytes())))
 				.withMaxAge(Duration.ofSeconds(60))
 				.withPath("/")
-				.withDomain(ConfigFactory.load().getString("COOKIE_DOMAIN"))
+				.withDomain(ConfigFactory.load().getString("COOKIE_DOMAIN")) // todo is this paremeter important?
 				.withSecure(false)
 				.withHttpOnly(true)
 				.withSameSite(Http.Cookie.SameSite.STRICT)

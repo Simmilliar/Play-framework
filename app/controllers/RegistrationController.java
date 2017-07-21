@@ -59,9 +59,9 @@ public class RegistrationController extends Controller
 				Users user = new Users();
 				user.name = form.get().name;
 				user.email = form.get().email;
-				user.passwordHash = Utils.hashString(form.get().password);
+				user.passwordHash = Utils.hashString(form.get().password); // todo it's a good practice to have hash from salt + password
 				user.confirmationKey = Utils.hashString(user.email + System.currentTimeMillis());
-				user.avatarUrl = "https://lelakisihat.com/wp-content/uploads/2016/09/avatar.jpg";
+				user.avatarUrl = "https://lelakisihat.com/wp-content/uploads/2016/09/avatar.jpg"; // todo move to some constant
 
 				if (ConfigFactory.load().getBoolean("EMAIL_CONFIRMATION_REQUIRED"))
 				{
@@ -83,6 +83,7 @@ public class RegistrationController extends Controller
 					user.confirmed = true;
 				}
 
+				// todo add to db rule to override existing record
 				Users oldUser = Ebean.find(Users.class, user.email);
 				if (oldUser != null)
 				{
