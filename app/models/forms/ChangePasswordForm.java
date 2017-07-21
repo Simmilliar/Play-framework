@@ -26,7 +26,9 @@ public class ChangePasswordForm implements Constraints.Validatable<List<Validati
 		{
 			errors.add(new ValidationError("password", "Passwords does not match."));
 		}
-		// todo are you sure it's not enough just ti return errors ?
-		return errors.isEmpty() ? null : errors;
+		// solved todo are you sure it's not enough just to return errors ?
+		// that's how on play docs was written...
+		// but it's seems to be everything works without null-returning
+		return errors;
 	}
 }

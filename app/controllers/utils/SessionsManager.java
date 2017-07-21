@@ -20,7 +20,8 @@ public class SessionsManager
 
 	public static String registerSession(String userAgent, String email)
 	{
-		// todo why convert to seconds?
+		// solved todo why convert to seconds?
+		// prost ))0)0
 		long timestamp = System.currentTimeMillis() / 1000L + TOKEN_LIFETIME;
 
 		String token = Utils.hashString(userAgent + email + timestamp);

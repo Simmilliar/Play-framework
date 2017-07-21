@@ -55,9 +55,9 @@ public class ForgotPasswordController extends Controller
 				Users user = Ebean.find(Users.class, form.get().email);
 				user.confirmationKey = Utils.hashString(user.confirmationKey + System.currentTimeMillis());
 				user.save();
-				String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE, user.confirmationKey);
+				String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE, request().host(), user.confirmationKey);
 				mailerService.sendEmail(form.get().email, "Change password.", confirmationBodyText);
-				utils.setNotification(response(), "We'll sen you an e-mail to change your password.");
+				utils.setNotification(response(), "We'll sen you an e-mail to change your password.", request().host());
 			}
 		}
 		return redirect(routes.HomeController.index());
@@ -90,7 +90,7 @@ public class ForgotPasswordController extends Controller
 			{
 				user.passwordHash = Utils.hashString(form.get().password);
 				user.save();
-				utils.setNotification(response(), "Password had been changed successfully.");
+				utils.setNotification(response(), "Password had been changed successfully.", request().host());
 				return redirect(routes.AuthorizationController.authorization());
 			}
 		}

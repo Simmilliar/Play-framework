@@ -50,6 +50,6 @@ public class RegistrationForm implements Constraints.Validatable<List<Validation
 		{
 			errors.add(new ValidationError("passwordConfirm", "Passwords does not match."));
 		}
-		return errors.isEmpty() ? null : errors;
+		return errors;
 	}
 }

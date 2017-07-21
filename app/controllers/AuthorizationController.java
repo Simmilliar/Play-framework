@@ -1,6 +1,5 @@
 package controllers;
 
-import com.typesafe.config.ConfigFactory;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import models.forms.AuthorizationForm;
@@ -38,7 +37,10 @@ public class AuthorizationController extends Controller
 		{
 			result = ok(views.html.authorization.render(formFactory.form(AuthorizationForm.class)));
 		}
-		utils.setNotification(response(), "");
+		if (!utils.getNotification(request()).equals(""))
+		{
+			utils.setNotification(response(), "", request().host());
+		}
 		return result;
 	}
 
@@ -58,7 +60,7 @@ public class AuthorizationController extends Controller
 				response().setCookie(Http.Cookie.builder("session_token", sessionToken)
 						.withMaxAge(Duration.ofSeconds(SessionsManager.TOKEN_LIFETIME))
 						.withPath("/")
-						.withDomain(ConfigFactory.load().getString("COOKIE_DOMAIN"))
+						.withDomain(request().host())
 						.withSecure(false)
 						.withHttpOnly(true)
 						.withSameSite(Http.Cookie.SameSite.STRICT)

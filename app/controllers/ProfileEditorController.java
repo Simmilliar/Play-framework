@@ -111,7 +111,7 @@ public class ProfileEditorController extends Controller
 				if (needToSave)
 				{
 					user.save();
-					utils.setNotification(response(), "Your profile info successfully changed.");
+					utils.setNotification(response(), "Your profile info successfully changed.", request().host());
 				}
 			}
 		}

@@ -29,6 +29,6 @@ public class ForgotPasswordForm implements Constraints.Validatable<List<Validati
 			errors.add(new ValidationError("email", "No registered user with this e-mail."));
 		}
 
-		return errors.isEmpty() ? null : errors;
+		return errors;
 	}
 }

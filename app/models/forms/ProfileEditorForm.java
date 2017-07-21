@@ -47,6 +47,6 @@ public class ProfileEditorForm implements Constraints.Validatable<List<Validatio
 		{
 			errors.add(new ValidationError("avatarFile", "Unable to read file as image."));
 		}
-		return errors.isEmpty() ? null : errors;
+		return errors;
 	}
 }

@@ -31,11 +31,17 @@ public class HomeController extends Controller
 		}
 		else
 		{
-			// todo it's better to redirect to login screen from here
+			// solved todo it's better to redirect to login screen from here
+			// not sure. there can be (or even should be) some welcome info.
 			result = ok(views.html.index.render(utils.getNotification(request())));
 		}
-		// todo why to set up empty message here?
-		utils.setNotification(response(), "");
+		// solved todo why to set up empty message here?
+		// cause we need to show notif only once. so after showing we remove it.
+		// i can only add this if clause to make it better
+		if (!utils.getNotification(request()).equals(""))
+		{
+			utils.setNotification(response(), "", request().host());
+		}
 		return result;
 	}
 }

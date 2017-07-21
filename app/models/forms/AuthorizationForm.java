@@ -37,6 +37,6 @@ public class AuthorizationForm implements Constraints.Validatable<List<Validatio
 			errors.add(new ValidationError("password", "Invalid e-mail or password."));
 		}
 
-		return errors.isEmpty() ? null : errors;
+		return errors;
 	}
 }
