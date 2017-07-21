@@ -56,19 +56,21 @@ public class RegistrationController extends Controller
 			}
 			else
 			{
-				Users user = new Users();
+				Users user = Ebean.find(Users.class, form.get().email);
+				if (user == null)
+					user = new Users();
 				user.name = form.get().name;
 				user.email = form.get().email;
 				user.passwordHash = Utils.hashString(form.get().password); // todo it's a good practice to have hash from salt + password
 				user.confirmationKey = Utils.hashString(user.email + System.currentTimeMillis());
-				user.avatarUrl = "https://lelakisihat.com/wp-content/uploads/2016/09/avatar.jpg"; // todo move to some constant
+				user.avatarUrl = routes.Assets.versioned(new Assets.Asset("images/default_avatar.jpg")).url(); // solved todo move to some constant
 
 				if (ConfigFactory.load().getBoolean("EMAIL_CONFIRMATION_REQUIRED"))
 				{
 					user.confirmed = false;
 					try
 					{
-						String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION, user.confirmationKey);
+						String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION, request().host(), user.confirmationKey);
 						new MailerService(mailerClient)
 								.sendEmail(user.email, "Registration confirmation.", confirmationBodyText);
 					}
@@ -83,12 +85,7 @@ public class RegistrationController extends Controller
 					user.confirmed = true;
 				}
 
-				// todo add to db rule to override existing record
-				Users oldUser = Ebean.find(Users.class, user.email);
-				if (oldUser != null)
-				{
-					Ebean.delete(oldUser);
-				}
+				// solved todo add to db rule to override existing record
 
 				user.save();
 
@@ -109,7 +106,7 @@ public class RegistrationController extends Controller
 		{
 			user.confirmed = true;
 			user.save();
-			utils.setNotification(response(), "You were successfully registered!");
+			utils.setNotification(response(), "You were successfully registered!", request().host());
 			String sessionToken = SessionsManager.registerSession(
 					request().header("User-Agent").get(), user.email);
 			response().setCookie(Http.Cookie.builder("session_token", sessionToken)
