@@ -78,7 +78,7 @@ public class RegistrationController extends Controller
 
 			user.save();
 
-			// todo move to where you actually send notification
+			// solved todo move to where you actually send notification
 			flash().put("notification", "We'll send you an e-mail to confirm your registration.");
 
 			return redirect(routes.HomeController.index());
