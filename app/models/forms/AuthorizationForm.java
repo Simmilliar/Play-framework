@@ -20,7 +20,7 @@ public class AuthorizationForm implements Constraints.Validatable<List<Validatio
 	@Override
 	public List<ValidationError> validate()
 	{
-		List<ValidationError> errors = new ArrayList<ValidationError>();
+		List<ValidationError> errors = new ArrayList<>();
 		if (!email.matches(Utils.REGEX_EMAIL))
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
@@ -40,8 +40,8 @@ public class AuthorizationForm implements Constraints.Validatable<List<Validatio
 		{
 			String hash = Utils.hashString(
 					new StringBuilder(password)
-					.insert(password.length() / 2, foundedUser.passwordSalt)
-					.toString()
+							.insert(password.length() / 2, foundedUser.passwordSalt)
+							.toString()
 			);
 			if (!foundedUser.passwordHash.equals(hash))
 			{

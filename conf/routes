@@ -4,6 +4,8 @@ GET     /registration               controllers.RegistrationController.registrat
 +nocsrf
 POST    /registration               controllers.RegistrationController.register
 
+GET     /emailconfirm               controllers.RegistrationController.confirmEmail(key)
+
 GET     /login                      controllers.AuthorizationController.authorization
 +nocsrf
 POST    /login                      controllers.AuthorizationController.authorize
@@ -13,8 +15,6 @@ GET     /logout                     controllers.AuthorizationController.logout
 GET     /editprofile                controllers.ProfileEditorController.profileEditor
 +nocsrf
 POST    /editprofile                controllers.ProfileEditorController.edit
-
-GET     /emailconfirm               controllers.RegistrationController.confirmEmail(key)
 
 GET     /forgotpassword            controllers.ForgotPasswordController.forgotPassword
 +nocsrf
