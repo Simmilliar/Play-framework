@@ -57,7 +57,7 @@ public class ForgotPasswordController extends Controller
 				user.save();
 				String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE, request().host(), user.confirmationKey);
 				mailerService.sendEmail(form.get().email, "Change password.", confirmationBodyText);
-				utils.setNotification(response(), "We'll sen you an e-mail to change your password.", request().host());
+				utils.setNotification(response(), "We'll sen you an e-mail to change your password.");
 			}
 		}
 		return redirect(routes.HomeController.index());
@@ -90,7 +90,7 @@ public class ForgotPasswordController extends Controller
 			{
 				user.passwordHash = Utils.hashString(form.get().password);
 				user.save();
-				utils.setNotification(response(), "Password had been changed successfully.", request().host());
+				utils.setNotification(response(), "Password had been changed successfully.");
 				return redirect(routes.AuthorizationController.authorization());
 			}
 		}

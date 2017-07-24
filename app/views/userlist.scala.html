@@ -1,10 +1,7 @@
 @import models.data.Users
-@(registeredUsers: java.util.List[Users])(notification: String)
+@(registeredUsers: java.util.List[Users])
 @main("Registered users") {
     <h1>Registered users</h1>
-    @if(!notification.equals("")) {
-        <p class="bg-success">@notification</p>
-    }
     <table class="table table-striped">
         <thead>
             <tr>

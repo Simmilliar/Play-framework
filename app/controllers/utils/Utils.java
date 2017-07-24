@@ -38,28 +38,17 @@ public class Utils
 		return hash;
 	}
 
-	public void setNotification(Http.Response response, String notification, String host)
+	public void setNotification(Http.Response response, String notification)
 	{
 		response.setCookie(Http.Cookie.builder("notif", new String(Base64.encodeBase64(notification.getBytes())))
 				.withMaxAge(Duration.ofSeconds(60))
 				.withPath("/")
-				.withDomain(host)	// solved todo is this parameter important?
-									//yes, it is
+				//.withDomain(host)	// solved todo is this parameter important?
+									// nope
 				.withSecure(false)
 				.withHttpOnly(true)
 				.withSameSite(Http.Cookie.SameSite.STRICT)
 				.build()
 		);
-	}
-
-	public String getNotification(Http.Request request)
-	{
-		Http.Cookie notif = request.cookies().get("notif");
-		String notification = "";
-		if (notif != null)
-		{
-			notification = new String(java.util.Base64.getDecoder().decode(notif.value()));
-		}
-		return notification;
 	}
 }

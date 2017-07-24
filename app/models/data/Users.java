@@ -22,5 +22,7 @@ public class Users extends Model
 	@Column(nullable = false)
 	public String passwordHash;
 	@Column(nullable = false)
+	public String passwordSalt;
+	@Column(nullable = false)
 	public String avatarUrl;
 }

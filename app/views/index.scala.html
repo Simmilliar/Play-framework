@@ -1,11 +1,11 @@
-@(notification: String)
 @main("Welcome to Play") {
     <h1>Welcome to Play!</h1>
 
-    <!--todo this logic can be moved to separate html layout and included where you need -->
-    @if(!notification.equals("")){
-        <p class="bg-success">@notification</p>
-    }
+    <!--solved todo this logic can be moved to separate html layout and included where you need -->
+    @notification()
+
+    <blockquote class="blockquote">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis interdum dui non massa volutpat consequat. Pellentesque euismod nibh at sem ullamcorper consectetur. Etiam eu tellus euismod, rutrum purus vitae, condimentum nibh. Integer maximus tortor odio, ut porttitor purus cursus non. Donec congue nulla sagittis diam tempus finibus. Integer at luctus justo. Nullam sed malesuada justo. Nulla interdum sagittis tellus, sit amet tristique velit convallis eget. Aliquam erat volutpat. Vestibulum malesuada elementum urna, ac efficitur eros eleifend non.</blockquote>
+
     <a href="@routes.AuthorizationController.authorization()" class="btn btn-primary">Login</a>
     <a href="@routes.RegistrationController.registration()" class="btn btn-default">Registration</a>
 }

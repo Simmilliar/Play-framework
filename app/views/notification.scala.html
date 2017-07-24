@@ -1,0 +1,5 @@
+@()
+@if(request.cookies.get("notif") != null) {
+    <p class="bg-success">@(new String(Base64.getDecoder.decode(request.cookies.get("notif").value())))</p>
+    @response().discardCookie("notif")
+}
