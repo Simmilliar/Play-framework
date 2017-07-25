@@ -40,6 +40,11 @@ public class AuthorizationController extends Controller
 	public Result authorize()
 	{
 		Form<AuthorizationForm> authorizationForm = formFactory.form(AuthorizationForm.class).bindFromRequest();
+		if (authorizationForm.hasErrors())
+		{
+			return badRequest(views.html.authorization.render(authorizationForm));
+		}
+
 		AuthorizationForm authorizationData = authorizationForm.get();
 
 		Users foundedUser = Ebean.find(Users.class, authorizationData.getEmail());

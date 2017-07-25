@@ -44,7 +44,8 @@ public class ApiController extends Controller
 		if (!loginForm.hasErrors() && request().header("User-Agent").isPresent())
 		{
 			String sessionToken = sessionsManager.registerSession(
-					request().header("User-Agent").get(), loginForm.get().getEmail());
+					request().header("User-Agent").get(), loginForm.get().getEmail()
+			);
 			return ok(sessionToken);
 		}
 		else
@@ -55,9 +56,10 @@ public class ApiController extends Controller
 
 	public Result unauthorize(String sessionToken)
 	{
-		if (sessionsManager.checkSession(sessionToken))
-		{
-			sessionsManager.unregisterSession(sessionToken);
+		Session session = Ebean.find(Session.class, sessionToken);
+		if (session != null && !session.isExpired()){
+			session.setExpirationDate(System.currentTimeMillis());
+			session.save();
 			return ok("");
 		}
 		else
@@ -72,7 +74,7 @@ public class ApiController extends Controller
 	{
 		if (sessionsManager.checkSession(sessionToken))
 		{
-			return ok(Json.toJson(Ebean.createSqlQuery("SELECT name, email FROM Users").findList()));
+			return ok(Json.toJson(Ebean.createSqlQuery("SELECT name, email FROM Users WHERE confirmed = true;").findList()));
 		}
 		else
 		{
@@ -84,7 +86,8 @@ public class ApiController extends Controller
 
 	public Result editProfile(String newName, String newPassword, String sessionToken)
 	{
-		if (sessionsManager.checkSession(sessionToken))
+		Session session = Ebean.find(Session.class, sessionToken);
+		if (session != null && session.getExpirationDate() <= System.currentTimeMillis())
 		{
 			Map<String, String> data = new HashMap<>();
 			data.put("name", newName);
@@ -97,7 +100,7 @@ public class ApiController extends Controller
 			}
 			else
 			{
-				Users user = Ebean.find(Users.class, Ebean.find(Session.class, sessionToken).getUser().getEmail());
+				Users user = session.getUser();
 				boolean needToSave = false;
 				if (!user.getName().equals(newName))
 				{

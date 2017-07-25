@@ -51,6 +51,11 @@ public class ProfileEditorController extends Controller
 		Users user = request().attrs().get(AuthorizationCheckAction.USER);
 
 		Form<ProfileEditorForm> profileEditorForm = formFactory.form(ProfileEditorForm.class).bindFromRequest();
+		if (profileEditorForm.hasErrors())
+		{
+			return badRequest(views.html.editprofile.render(profileEditorForm));
+		}
+
 		ProfileEditorForm profileEditorData = profileEditorForm.get();
 		Http.MultipartFormData.FilePart avatarFilePart =
 				request().body().asMultipartFormData().getFile("avatarFile");

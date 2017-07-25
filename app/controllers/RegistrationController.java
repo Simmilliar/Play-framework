@@ -49,6 +49,11 @@ public class RegistrationController extends Controller
 	public Result register()
 	{
 		Form<RegistrationForm> registrationForm = formFactory.form(RegistrationForm.class).bindFromRequest();
+		if (registrationForm.hasErrors())
+		{
+			return badRequest(views.html.registration.render(registrationForm));
+		}
+
 		RegistrationForm registrationData = registrationForm.get();
 
 		// solved todo here has to be checking if user exists

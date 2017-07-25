@@ -44,6 +44,11 @@ public class ForgotPasswordController extends Controller
 	public Result sendForgotMail()
 	{
 		Form<ForgotPasswordForm> forgotPasswordForm = formFactory.form(ForgotPasswordForm.class).bindFromRequest();
+		if (forgotPasswordForm.hasErrors())
+		{
+			return badRequest(views.html.forgotpassword.render(forgotPasswordForm));
+		}
+
 		ForgotPasswordForm forgotPasswordData = forgotPasswordForm.get();
 
 		Users user = Ebean.find(Users.class, forgotPasswordData.getEmail());
@@ -114,13 +119,14 @@ public class ForgotPasswordController extends Controller
 		if (user != null)
 		{
 			Form<ChangePasswordForm> changePasswordForm = formFactory.form(ChangePasswordForm.class).bindFromRequest();
-			ChangePasswordForm changePasswordData = changePasswordForm.get();
 			if (changePasswordForm.hasErrors())
 			{
 				return badRequest(views.html.changepassword.render(changePasswordForm, key));
 			}
 			else
 			{
+				ChangePasswordForm changePasswordData = changePasswordForm.get();
+
 				user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
 				user.setPasswordHash(utils.hashString(changePasswordData.getPassword(), user.getPasswordSalt()));
 

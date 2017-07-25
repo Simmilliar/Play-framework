@@ -25,7 +25,9 @@ public class AuthorizationCheckAction extends play.mvc.Action.Simple
 			"/changepassword"
 	);
 
-	private final List<String> forAll = Arrays.asList("/");
+	private final List<String> forAll = Arrays.asList(
+			"/"
+	);
 
 	public CompletionStage<Result> call(Http.Context ctx)
 	{

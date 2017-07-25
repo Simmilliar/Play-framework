@@ -17,6 +17,11 @@ public class Session extends Model
 	@Column(nullable = false)
 	private long expirationDate;
 
+	public boolean isExpired()
+	{
+		return expirationDate <= System.currentTimeMillis();
+	}
+
 	public String getToken()
 	{
 		return token;
