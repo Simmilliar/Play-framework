@@ -25,7 +25,5 @@ public class HomeController extends Controller
 		{
 			return ok(views.html.index.render());
 		}
-		// solved todo it's better to redirect to login screen from here
-		// solved todo why to set up empty message here?
 	}
 }

@@ -1,6 +1,7 @@
 package models.data;
 
 import io.ebean.Model;
+import io.ebean.annotation.Index;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

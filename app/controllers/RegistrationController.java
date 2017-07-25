@@ -46,10 +46,13 @@ public class RegistrationController extends Controller
 		}
 		else
 		{
+			// todo here has to be checking if user exists
 			RegistrationForm rf = form.get();
 			Users user = Ebean.find(Users.class, rf.email);
 			if (user == null)
+			{
 				user = new Users();
+			}
 			user.name = rf.name;
 			user.email = rf.email;
 			user.passwordSalt = "" + ThreadLocalRandom.current().nextInt();
@@ -57,9 +60,9 @@ public class RegistrationController extends Controller
 					new StringBuilder(rf.password)
 							.insert(rf.password.length() / 2, user.passwordSalt)
 							.toString()
-			); // solved todo it's a good practice to have hash from salt + password
+			);
 			user.confirmationKey = Utils.hashString(user.email + System.currentTimeMillis());
-			user.avatarUrl = routes.Assets.versioned(new Assets.Asset("images/default_avatar.jpg")).url(); // solved todo move to some constant
+			user.avatarUrl = routes.Assets.versioned(new Assets.Asset("images/default_avatar.jpg")).url(); // todo move to some constant
 
 			user.confirmed = false;
 			try
@@ -74,11 +77,9 @@ public class RegistrationController extends Controller
 				return internalServerError(views.html.registration.render(form));
 			}
 
-			// solved todo add to db rule to override existing record
+ 			user.save();
 
-			user.save();
-
-			// solved todo move to where you actually send notification
+			// todo move to where you actually send notification
 			flash().put("notification", "We'll send you an e-mail to confirm your registration.");
 
 			return redirect(routes.HomeController.index());

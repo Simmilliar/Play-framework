@@ -35,6 +35,7 @@ public class RegistrationForm implements Constraints.Validatable<List<Validation
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
+		// todo move it out to registration controller
 		if (Ebean.find(Users.class).where()
 				.eq("email", email)
 				.eq("confirmed", true)

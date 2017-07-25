@@ -26,6 +26,7 @@ public class AuthorizationForm implements Constraints.Validatable<List<Validatio
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
 
+		// todo move it out, only validate data format here
 		Users foundedUser = Ebean.find(Users.class).where()
 				.and()
 				.eq("email", email)
