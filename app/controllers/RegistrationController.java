@@ -134,10 +134,6 @@ public class RegistrationController extends Controller
 			response().setCookie(
 					Http.Cookie.builder("session_token", sessionToken)
 					.withMaxAge(Duration.ofSeconds(sessionsManager.TOKEN_LIFETIME))
-					.withPath("/")
-					.withSecure(false)
-					.withHttpOnly(true)
-					.withSameSite(Http.Cookie.SameSite.STRICT)
 					.build()
 			);
 		}

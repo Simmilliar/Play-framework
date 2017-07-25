@@ -70,14 +70,9 @@ public class AuthorizationController extends Controller
 			String sessionToken = sessionsManager.registerSession(
 					request().header("User-Agent").get(), authorizationData.email
 			);
-			// todo find out which of params are unnecessary
 			response().setCookie(
 					Http.Cookie.builder("session_token", sessionToken)
 					.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME))
-					.withPath("/")
-					.withSecure(false)
-					.withHttpOnly(true)
-					.withSameSite(Http.Cookie.SameSite.STRICT)
 					.build()
 			);
 		}

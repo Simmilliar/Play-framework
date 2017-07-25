@@ -17,7 +17,7 @@ public class AuthorizationCheckAction extends play.mvc.Action.Simple
 {
 	public static final TypedKey<Users> USER = TypedKey.create("user");
 
-	private static final List<String> unauthorizedOnly = Arrays.asList(
+	private final List<String> unauthorizedOnly = Arrays.asList(
 			"/registration",
 			"/emailconfirm",
 			"/login",
@@ -25,7 +25,7 @@ public class AuthorizationCheckAction extends play.mvc.Action.Simple
 			"/changepassword"
 	);
 
-	private static final List<String> forAll = Arrays.asList("/");
+	private final List<String> forAll = Arrays.asList("/");
 
 	public CompletionStage<Result> call(Http.Context ctx)
 	{
