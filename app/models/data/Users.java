@@ -7,8 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-// solved todo where are getters and setters?
-// solved todo all fields we use in queries should be indexed
 @Entity
 public class Users extends Model
 {

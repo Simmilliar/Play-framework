@@ -18,11 +18,8 @@ public class SessionsManager
 		this.utils = utils;
 	}
 
-	// solved todo remove it
-
 	public String registerSession(String userAgent, String email)
 	{
-		// solved todo figure out how to avoid using magic numbers
 		long expirationDate = System.currentTimeMillis() + TOKEN_LIFETIME;
 
 		String token = utils.hashString(userAgent + email + expirationDate, "");

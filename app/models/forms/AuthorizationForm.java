@@ -25,7 +25,6 @@ public class AuthorizationForm implements Constraints.Validatable<List<Validatio
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
-		// solved todo move it out, only validate data format here
 		return errors;
 	}
 

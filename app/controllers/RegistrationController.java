@@ -56,7 +56,6 @@ public class RegistrationController extends Controller
 
 		RegistrationForm registrationData = registrationForm.get();
 
-		// solved todo here has to be checking if user exists
 		Users foundedUser = Ebean.find(Users.class, registrationData.getEmail());
 		if (foundedUser != null && foundedUser.isConfirmed())
 		{
@@ -86,7 +85,7 @@ public class RegistrationController extends Controller
 
 			user.setAvatarUrl(routes.Assets.versioned(
 					new Assets.Asset(config.getString("DEFAULT_AVATAR_ASSET"))
-			).url()); // solved todo move to some constant
+			).url()); // todo it's better, but please, use java constants
 
 			user.setConfirmed(false);
 			try
@@ -95,7 +94,6 @@ public class RegistrationController extends Controller
 						routes.RegistrationController.confirmEmail(confirmationKey).absoluteURL(request()));
 				new MailerService(mailerClient)
 						.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
-				// solved todo move to where you actually send notification
 				flash().put("notification", "We'll send you an e-mail to confirm your registration.");
 			}
 			catch (Exception e)

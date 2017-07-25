@@ -35,7 +35,6 @@ public class RegistrationForm implements Constraints.Validatable<List<Validation
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
-		// solved todo move it out to registration controller
 		if (password.length() < 8)
 		{
 			errors.add(new ValidationError("password", "Password must be at least 8 symbols long."));
