@@ -38,9 +38,9 @@ public class ProfileEditorController extends Controller
 	{
 		Users user = request().attrs().get(AuthorizationCheckAction.USER);
 		Map<String, String> data = new HashMap<>();
-		data.put("email", user.email);
-		data.put("name", user.name);
-		data.put("avatarUrl", user.avatarUrl);
+		data.put("email", user.getEmail());
+		data.put("name", user.getName());
+		data.put("avatarUrl", user.getAvatarUrl());
 		Form<ProfileEditorForm> form = formFactory.form(ProfileEditorForm.class).bind(data);
 
 		return ok(views.html.editprofile.render(form));
@@ -87,18 +87,18 @@ public class ProfileEditorController extends Controller
 				s3File.file = (File) avatarFilePart.getFile();
 				s3File.save();
 
-				user.avatarUrl = s3File.getUrl();
+				user.setAvatarUrl(s3File.getUrl());
 				needToSave = true;
 			}
-			if (!user.name.equals(profileEditorData.name))
+			if (!user.getName().equals(profileEditorData.name))
 			{
-				user.name = profileEditorData.name;
+				user.setName(profileEditorData.name);
 				needToSave = true;
 			}
 			if (!profileEditorData.password.isEmpty())
 			{
-				user.passwordSalt = "" + ThreadLocalRandom.current().nextInt();
-				user.passwordHash = utils.hashString(profileEditorData.password, user.passwordSalt);
+				user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
+				user.setPasswordHash(utils.hashString(profileEditorData.password, user.getPasswordSalt()));
 				needToSave = true;
 			}
 			if (needToSave)

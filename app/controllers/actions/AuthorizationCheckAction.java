@@ -35,9 +35,9 @@ public class AuthorizationCheckAction extends play.mvc.Action.Simple
 		if (cookie != null)
 		{
 			Session session = Ebean.find(Session.class, cookie.value());
-			if (session != null && session.expirationDate > System.currentTimeMillis())
+			if (session != null && session.getExpirationDate() > System.currentTimeMillis())
 			{
-				user = session.user;
+				user = session.getUser();
 			}
 		}
 

@@ -47,7 +47,7 @@ public class ForgotPasswordController extends Controller
 		ForgotPasswordForm forgotPasswordData = forgotPasswordForm.get();
 
 		Users user = Ebean.find(Users.class, forgotPasswordData.email);
-		if (user == null || !user.confirmed)
+		if (user == null || !user.isConfirmed())
 		{
 			forgotPasswordData.errors.add(new ValidationError("email", "No registered user with this e-mail."));
 		}
@@ -59,8 +59,8 @@ public class ForgotPasswordController extends Controller
 		else
 		{
 			String confirmationKey = System.currentTimeMillis() + "" + ThreadLocalRandom.current().nextInt();
-			user.confirmationKeyHash = utils.hashString(confirmationKey, confirmationKey);
-			user.confirmationKeyExpirationDate = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1);
+			user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
+			user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
 
 			try
 			{
@@ -121,11 +121,11 @@ public class ForgotPasswordController extends Controller
 			}
 			else
 			{
-				user.passwordSalt = "" + ThreadLocalRandom.current().nextInt();
-				user.passwordHash = utils.hashString(changePasswordData.password, user.passwordSalt);
+				user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
+				user.setPasswordHash(utils.hashString(changePasswordData.password, user.getPasswordSalt()));
 
-				user.confirmationKeyHash = "";
-				user.confirmationKeyExpirationDate = System.currentTimeMillis();
+				user.setConfirmationKeyHash("");
+				user.setConfirmationKeyExpirationDate(System.currentTimeMillis());
 
 				user.save();
 

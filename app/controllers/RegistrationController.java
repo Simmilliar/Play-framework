@@ -53,7 +53,7 @@ public class RegistrationController extends Controller
 
 		// solved todo here has to be checking if user exists
 		Users foundedUser = Ebean.find(Users.class, registrationData.email);
-		if (foundedUser != null && foundedUser.confirmed)
+		if (foundedUser != null && foundedUser.isConfirmed())
 		{
 			registrationData.errors.add(new ValidationError("email", "This e-mail is already registered."));
 		}
@@ -69,27 +69,27 @@ public class RegistrationController extends Controller
 			{
 				user = new Users();
 			}
-			user.name = registrationData.name;
-			user.email = registrationData.email;
+			user.setName(registrationData.name);
+			user.setName(registrationData.email);
 
-			user.passwordSalt = "" + ThreadLocalRandom.current().nextInt();
-			user.passwordHash = utils.hashString(registrationData.password, user.passwordSalt);
+			user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
+			user.setPasswordHash(utils.hashString(registrationData.password, user.getPasswordSalt()));
 
 			String confirmationKey = System.currentTimeMillis() + "" + ThreadLocalRandom.current().nextInt();
-			user.confirmationKeyHash = utils.hashString(confirmationKey, confirmationKey);
-			user.confirmationKeyExpirationDate = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1);
+			user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
+			user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
 
-			user.avatarUrl = routes.Assets.versioned(
+			user.setAvatarUrl(routes.Assets.versioned(
 					new Assets.Asset(config.getString("DEFAULT_AVATAR_ASSET"))
-			).url(); // solved todo move to some constant
+			).url()); // solved todo move to some constant
 
-			user.confirmed = false;
+			user.setConfirmed(false);
 			try
 			{
 				String confirmationBodyText = String.format(config.getString("EMAIL_CONFIRMATION"),
 						routes.RegistrationController.confirmEmail(confirmationKey).absoluteURL(request()));
 				new MailerService(mailerClient)
-						.sendEmail(user.email, "Registration confirmation.", confirmationBodyText);
+						.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
 				// solved todo move to where you actually send notification
 				flash().put("notification", "We'll send you an e-mail to confirm your registration.");
 			}
@@ -118,15 +118,15 @@ public class RegistrationController extends Controller
 				.findOne();
 		if (user != null && request().header("User-Agent").isPresent())
 		{
-			user.confirmed = true;
-			user.confirmationKeyHash = "";
-			user.confirmationKeyExpirationDate = System.currentTimeMillis();
+			user.setConfirmed(true);
+			user.setConfirmationKeyHash("");
+			user.setConfirmationKeyExpirationDate(System.currentTimeMillis());
 			user.save();
 
 			flash().put("notification", "You were successfully registered!");
 
 			String sessionToken = sessionsManager.registerSession(
-					request().header("User-Agent").get(), user.email
+					request().header("User-Agent").get(), user.getEmail()
 			);
 			response().setCookie(
 					Http.Cookie.builder("session_token", sessionToken)

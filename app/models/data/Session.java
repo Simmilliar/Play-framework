@@ -11,9 +11,39 @@ import javax.persistence.ManyToOne;
 public class Session extends Model
 {
 	@Id
-	public String token;
+	private String token;
 	@ManyToOne(optional = false)
-	public Users user;
+	private Users user;
 	@Column(nullable = false)
-	public long expirationDate;
+	private long expirationDate;
+
+	public String getToken()
+	{
+		return token;
+	}
+
+	public void setToken(String token)
+	{
+		this.token = token;
+	}
+
+	public Users getUser()
+	{
+		return user;
+	}
+
+	public void setUser(Users user)
+	{
+		this.user = user;
+	}
+
+	public long getExpirationDate()
+	{
+		return expirationDate;
+	}
+
+	public void setExpirationDate(long expirationDate)
+	{
+		this.expirationDate = expirationDate;
+	}
 }

@@ -43,14 +43,14 @@ public class AuthorizationController extends Controller
 		AuthorizationForm authorizationData = authorizationForm.get();
 
 		Users foundedUser = Ebean.find(Users.class, authorizationData.email);
-		if (foundedUser == null || !foundedUser.confirmed)
+		if (foundedUser == null || !foundedUser.isConfirmed())
 		{
 			authorizationData.errors.add(new ValidationError("email", "Unregistered user."));
 		}
 		else
 		{
-			String hash = utils.hashString(authorizationData.password, foundedUser.passwordSalt);
-			if (!foundedUser.passwordHash.equals(hash))
+			String hash = utils.hashString(authorizationData.password, foundedUser.getPasswordSalt());
+			if (!foundedUser.getPasswordHash().equals(hash))
 			{
 				authorizationData.errors.add(new ValidationError("password", "Wrong password."));
 			}

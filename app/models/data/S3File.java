@@ -16,11 +16,21 @@ import java.util.UUID;
 public class S3File extends Model
 {
 	@Id
-	public UUID id;
+	private UUID id;
 	private String bucket;
 
 	@Transient
 	public File file;
+
+	public UUID getId()
+	{
+		return id;
+	}
+
+	public void setId(UUID id)
+	{
+		this.id = id;
+	}
 
 	public String getUrl()
 	{

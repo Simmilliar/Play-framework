@@ -28,9 +28,9 @@ public class SessionsManager
 		String token = utils.hashString(userAgent + email + expirationDate, "");
 
 		Session session = new Session();
-		session.user = Ebean.find(Users.class, email);
-		session.expirationDate = expirationDate;
-		session.token = token;
+		session.setUser(Ebean.find(Users.class, email));
+		session.setExpirationDate(expirationDate);
+		session.setToken(token);
 		session.save();
 
 		return token;
@@ -41,7 +41,7 @@ public class SessionsManager
 		Session session = Ebean.find(Session.class, token);
 		if (session != null)
 		{
-			session.expirationDate = System.currentTimeMillis();
+			session.setExpirationDate(System.currentTimeMillis());
 			session.save();
 		}
 	}
@@ -53,7 +53,7 @@ public class SessionsManager
 		{
 			return false;
 		}
-		else if (session.expirationDate <= System.currentTimeMillis())
+		else if (session.getExpirationDate() <= System.currentTimeMillis())
 		{
 			return false;
 		}

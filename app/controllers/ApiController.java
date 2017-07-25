@@ -97,17 +97,17 @@ public class ApiController extends Controller
 			}
 			else
 			{
-				Users user = Ebean.find(Users.class, Ebean.find(Session.class, sessionToken).user.email);
+				Users user = Ebean.find(Users.class, Ebean.find(Session.class, sessionToken).getUser().getEmail());
 				boolean needToSave = false;
-				if (!user.name.equals(newName))
+				if (!user.getName().equals(newName))
 				{
-					user.name = newName;
+					user.setName(newName);
 					needToSave = true;
 				}
 				if (!newPassword.isEmpty())
 				{
-					user.passwordSalt = "" + ThreadLocalRandom.current().nextInt();
-					user.passwordHash = utils.hashString(newPassword, user.passwordSalt);
+					user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
+					user.setPasswordHash(utils.hashString(newPassword, user.getPasswordSalt()));
 					needToSave = true;
 				}
 				if (needToSave)

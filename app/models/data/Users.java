@@ -13,25 +13,105 @@ import javax.persistence.Id;
 public class Users extends Model
 {
 	@Id
-	public String email;
+	private String email;
 
 	@Column(nullable = false)
-	public String name;
+	private String name;
 	@Column(nullable = false)
-	public String avatarUrl;
+	private String avatarUrl;
 
 	@Column(nullable = false)
-	public String passwordHash;
+	private String passwordHash;
 	@Column(nullable = false)
-	public String passwordSalt;
+	private String passwordSalt;
 
 	@Index
 	@Column(nullable = false)
-	public boolean confirmed;
+	private boolean confirmed;
 	@Index
 	@Column(nullable = false)
-	public String confirmationKeyHash;
+	private String confirmationKeyHash;
 	@Index
 	@Column(nullable = false)
-	public long confirmationKeyExpirationDate;
+	private long confirmationKeyExpirationDate;
+
+	public String getEmail()
+	{
+		return email;
+	}
+
+	public void setEmail(String email)
+	{
+		this.email = email;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public String getAvatarUrl()
+	{
+		return avatarUrl;
+	}
+
+	public void setAvatarUrl(String avatarUrl)
+	{
+		this.avatarUrl = avatarUrl;
+	}
+
+	public String getPasswordHash()
+	{
+		return passwordHash;
+	}
+
+	public void setPasswordHash(String passwordHash)
+	{
+		this.passwordHash = passwordHash;
+	}
+
+	public String getPasswordSalt()
+	{
+		return passwordSalt;
+	}
+
+	public void setPasswordSalt(String passwordSalt)
+	{
+		this.passwordSalt = passwordSalt;
+	}
+
+	public boolean isConfirmed()
+	{
+		return confirmed;
+	}
+
+	public void setConfirmed(boolean confirmed)
+	{
+		this.confirmed = confirmed;
+	}
+
+	public String getConfirmationKeyHash()
+	{
+		return confirmationKeyHash;
+	}
+
+	public void setConfirmationKeyHash(String confirmationKeyHash)
+	{
+		this.confirmationKeyHash = confirmationKeyHash;
+	}
+
+	public long getConfirmationKeyExpirationDate()
+	{
+		return confirmationKeyExpirationDate;
+	}
+
+	public void setConfirmationKeyExpirationDate(long confirmationKeyExpirationDate)
+	{
+		this.confirmationKeyExpirationDate = confirmationKeyExpirationDate;
+	}
 }
