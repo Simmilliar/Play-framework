@@ -42,13 +42,8 @@ public class AuthorizationController extends Controller
 		Form<AuthorizationForm> authorizationForm = formFactory.form(AuthorizationForm.class).bindFromRequest();
 		AuthorizationForm authorizationData = authorizationForm.get();
 
-		Users foundedUser = Ebean.find(Users.class).where()
-				.and()
-				.eq("email", authorizationData.email)
-				.eq("confirmed", true)
-				.endAnd()
-				.findOne();
-		if (foundedUser == null)
+		Users foundedUser = Ebean.find(Users.class, authorizationData.email);
+		if (foundedUser == null || !foundedUser.confirmed)
 		{
 			authorizationData.errors.add(new ValidationError("email", "Unregistered user."));
 		}

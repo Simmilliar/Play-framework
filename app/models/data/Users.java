@@ -1,13 +1,14 @@
 package models.data;
 
 import io.ebean.Model;
+import io.ebean.annotation.Index;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 // todo where are getters and setters?
-// todo all fields we use in queries should be indexed
+// solved todo all fields we use in queries should be indexed
 @Entity
 public class Users extends Model
 {
@@ -24,10 +25,13 @@ public class Users extends Model
 	@Column(nullable = false)
 	public String passwordSalt;
 
+	@Index
 	@Column(nullable = false)
 	public boolean confirmed;
+	@Index
 	@Column(nullable = false)
 	public String confirmationKeyHash;
+	@Index
 	@Column(nullable = false)
 	public long confirmationKeyExpirationDate;
 }

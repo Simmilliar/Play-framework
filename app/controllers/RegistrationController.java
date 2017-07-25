@@ -52,11 +52,8 @@ public class RegistrationController extends Controller
 		RegistrationForm registrationData = registrationForm.get();
 
 		// solved todo here has to be checking if user exists
-		if (Ebean.find(Users.class)
-				.where()
-				.eq("email", registrationData.email)
-				.eq("confirmed", true)
-				.findOne() != null)
+		Users foundedUser = Ebean.find(Users.class, registrationData.email);
+		if (foundedUser != null && foundedUser.confirmed)
 		{
 			registrationData.errors.add(new ValidationError("email", "This e-mail is already registered."));
 		}
