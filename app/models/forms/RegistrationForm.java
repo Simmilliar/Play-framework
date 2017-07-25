@@ -11,17 +11,17 @@ import java.util.List;
 public class RegistrationForm implements Constraints.Validatable<List<ValidationError>>
 {
 	@Constraints.Required
-	public String name;
+	private String name;
 
 	@Constraints.Required
-	public String email;
+	private String email;
 
 	@Constraints.Required
-	public String password;
+	private String password;
 
-	public String passwordConfirm;
+	private String passwordConfirm;
 
-	public List<ValidationError> errors = new ArrayList<>();
+	private List<ValidationError> errors = new ArrayList<>();
 
 	@Override
 	public List<ValidationError> validate()
@@ -45,5 +45,60 @@ public class RegistrationForm implements Constraints.Validatable<List<Validation
 			errors.add(new ValidationError("passwordConfirm", "Passwords does not match."));
 		}
 		return errors;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public String getEmail()
+	{
+		return email;
+	}
+
+	public void setEmail(String email)
+	{
+		this.email = email;
+	}
+
+	public String getPassword()
+	{
+		return password;
+	}
+
+	public void setPassword(String password)
+	{
+		this.password = password;
+	}
+
+	public String getPasswordConfirm()
+	{
+		return passwordConfirm;
+	}
+
+	public void setPasswordConfirm(String passwordConfirm)
+	{
+		this.passwordConfirm = passwordConfirm;
+	}
+
+	public List<ValidationError> getErrors()
+	{
+		return errors;
+	}
+
+	public void setErrors(List<ValidationError> errors)
+	{
+		this.errors = errors;
+	}
+
+	public void addError(ValidationError validationError)
+	{
+		errors.add(validationError);
 	}
 }

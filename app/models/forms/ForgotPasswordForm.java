@@ -12,9 +12,9 @@ public class ForgotPasswordForm implements Constraints.Validatable<List<Validati
 {
 
 	@Constraints.Required
-	public String email;
+	private String email;
 
-	public List<ValidationError> errors = new ArrayList<>();
+	private List<ValidationError> errors = new ArrayList<>();
 
 	@Override
 	public List<ValidationError> validate()
@@ -25,5 +25,30 @@ public class ForgotPasswordForm implements Constraints.Validatable<List<Validati
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
 		return errors;
+	}
+
+	public String getEmail()
+	{
+		return email;
+	}
+
+	public void setEmail(String email)
+	{
+		this.email = email;
+	}
+
+	public List<ValidationError> getErrors()
+	{
+		return errors;
+	}
+
+	public void setErrors(List<ValidationError> errors)
+	{
+		this.errors = errors;
+	}
+
+	public void addError(ValidationError validationError)
+	{
+		errors.add(validationError);
 	}
 }

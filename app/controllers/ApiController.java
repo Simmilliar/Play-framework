@@ -44,7 +44,7 @@ public class ApiController extends Controller
 		if (!loginForm.hasErrors() && request().header("User-Agent").isPresent())
 		{
 			String sessionToken = sessionsManager.registerSession(
-					request().header("User-Agent").get(), loginForm.get().email);
+					request().header("User-Agent").get(), loginForm.get().getEmail());
 			return ok(sessionToken);
 		}
 		else

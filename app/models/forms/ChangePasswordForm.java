@@ -10,9 +10,9 @@ import java.util.List;
 public class ChangePasswordForm implements Constraints.Validatable<List<ValidationError>>
 {
 	@Constraints.Required
-	public String password;
+	private String password;
 
-	public String passwordConfirm;
+	private String passwordConfirm;
 
 	@Override
 	public List<ValidationError> validate()
@@ -27,5 +27,25 @@ public class ChangePasswordForm implements Constraints.Validatable<List<Validati
 			errors.add(new ValidationError("password", "Passwords does not match."));
 		}
 		return errors;
+	}
+
+	public String getPassword()
+	{
+		return password;
+	}
+
+	public void setPassword(String password)
+	{
+		this.password = password;
+	}
+
+	public String getPasswordConfirm()
+	{
+		return passwordConfirm;
+	}
+
+	public void setPasswordConfirm(String passwordConfirm)
+	{
+		this.passwordConfirm = passwordConfirm;
 	}
 }

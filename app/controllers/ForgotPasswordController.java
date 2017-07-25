@@ -46,10 +46,10 @@ public class ForgotPasswordController extends Controller
 		Form<ForgotPasswordForm> forgotPasswordForm = formFactory.form(ForgotPasswordForm.class).bindFromRequest();
 		ForgotPasswordForm forgotPasswordData = forgotPasswordForm.get();
 
-		Users user = Ebean.find(Users.class, forgotPasswordData.email);
+		Users user = Ebean.find(Users.class, forgotPasswordData.getEmail());
 		if (user == null || !user.isConfirmed())
 		{
-			forgotPasswordData.errors.add(new ValidationError("email", "No registered user with this e-mail."));
+			forgotPasswordData.getErrors().add(new ValidationError("email", "No registered user with this e-mail."));
 		}
 
 		if (forgotPasswordForm.hasErrors())
@@ -66,13 +66,13 @@ public class ForgotPasswordController extends Controller
 			{
 				String confirmationBodyText = String.format(config.getString("EMAIL_PASSWORD_CHANGE"),
 						routes.ForgotPasswordController.changingPassword(confirmationKey).absoluteURL(request()));
-				mailerService.sendEmail(forgotPasswordData.email, "Change password.", confirmationBodyText);
+				mailerService.sendEmail(forgotPasswordData.getEmail(), "Change password.", confirmationBodyText);
 				flash().put("notification", "We'll sen you an e-mail to change your password.");
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				forgotPasswordData.errors.add(new ValidationError("email", "Unable to send confirmation email."));
+				forgotPasswordData.getErrors().add(new ValidationError("email", "Unable to send confirmation email."));
 				return internalServerError(views.html.forgotpassword.render(forgotPasswordForm));
 			}
 
@@ -122,7 +122,7 @@ public class ForgotPasswordController extends Controller
 			else
 			{
 				user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
-				user.setPasswordHash(utils.hashString(changePasswordData.password, user.getPasswordSalt()));
+				user.setPasswordHash(utils.hashString(changePasswordData.getPassword(), user.getPasswordSalt()));
 
 				user.setConfirmationKeyHash("");
 				user.setConfirmationKeyExpirationDate(System.currentTimeMillis());

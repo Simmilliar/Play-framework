@@ -52,10 +52,10 @@ public class RegistrationController extends Controller
 		RegistrationForm registrationData = registrationForm.get();
 
 		// solved todo here has to be checking if user exists
-		Users foundedUser = Ebean.find(Users.class, registrationData.email);
+		Users foundedUser = Ebean.find(Users.class, registrationData.getEmail());
 		if (foundedUser != null && foundedUser.isConfirmed())
 		{
-			registrationData.errors.add(new ValidationError("email", "This e-mail is already registered."));
+			registrationData.addError(new ValidationError("email", "This e-mail is already registered."));
 		}
 
 		if (registrationForm.hasErrors())
@@ -64,16 +64,16 @@ public class RegistrationController extends Controller
 		}
 		else
 		{
-			Users user = Ebean.find(Users.class, registrationData.email);
+			Users user = Ebean.find(Users.class, registrationData.getEmail());
 			if (user == null)
 			{
 				user = new Users();
 			}
-			user.setName(registrationData.name);
-			user.setName(registrationData.email);
+			user.setName(registrationData.getName());
+			user.setName(registrationData.getEmail());
 
 			user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
-			user.setPasswordHash(utils.hashString(registrationData.password, user.getPasswordSalt()));
+			user.setPasswordHash(utils.hashString(registrationData.getPassword(), user.getPasswordSalt()));
 
 			String confirmationKey = System.currentTimeMillis() + "" + ThreadLocalRandom.current().nextInt();
 			user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
@@ -96,7 +96,7 @@ public class RegistrationController extends Controller
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				registrationData.errors.add(new ValidationError("email", "Unable to send confirmation email."));
+				registrationData.addError(new ValidationError("email", "Unable to send confirmation email."));
 				return internalServerError(views.html.registration.render(registrationForm));
 			}
 

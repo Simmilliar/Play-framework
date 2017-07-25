@@ -42,17 +42,17 @@ public class AuthorizationController extends Controller
 		Form<AuthorizationForm> authorizationForm = formFactory.form(AuthorizationForm.class).bindFromRequest();
 		AuthorizationForm authorizationData = authorizationForm.get();
 
-		Users foundedUser = Ebean.find(Users.class, authorizationData.email);
+		Users foundedUser = Ebean.find(Users.class, authorizationData.getEmail());
 		if (foundedUser == null || !foundedUser.isConfirmed())
 		{
-			authorizationData.errors.add(new ValidationError("email", "Unregistered user."));
+			authorizationData.addError(new ValidationError("email", "Unregistered user."));
 		}
 		else
 		{
-			String hash = utils.hashString(authorizationData.password, foundedUser.getPasswordSalt());
+			String hash = utils.hashString(authorizationData.getPassword(), foundedUser.getPasswordSalt());
 			if (!foundedUser.getPasswordHash().equals(hash))
 			{
-				authorizationData.errors.add(new ValidationError("password", "Wrong password."));
+				authorizationData.addError(new ValidationError("password", "Wrong password."));
 			}
 		}
 
@@ -63,7 +63,7 @@ public class AuthorizationController extends Controller
 		else if (request().header("User-Agent").isPresent())
 		{
 			String sessionToken = sessionsManager.registerSession(
-					request().header("User-Agent").get(), authorizationData.email
+					request().header("User-Agent").get(), authorizationData.getEmail()
 			);
 			response().setCookie(
 					Http.Cookie.builder("session_token", sessionToken)

@@ -71,7 +71,7 @@ public class ProfileEditorController extends Controller
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				profileEditorData.errors.add(new ValidationError("avatarFile", "Unable to read file as image."));
+				profileEditorData.addError(new ValidationError("avatarFile", "Unable to read file as image."));
 			}
 		}
 		if (profileEditorForm.hasErrors())
@@ -90,15 +90,15 @@ public class ProfileEditorController extends Controller
 				user.setAvatarUrl(s3File.getUrl());
 				needToSave = true;
 			}
-			if (!user.getName().equals(profileEditorData.name))
+			if (!user.getName().equals(profileEditorData.getName()))
 			{
-				user.setName(profileEditorData.name);
+				user.setName(profileEditorData.getName());
 				needToSave = true;
 			}
-			if (!profileEditorData.password.isEmpty())
+			if (!profileEditorData.getPassword().isEmpty())
 			{
 				user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
-				user.setPasswordHash(utils.hashString(profileEditorData.password, user.getPasswordSalt()));
+				user.setPasswordHash(utils.hashString(profileEditorData.getPassword(), user.getPasswordSalt()));
 				needToSave = true;
 			}
 			if (needToSave)

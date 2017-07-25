@@ -3,7 +3,7 @@
 
 @main("Edit profile") {
     <h1>Edit profile</h1>
-    <img src="@userForm.get().avatarUrl" alt="User avatar" style="width:200px;height:200px;border-radius:100px;">
+    <img src="@userForm.get().getAvatarUrl()" alt="User avatar" style="width:200px;height:200px;border-radius:100px;">
     @b3.form(routes.ProfileEditorController.edit, 'enctype -> "multipart/form-data") {
         @b3.file(userForm("avatarFile"), '_label -> "Avatar")
         @b3.text(userForm("name"), '_label -> "Name")
