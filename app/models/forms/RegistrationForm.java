@@ -1,8 +1,6 @@
 package models.forms;
 
-import controllers.utils.Utils;
-import io.ebean.Ebean;
-import models.data.Users;
+import com.typesafe.config.ConfigFactory;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -23,26 +21,21 @@ public class RegistrationForm implements Constraints.Validatable<List<Validation
 
 	public String passwordConfirm;
 
+	public List<ValidationError> errors = new ArrayList<>();
+
 	@Override
 	public List<ValidationError> validate()
 	{
-		List<ValidationError> errors = new ArrayList<>();
-		if (!name.matches(Utils.REGEX_NAME))
+		errors.clear();
+		if (!name.matches(ConfigFactory.load().getString("REGEX_NAME")))
 		{
 			errors.add(new ValidationError("name", "Invalid name."));
 		}
-		if (!email.matches(Utils.REGEX_EMAIL))
+		if (!email.matches(ConfigFactory.load().getString("REGEX_EMAIL")))
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
-		// todo move it out to registration controller
-		if (Ebean.find(Users.class).where()
-				.eq("email", email)
-				.eq("confirmed", true)
-				.findOne() != null)
-		{
-			errors.add(new ValidationError("email", "This e-mail is already registered."));
-		}
+		// solved todo move it out to registration controller
 		if (password.length() < 8)
 		{
 			errors.add(new ValidationError("password", "Password must be at least 8 symbols long."));

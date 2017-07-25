@@ -2,9 +2,13 @@ package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
 import controllers.utils.SessionsManager;
+import controllers.utils.Utils;
+import io.ebean.Ebean;
+import models.data.Users;
 import models.forms.AuthorizationForm;
 import play.data.Form;
 import play.data.FormFactory;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -17,11 +21,15 @@ import java.time.Duration;
 public class AuthorizationController extends Controller
 {
 	private final FormFactory formFactory;
+	private final Utils utils;
+	private final SessionsManager sessionsManager;
 
 	@Inject
-	public AuthorizationController(FormFactory formFactory)
+	public AuthorizationController(FormFactory formFactory, Utils utils, SessionsManager sessionsManager)
 	{
 		this.formFactory = formFactory;
+		this.utils = utils;
+		this.sessionsManager = sessionsManager;
 	}
 
 	public Result authorization()
@@ -31,17 +39,41 @@ public class AuthorizationController extends Controller
 
 	public Result authorize()
 	{
-		Form<AuthorizationForm> form = formFactory.form(AuthorizationForm.class).bindFromRequest();
-		if (form.hasErrors())
+		Form<AuthorizationForm> authorizationForm = formFactory.form(AuthorizationForm.class).bindFromRequest();
+		AuthorizationForm authorizationData = authorizationForm.get();
+
+		Users foundedUser = Ebean.find(Users.class).where()
+				.and()
+				.eq("email", authorizationData.email)
+				.eq("confirmed", true)
+				.endAnd()
+				.findOne();
+		if (foundedUser == null)
 		{
-			return badRequest(views.html.authorization.render(form));
+			authorizationData.errors.add(new ValidationError("email", "Unregistered user."));
+		}
+		else
+		{
+			String hash = utils.hashString(authorizationData.password, foundedUser.passwordSalt);
+			if (!foundedUser.passwordHash.equals(hash))
+			{
+				authorizationData.errors.add(new ValidationError("password", "Wrong password."));
+			}
+		}
+
+		if (authorizationForm.hasErrors())
+		{
+			return badRequest(views.html.authorization.render(authorizationForm));
 		}
 		else if (request().header("User-Agent").isPresent())
 		{
-			String sessionToken = SessionsManager.registerSession(
-					request().header("User-Agent").get(), form.get().email);
-			response().setCookie(Http.Cookie.builder("session_token", sessionToken)
-					.withMaxAge(Duration.ofSeconds(SessionsManager.TOKEN_LIFETIME))
+			String sessionToken = sessionsManager.registerSession(
+					request().header("User-Agent").get(), authorizationData.email
+			);
+			// todo find out which of params are unnecessary
+			response().setCookie(
+					Http.Cookie.builder("session_token", sessionToken)
+					.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME))
 					.withPath("/")
 					.withSecure(false)
 					.withHttpOnly(true)
@@ -54,7 +86,7 @@ public class AuthorizationController extends Controller
 
 	public Result logout()
 	{
-		SessionsManager.unregisterSession(request().cookies().get("session_token").value());
+		sessionsManager.unregisterSession(request().cookies().get("session_token").value());
 		response().discardCookie("session_token");
 		return redirect(routes.HomeController.index());
 	}

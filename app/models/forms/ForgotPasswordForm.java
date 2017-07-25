@@ -1,8 +1,6 @@
 package models.forms;
 
-import controllers.utils.Utils;
-import io.ebean.Ebean;
-import models.data.Users;
+import com.typesafe.config.ConfigFactory;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -16,19 +14,16 @@ public class ForgotPasswordForm implements Constraints.Validatable<List<Validati
 	@Constraints.Required
 	public String email;
 
+	public List<ValidationError> errors = new ArrayList<>();
+
 	@Override
 	public List<ValidationError> validate()
 	{
-		List<ValidationError> errors = new ArrayList<ValidationError>();
-		if (!email.matches(Utils.REGEX_EMAIL))
+		errors.clear();
+		if (!email.matches(ConfigFactory.load().getString("REGEX_EMAIL")))
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
-		else if (Ebean.find(Users.class, email) == null)
-		{
-			errors.add(new ValidationError("email", "No registered user with this e-mail."));
-		}
-
 		return errors;
 	}
 }

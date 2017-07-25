@@ -9,6 +9,7 @@ import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
 import play.data.Form;
 import play.data.FormFactory;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -24,11 +25,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ProfileEditorController extends Controller
 {
 	private final FormFactory formFactory;
+	private final Utils utils;
 
 	@Inject
-	public ProfileEditorController(FormFactory formFactory)
+	public ProfileEditorController(FormFactory formFactory, Utils utils)
 	{
 		this.formFactory = formFactory;
+		this.utils = utils;
 	}
 
 	public Result profileEditor()
@@ -46,9 +49,12 @@ public class ProfileEditorController extends Controller
 	public Result edit()
 	{
 		Users user = request().attrs().get(AuthorizationCheckAction.USER);
-		Form<ProfileEditorForm> form = formFactory.form(ProfileEditorForm.class).bindFromRequest();
+
+		Form<ProfileEditorForm> profileEditorForm = formFactory.form(ProfileEditorForm.class).bindFromRequest();
+		ProfileEditorForm profileEditorData = profileEditorForm.get();
 		Http.MultipartFormData.FilePart avatarFilePart =
 				request().body().asMultipartFormData().getFile("avatarFile");
+
 		if (avatarFilePart != null && ((File)avatarFilePart.getFile()).length() > 0)
 		{
 			try
@@ -61,20 +67,19 @@ public class ProfileEditorController extends Controller
 				imOperation.crop(100, 100, 0, 0);
 				imOperation.addImage(((File) avatarFilePart.getFile()).getAbsolutePath());
 				convertCmd.run(imOperation);
-				form.get().avatarFileIsValid = true;
 			}
 			catch (Exception e)
 			{
-				form.get().avatarFileIsValid = false;
+				e.printStackTrace();
+				profileEditorData.errors.add(new ValidationError("avatarFile", "Unable to read file as image."));
 			}
 		}
-		if (form.hasErrors())
+		if (profileEditorForm.hasErrors())
 		{
-			return badRequest(views.html.editprofile.render(form));
+			return badRequest(views.html.editprofile.render(profileEditorForm));
 		}
 		else
 		{
-			ProfileEditorForm pef = form.get();
 			boolean needToSave = false;
 			if (avatarFilePart != null && ((File)avatarFilePart.getFile()).length() > 0)
 			{
@@ -85,19 +90,15 @@ public class ProfileEditorController extends Controller
 				user.avatarUrl = s3File.getUrl();
 				needToSave = true;
 			}
-			if (!user.name.equals(pef.name))
+			if (!user.name.equals(profileEditorData.name))
 			{
-				user.name = pef.name;
+				user.name = profileEditorData.name;
 				needToSave = true;
 			}
-			if (!pef.password.isEmpty())
+			if (!profileEditorData.password.isEmpty())
 			{
 				user.passwordSalt = "" + ThreadLocalRandom.current().nextInt();
-				user.passwordHash = Utils.hashString(
-						new StringBuilder(pef.password)
-								.insert(pef.password.length() / 2, user.passwordSalt)
-								.toString()
-				);
+				user.passwordHash = utils.hashString(profileEditorData.password, user.passwordSalt);
 				needToSave = true;
 			}
 			if (needToSave)

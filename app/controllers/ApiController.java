@@ -18,16 +18,21 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ApiController extends Controller
 {
 	private final FormFactory formFactory;
+	private final SessionsManager sessionsManager;
+	private final Utils utils;
 	private Multimap<String, String> errors = ArrayListMultimap.create();
 
 	@Inject
-	public ApiController(FormFactory formFactory)
+	public ApiController(FormFactory formFactory, SessionsManager sessionsManager, Utils utils)
 	{
 		this.formFactory = formFactory;
+		this.sessionsManager = sessionsManager;
+		this.utils = utils;
 	}
 
 	public Result authorize(String email, String password)
@@ -38,7 +43,7 @@ public class ApiController extends Controller
 		Form<AuthorizationForm> loginForm = formFactory.form(AuthorizationForm.class).bind(authorizationData);
 		if (!loginForm.hasErrors() && request().header("User-Agent").isPresent())
 		{
-			String sessionToken = SessionsManager.registerSession(
+			String sessionToken = sessionsManager.registerSession(
 					request().header("User-Agent").get(), loginForm.get().email);
 			return ok(sessionToken);
 		}
@@ -50,9 +55,9 @@ public class ApiController extends Controller
 
 	public Result unauthorize(String sessionToken)
 	{
-		if (SessionsManager.checkSession(sessionToken))
+		if (sessionsManager.checkSession(sessionToken))
 		{
-			SessionsManager.unregisterSession(sessionToken);
+			sessionsManager.unregisterSession(sessionToken);
 			return ok("");
 		}
 		else
@@ -65,7 +70,7 @@ public class ApiController extends Controller
 
 	public Result userlist(String sessionToken)
 	{
-		if (SessionsManager.checkSession(sessionToken))
+		if (sessionsManager.checkSession(sessionToken))
 		{
 			return ok(Json.toJson(Ebean.createSqlQuery("SELECT name, email FROM Users").findList()));
 		}
@@ -79,7 +84,7 @@ public class ApiController extends Controller
 
 	public Result editProfile(String newName, String newPassword, String sessionToken)
 	{
-		if (SessionsManager.checkSession(sessionToken))
+		if (sessionsManager.checkSession(sessionToken))
 		{
 			Map<String, String> data = new HashMap<>();
 			data.put("name", newName);
@@ -101,7 +106,8 @@ public class ApiController extends Controller
 				}
 				if (!newPassword.isEmpty())
 				{
-					user.passwordHash = Utils.hashString(newPassword);
+					user.passwordSalt = "" + ThreadLocalRandom.current().nextInt();
+					user.passwordHash = utils.hashString(newPassword, user.passwordSalt);
 					needToSave = true;
 				}
 				if (needToSave)

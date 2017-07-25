@@ -1,6 +1,6 @@
 package models.forms;
 
-import controllers.utils.Utils;
+import com.typesafe.config.ConfigFactory;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -25,13 +25,13 @@ public class ProfileEditorForm implements Constraints.Validatable<List<Validatio
 
 	public String avatarUrl;
 
-	public boolean avatarFileIsValid;
+	public List<ValidationError> errors = new ArrayList<>();
 
 	@Override
 	public List<ValidationError> validate()
 	{
-		List<ValidationError> errors = new ArrayList<>();
-		if (!name.matches(Utils.REGEX_NAME))
+		errors.clear();
+		if (!name.matches(ConfigFactory.load().getString("REGEX_NAME")))
 		{
 			errors.add(new ValidationError("name", "Invalid name."));
 		}
@@ -42,10 +42,6 @@ public class ProfileEditorForm implements Constraints.Validatable<List<Validatio
 		if (!passwordConfirm.equals(password))
 		{
 			errors.add(new ValidationError("passwordConfirm", "Passwords does not match."));
-		}
-		if (avatarFile != null && !avatarFileIsValid)
-		{
-			errors.add(new ValidationError("avatarFile", "Unable to read file as image."));
 		}
 		return errors;
 	}

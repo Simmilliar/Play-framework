@@ -1,8 +1,6 @@
 package models.forms;
 
-import controllers.utils.Utils;
-import io.ebean.Ebean;
-import models.data.Users;
+import com.typesafe.config.ConfigFactory;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -17,38 +15,19 @@ public class AuthorizationForm implements Constraints.Validatable<List<Validatio
 	@Constraints.Required
 	public String password;
 
+	public List<ValidationError> errors = new ArrayList<>();
+
 	@Override
 	public List<ValidationError> validate()
 	{
-		List<ValidationError> errors = new ArrayList<>();
-		if (!email.matches(Utils.REGEX_EMAIL))
+		errors.clear();
+
+		if (!email.matches(ConfigFactory.load().getString("REGEX_EMAIL")))
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
 
-		// todo move it out, only validate data format here
-		Users foundedUser = Ebean.find(Users.class).where()
-				.and()
-				.eq("email", email)
-				.eq("confirmed", true)
-				.endAnd()
-				.findOne();
-		if (foundedUser == null)
-		{
-			errors.add(new ValidationError("email", "Unregistered user."));
-		}
-		else
-		{
-			String hash = Utils.hashString(
-					new StringBuilder(password)
-							.insert(password.length() / 2, foundedUser.passwordSalt)
-							.toString()
-			);
-			if (!foundedUser.passwordHash.equals(hash))
-			{
-				errors.add(new ValidationError("password", "Wrong password."));
-			}
-		}
+		// solved todo move it out, only validate data format here
 
 		return errors;
 	}

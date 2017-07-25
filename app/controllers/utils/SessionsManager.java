@@ -3,53 +3,57 @@ package controllers.utils;
 import io.ebean.Ebean;
 import models.data.Session;
 import models.data.Users;
-import play.mvc.Http;
 
+import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 
 public class SessionsManager
 {
-	public static final long TOKEN_LIFETIME = TimeUnit.DAYS.toSeconds(30);
+	public final long TOKEN_LIFETIME = TimeUnit.DAYS.toMillis(30);
+	public final Utils utils;
 
-	// todo remove it
-	public static boolean userAuthorized(Http.Request request)
+	@Inject
+	public SessionsManager(Utils utils)
 	{
-		return request.cookies().get("session_token") != null &&
-				SessionsManager.checkSession(request.cookies().get("session_token").value());
+		this.utils = utils;
 	}
 
-	public static String registerSession(String userAgent, String email)
-	{
-		// todo figure out how to avoid using magic numbers
-		long timestamp = System.currentTimeMillis() / 1000L + TOKEN_LIFETIME;
+	// solved todo remove it
 
-		String token = Utils.hashString(userAgent + email + timestamp);
+	public String registerSession(String userAgent, String email)
+	{
+		// solved todo figure out how to avoid using magic numbers
+		long expirationDate = System.currentTimeMillis() + TOKEN_LIFETIME;
+
+		String token = utils.hashString(userAgent + email + expirationDate, "");
 
 		Session session = new Session();
 		session.user = Ebean.find(Users.class, email);
-		session.expirationDate = timestamp;
+		session.expirationDate = expirationDate;
 		session.token = token;
 		session.save();
 
 		return token;
 	}
 
-	public static void unregisterSession(String token)
+	public void unregisterSession(String token)
 	{
-		if (checkSession(token))
+		Session session = Ebean.find(Session.class, token);
+		if (session != null)
 		{
-			Ebean.delete(Ebean.find(Session.class, token));
+			session.expirationDate = System.currentTimeMillis();
+			session.save();
 		}
 	}
 
-	public static boolean checkSession(String token)
+	public boolean checkSession(String token)
 	{
 		Session session = Ebean.find(Session.class, token);
 		if (session == null)
 		{
 			return false;
 		}
-		else if (session.expirationDate <= System.currentTimeMillis() / 1000L)
+		else if (session.expirationDate <= System.currentTimeMillis())
 		{
 			return false;
 		}
