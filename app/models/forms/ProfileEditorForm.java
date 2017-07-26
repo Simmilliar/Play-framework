@@ -1,6 +1,6 @@
 package models.forms;
 
-import com.typesafe.config.ConfigFactory;
+import controllers.utils.Utils;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -31,7 +31,7 @@ public class ProfileEditorForm implements Constraints.Validatable<List<Validatio
 	public List<ValidationError> validate()
 	{
 		errors.clear();
-		if (!name.matches(ConfigFactory.load().getString("REGEX_NAME")))
+		if (!name.matches(Utils.REGEX_NAME))
 		{
 			errors.add(new ValidationError("name", "Invalid name."));
 		}

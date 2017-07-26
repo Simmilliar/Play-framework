@@ -1,6 +1,6 @@
 package models.forms;
 
-import com.typesafe.config.ConfigFactory;
+import controllers.utils.Utils;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -27,11 +27,11 @@ public class RegistrationForm implements Constraints.Validatable<List<Validation
 	public List<ValidationError> validate()
 	{
 		errors.clear();
-		if (!name.matches(ConfigFactory.load().getString("REGEX_NAME")))
+		if (!name.matches(Utils.REGEX_NAME))
 		{
 			errors.add(new ValidationError("name", "Invalid name."));
 		}
-		if (!email.matches(ConfigFactory.load().getString("REGEX_EMAIL")))
+		if (!email.matches(Utils.REGEX_EMAIL))
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}

@@ -84,13 +84,13 @@ public class RegistrationController extends Controller
 			user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
 
 			user.setAvatarUrl(routes.Assets.versioned(
-					new Assets.Asset(config.getString("DEFAULT_AVATAR_ASSET"))
-			).url()); // todo it's better, but please, use java constants
+					new Assets.Asset(Utils.DEFAULT_AVATAR_ASSET)
+			).url()); // solved todo it's better, but please, use java constants
 
 			user.setConfirmed(false);
 			try
 			{
-				String confirmationBodyText = String.format(config.getString("EMAIL_CONFIRMATION"),
+				String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION,
 						routes.RegistrationController.confirmEmail(confirmationKey).absoluteURL(request()));
 				new MailerService(mailerClient)
 						.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);

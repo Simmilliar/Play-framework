@@ -42,21 +42,4 @@ public class SessionsManager
 			session.save();
 		}
 	}
-
-	public boolean checkSession(String token)
-	{
-		Session session = Ebean.find(Session.class, token);
-		if (session == null)
-		{
-			return false;
-		}
-		else if (session.getExpirationDate() <= System.currentTimeMillis())
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
 }

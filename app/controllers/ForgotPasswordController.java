@@ -69,7 +69,7 @@ public class ForgotPasswordController extends Controller
 
 			try
 			{
-				String confirmationBodyText = String.format(config.getString("EMAIL_PASSWORD_CHANGE"),
+				String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE,
 						routes.ForgotPasswordController.changingPassword(confirmationKey).absoluteURL(request()));
 				mailerService.sendEmail(forgotPasswordData.getEmail(), "Change password.", confirmationBodyText);
 				flash().put("notification", "We'll sen you an e-mail to change your password.");

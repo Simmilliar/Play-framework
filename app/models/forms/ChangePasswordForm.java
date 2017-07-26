@@ -17,7 +17,7 @@ public class ChangePasswordForm implements Constraints.Validatable<List<Validati
 	@Override
 	public List<ValidationError> validate()
 	{
-		List<ValidationError> errors = new ArrayList<ValidationError>();
+		List<ValidationError> errors = new ArrayList<>();
 		if (password.length() < 8)
 		{
 			errors.add(new ValidationError("password", "Password must be at least 8 symbols long."));

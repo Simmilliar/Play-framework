@@ -5,125 +5,222 @@ import com.google.common.collect.Multimap;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
+import models.data.S3File;
 import models.data.Session;
 import models.data.Users;
-import models.forms.AuthorizationForm;
-import models.forms.ProfileEditorForm;
-import play.data.Form;
-import play.data.FormFactory;
+import org.im4java.core.ConvertCmd;
+import org.im4java.core.IMOperation;
 import play.libs.Json;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ApiController extends Controller
 {
-	private final FormFactory formFactory;
 	private final SessionsManager sessionsManager;
 	private final Utils utils;
-	private Multimap<String, String> errors = ArrayListMultimap.create();
+
+	// todo make API works
 
 	@Inject
-	public ApiController(FormFactory formFactory, SessionsManager sessionsManager, Utils utils)
+	public ApiController(SessionsManager sessionsManager, Utils utils)
 	{
-		this.formFactory = formFactory;
 		this.sessionsManager = sessionsManager;
 		this.utils = utils;
 	}
 
 	public Result authorize(String email, String password)
 	{
-		Map<String, String> authorizationData = new HashMap<>();
-		authorizationData.put("email", email);
-		authorizationData.put("password", password);
-		Form<AuthorizationForm> loginForm = formFactory.form(AuthorizationForm.class).bind(authorizationData);
-		if (!loginForm.hasErrors() && request().header("User-Agent").isPresent())
+		Multimap<String, String> errors = ArrayListMultimap.create();
+
+		if (!email.matches(Utils.REGEX_EMAIL))
 		{
-			String sessionToken = sessionsManager.registerSession(
-					request().header("User-Agent").get(), loginForm.get().getEmail()
-			);
-			return ok(sessionToken);
+			errors.put("email", "Invalid e-mail address.");
 		}
 		else
 		{
-			return badRequest(loginForm.errorsAsJson());
+			Users foundedUser = Ebean.find(Users.class, email);
+			if (foundedUser == null || !foundedUser.isConfirmed())
+			{
+				errors.put("email", "Unregistered user.");
+			}
+			else
+			{
+				String hash = utils.hashString(password, foundedUser.getPasswordSalt());
+				if (!foundedUser.getPasswordHash().equals(hash))
+				{
+					errors.put("password", "Wrong password.");
+				}
+				else if (!request().header("User-Agent").isPresent())
+				{
+					errors.put("user-agent", "Can't find User-Agent request header which is required for authorization.");
+				}
+			}
+		}
+
+		if (errors.isEmpty())
+		{
+			String sessionToken = sessionsManager.registerSession(
+					request().header("User-Agent").get(), email
+			);
+			return ok(Json.toJson(sessionToken));
+		}
+		else
+		{
+			return badRequest(Json.toJson(errors));
 		}
 	}
 
 	public Result unauthorize(String sessionToken)
 	{
+		Multimap<String, String> errors = ArrayListMultimap.create();
+
 		Session session = Ebean.find(Session.class, sessionToken);
-		if (session != null && !session.isExpired()){
-			session.setExpirationDate(System.currentTimeMillis());
-			session.save();
+		if (session == null || session.isExpired())
+		{
+			errors.put("session_token", "Invalid session token.");
+		}
+		if (errors.isEmpty())
+		{
+			sessionsManager.unregisterSession(sessionToken);
 			return ok("");
 		}
 		else
 		{
-			errors.clear();
-			errors.put("session_token", "Invalid session token.");
 			return badRequest(Json.toJson(errors.asMap()));
 		}
 	}
 
-	public Result userlist(String sessionToken)
+	public Result usersList(String sessionToken)
 	{
-		if (sessionsManager.checkSession(sessionToken))
+		Multimap<String, String> errors = ArrayListMultimap.create();
+
+		Session session = Ebean.find(Session.class, sessionToken);
+		if (session == null || session.isExpired())
 		{
-			return ok(Json.toJson(Ebean.createSqlQuery("SELECT name, email FROM Users WHERE confirmed = true;").findList()));
+			errors.put("session_token", "Invalid session token.");
+		}
+		if (errors.isEmpty())
+		{
+			return ok(Ebean.json().toJson(
+					Ebean.find(Users.class)
+							.select("name, email, avatarUrl")
+							.where()
+							.eq("confirmed", true)
+							.findList()
+			));
 		}
 		else
 		{
-			errors.clear();
-			errors.put("session_token", "Invalid session token.");
 			return badRequest(Json.toJson(errors.asMap()));
 		}
 	}
 
 	public Result editProfile(String newName, String newPassword, String sessionToken)
 	{
+		Multimap<String, String> errors = ArrayListMultimap.create();
+
 		Session session = Ebean.find(Session.class, sessionToken);
-		if (session != null && session.getExpirationDate() <= System.currentTimeMillis())
+		if (session == null || session.isExpired())
 		{
-			Map<String, String> data = new HashMap<>();
-			data.put("name", newName);
-			data.put("password", newPassword);
-			data.put("passwordConfirm", newPassword);
-			Form<ProfileEditorForm> form = formFactory.form(ProfileEditorForm.class).bind(data);
-			if (form.hasErrors())
-			{
-				return badRequest(form.errorsAsJson());
-			}
-			else
-			{
-				Users user = session.getUser();
-				boolean needToSave = false;
-				if (!user.getName().equals(newName))
-				{
-					user.setName(newName);
-					needToSave = true;
-				}
-				if (!newPassword.isEmpty())
-				{
-					user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
-					user.setPasswordHash(utils.hashString(newPassword, user.getPasswordSalt()));
-					needToSave = true;
-				}
-				if (needToSave)
-				{
-					user.save();
-				}
-				return ok("");
-			}
+			errors.put("session_token", "Invalid session token.");
 		}
 		else
 		{
-			errors.clear();
+			if (!newName.isEmpty() && !newName.matches(Utils.REGEX_NAME))
+			{
+				errors.put("name", "Invalid name.");
+			}
+			if (!newPassword.isEmpty() && newPassword.length() < 8)
+			{
+				errors.put("password", "Password must be at least 8 symbols long.");
+			}
+		}
+
+		if (errors.isEmpty())
+		{
+			Users user = session.getUser();
+			boolean needToSave = false;
+			if (!newName.isEmpty() && !user.getName().equals(newName))
+			{
+				user.setName(newName);
+				needToSave = true;
+			}
+			if (!newPassword.isEmpty())
+			{
+				user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
+				user.setPasswordHash(utils.hashString(newPassword, user.getPasswordSalt()));
+				needToSave = true;
+			}
+			if (needToSave)
+			{
+				user.save();
+			}
+			return ok("");
+		}
+		else
+		{
+			return badRequest(Json.toJson(errors.asMap()));
+		}
+	}
+
+	public Result editProfileAvatar(String sessionToken)
+	{
+		Multimap<String, String> errors = ArrayListMultimap.create();
+		Http.MultipartFormData.FilePart avatarFilePart = null;
+
+		Session session = Ebean.find(Session.class, sessionToken);
+		if (session == null || session.isExpired())
+		{
 			errors.put("session_token", "Invalid session token.");
+		}
+		else
+		{
+
+			avatarFilePart = request().body().asMultipartFormData().getFile("avatarFile");
+
+			if (avatarFilePart != null && ((File)avatarFilePart.getFile()).length() > 0)
+			{
+				try
+				{
+					ConvertCmd convertCmd = new ConvertCmd();
+					IMOperation imOperation = new IMOperation();
+					imOperation.addImage(((File) avatarFilePart.getFile()).getAbsolutePath());
+					imOperation.resize(100, 100, '^');
+					imOperation.gravity("Center");
+					imOperation.crop(100, 100, 0, 0);
+					imOperation.addImage(((File) avatarFilePart.getFile()).getAbsolutePath());
+					convertCmd.run(imOperation);
+				}
+				catch (Exception e)
+				{
+					errors.put("avatarFile", "Unable to read file as image.");
+				}
+			}
+			else
+			{
+				errors.put("avatarFile", "No file provided.");
+			}
+		}
+
+		if (errors.isEmpty())
+		{
+			S3File s3File = new S3File();
+			s3File.file = (File) avatarFilePart.getFile();
+			s3File.save();
+
+			Users user = session.getUser();
+			user.setAvatarUrl(s3File.getUrl());
+			user.save();
+
+			return ok("");
+		}
+		else
+		{
 			return badRequest(Json.toJson(errors.asMap()));
 		}
 	}

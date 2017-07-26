@@ -1,6 +1,6 @@
 package models.forms;
 
-import com.typesafe.config.ConfigFactory;
+import controllers.utils.Utils;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -21,7 +21,7 @@ public class AuthorizationForm implements Constraints.Validatable<List<Validatio
 	public List<ValidationError> validate()
 	{
 		errors.clear();
-		if (!email.matches(ConfigFactory.load().getString("REGEX_EMAIL")))
+		if (!email.matches(Utils.REGEX_EMAIL))
 		{
 			errors.add(new ValidationError("email", "Invalid e-mail address."));
 		}
