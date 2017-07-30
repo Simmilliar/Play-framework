@@ -1,7 +1,5 @@
 package controllers;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.utils.MailerService;
 import controllers.utils.SessionsManager;
@@ -17,6 +15,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.With;
+import tyrex.services.UUID;
 
 import javax.inject.Inject;
 import java.time.Duration;
@@ -30,7 +29,6 @@ public class RegistrationController extends Controller
 	private final MailerClient mailerClient;
 	private final Utils utils;
 	private final SessionsManager sessionsManager;
-	private final Config config = ConfigFactory.load();
 
 	@Inject
 	public RegistrationController(FormFactory formFactory, MailerClient mailerClient, Utils utils, SessionsManager sessionsManager)
@@ -56,8 +54,11 @@ public class RegistrationController extends Controller
 
 		RegistrationForm registrationData = registrationForm.get();
 
-		Users foundedUser = Ebean.find(Users.class, registrationData.getEmail());
-		if (foundedUser != null && foundedUser.isConfirmed())
+		Users user = Ebean.find(Users.class)
+				.where()
+				.eq("email", registrationData.getEmail())
+				.findOne();
+		if (user != null && user.isConfirmed())
 		{
 			registrationData.addError(new ValidationError("email", "This e-mail is already registered."));
 		}
@@ -68,26 +69,25 @@ public class RegistrationController extends Controller
 		}
 		else
 		{
-			Users user = Ebean.find(Users.class, registrationData.getEmail());
 			if (user == null)
 			{
 				user = new Users();
 			}
 			user.setName(registrationData.getName());
-			user.setName(registrationData.getEmail());
-
-			user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
-			user.setPasswordHash(utils.hashString(registrationData.getPassword(), user.getPasswordSalt()));
-
-			String confirmationKey = System.currentTimeMillis() + "" + ThreadLocalRandom.current().nextInt();
-			user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
-			user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
-
+			user.setEmail(registrationData.getEmail());
 			user.setAvatarUrl(routes.Assets.versioned(
 					new Assets.Asset(Utils.DEFAULT_AVATAR_ASSET)
 			).url()); // solved todo it's better, but please, use java constants
+			user.setFacebookId(0);
+
+			user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
+			user.setPasswordHash(utils.hashString(registrationData.getPassword(), user.getPasswordSalt()));
 
 			user.setConfirmed(false);
+			String confirmationKey = UUID.create();
+			user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
+			user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
+
 			try
 			{
 				String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION,
@@ -98,7 +98,6 @@ public class RegistrationController extends Controller
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
 				registrationData.addError(new ValidationError("email", "Unable to send confirmation email."));
 				return internalServerError(views.html.registration.render(registrationForm));
 			}
@@ -129,11 +128,12 @@ public class RegistrationController extends Controller
 			flash().put("notification", "You were successfully registered!");
 
 			String sessionToken = sessionsManager.registerSession(
-					request().header("User-Agent").get(), user.getEmail()
+					sessionsManager.AUTH_TYPE_PASSWORD,
+					request().header("User-Agent").get(), user.getUserId()
 			);
 			response().setCookie(
 					Http.Cookie.builder("session_token", sessionToken)
-					.withMaxAge(Duration.ofSeconds(sessionsManager.TOKEN_LIFETIME))
+					.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME))
 					.build()
 			);
 		}

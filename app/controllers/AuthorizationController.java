@@ -47,7 +47,10 @@ public class AuthorizationController extends Controller
 
 		AuthorizationForm authorizationData = authorizationForm.get();
 
-		Users foundedUser = Ebean.find(Users.class, authorizationData.getEmail());
+		Users foundedUser = Ebean.find(Users.class)
+				.where()
+				.eq("email", authorizationData.getEmail())
+				.findOne();
 		if (foundedUser == null || !foundedUser.isConfirmed())
 		{
 			authorizationData.addError(new ValidationError("email", "Unregistered user."));
@@ -68,7 +71,8 @@ public class AuthorizationController extends Controller
 		else if (request().header("User-Agent").isPresent())
 		{
 			String sessionToken = sessionsManager.registerSession(
-					request().header("User-Agent").get(), authorizationData.getEmail()
+					sessionsManager.AUTH_TYPE_PASSWORD,
+					request().header("User-Agent").get(), foundedUser.getUserId()
 			);
 			response().setCookie(
 					Http.Cookie.builder("session_token", sessionToken)

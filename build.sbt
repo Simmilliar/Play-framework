@@ -25,4 +25,6 @@ libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.11.82"
 
 libraryDependencies += "org.im4java" % "im4java" % "1.4.0"
 
+libraryDependencies += javaWs
+
 testOptions in Test += Tests.Argument(TestFrameworks.JUnit, "-a", "-v")

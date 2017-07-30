@@ -16,6 +16,8 @@ public class Session extends Model
 	private Users user;
 	@Column(nullable = false)
 	private long expirationDate;
+	@Column(nullable = false)
+	private String authType;
 
 	public boolean isExpired()
 	{
@@ -50,5 +52,15 @@ public class Session extends Model
 	public void setExpirationDate(long expirationDate)
 	{
 		this.expirationDate = expirationDate;
+	}
+
+	public String getAuthType()
+	{
+		return authType;
+	}
+
+	public void setAuthType(String authType)
+	{
+		this.authType = authType;
 	}
 }

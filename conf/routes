@@ -9,6 +9,8 @@ GET     /emailconfirm               controllers.RegistrationController.confirmEm
 GET     /login                      controllers.AuthorizationController.authorization
 +nocsrf
 POST    /login                      controllers.AuthorizationController.authorize
++nocsrf
+POST    /facebook_auth              controllers.FacebookAuthController.facebookAuth
 
 GET     /logout                     controllers.AuthorizationController.logout
 

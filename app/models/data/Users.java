@@ -6,17 +6,22 @@ import io.ebean.annotation.Index;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.UUID;
 
 @Entity
 public class Users extends Model
 {
 	@Id
-	private String email;
+	private UUID userId;
 
 	@Column(nullable = false)
 	private String name;
+	@Column(nullable = false, unique = true)
+	private String email;
 	@Column(nullable = false)
 	private String avatarUrl;
+	@Column(nullable = false, unique = true)
+	private long facebookId;
 
 	@Column(nullable = false)
 	private String passwordHash;
@@ -27,7 +32,7 @@ public class Users extends Model
 	@Column(nullable = false)
 	private boolean confirmed;
 	@Index
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String confirmationKeyHash;
 	@Index
 	@Column(nullable = false)
@@ -111,5 +116,25 @@ public class Users extends Model
 	public void setConfirmationKeyExpirationDate(long confirmationKeyExpirationDate)
 	{
 		this.confirmationKeyExpirationDate = confirmationKeyExpirationDate;
+	}
+
+	public UUID getUserId()
+	{
+		return userId;
+	}
+
+	public void setUserId(UUID userId)
+	{
+		this.userId = userId;
+	}
+
+	public long getFacebookId()
+	{
+		return facebookId;
+	}
+
+	public void setFacebookId(long facebookId)
+	{
+		this.facebookId = facebookId;
 	}
 }

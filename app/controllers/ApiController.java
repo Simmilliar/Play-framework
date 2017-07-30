@@ -36,6 +36,7 @@ public class ApiController extends Controller
 	public Result authorize(String email, String password)
 	{
 		Multimap<String, String> errors = ArrayListMultimap.create();
+		Users foundedUser = null;
 
 		if (!email.matches(Utils.REGEX_EMAIL))
 		{
@@ -43,7 +44,7 @@ public class ApiController extends Controller
 		}
 		else
 		{
-			Users foundedUser = Ebean.find(Users.class, email);
+			foundedUser = Ebean.find(Users.class, email);
 			if (foundedUser == null || !foundedUser.isConfirmed())
 			{
 				errors.put("email", "Unregistered user.");
@@ -65,7 +66,8 @@ public class ApiController extends Controller
 		if (errors.isEmpty())
 		{
 			String sessionToken = sessionsManager.registerSession(
-					request().header("User-Agent").get(), email
+					"api",
+					request().header("User-Agent").get(), foundedUser.getUserId()
 			);
 			return ok(Json.toJson(sessionToken));
 		}

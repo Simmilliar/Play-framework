@@ -1,7 +1,5 @@
 package controllers;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.utils.MailerService;
 import controllers.utils.Utils;
@@ -15,6 +13,7 @@ import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
+import tyrex.services.UUID;
 
 import javax.inject.Inject;
 import java.util.concurrent.ThreadLocalRandom;
@@ -26,7 +25,6 @@ public class ForgotPasswordController extends Controller
 	private final FormFactory formFactory;
 	private final MailerService mailerService;
 	private final Utils utils;
-	private final Config config = ConfigFactory.load();
 
 	@Inject
 	public ForgotPasswordController(FormFactory formFactory, MailerService mailerService, Utils utils)
@@ -51,10 +49,13 @@ public class ForgotPasswordController extends Controller
 
 		ForgotPasswordForm forgotPasswordData = forgotPasswordForm.get();
 
-		Users user = Ebean.find(Users.class, forgotPasswordData.getEmail());
+		Users user = Ebean.find(Users.class)
+				.where()
+				.eq("email", forgotPasswordData.getEmail())
+				.findOne();
 		if (user == null || !user.isConfirmed())
 		{
-			forgotPasswordData.getErrors().add(new ValidationError("email", "No registered user with this e-mail."));
+			forgotPasswordData.addError(new ValidationError("email", "No registered user with this e-mail."));
 		}
 
 		if (forgotPasswordForm.hasErrors())
@@ -63,7 +64,7 @@ public class ForgotPasswordController extends Controller
 		}
 		else
 		{
-			String confirmationKey = System.currentTimeMillis() + "" + ThreadLocalRandom.current().nextInt();
+			String confirmationKey = UUID.create();
 			user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
 			user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
 
@@ -76,7 +77,6 @@ public class ForgotPasswordController extends Controller
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
 				forgotPasswordData.getErrors().add(new ValidationError("email", "Unable to send confirmation email."));
 				return internalServerError(views.html.forgotpassword.render(forgotPasswordForm));
 			}
@@ -127,7 +127,7 @@ public class ForgotPasswordController extends Controller
 			{
 				ChangePasswordForm changePasswordData = changePasswordForm.get();
 
-				user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
+				user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
 				user.setPasswordHash(utils.hashString(changePasswordData.getPassword(), user.getPasswordSalt()));
 
 				user.setConfirmationKeyHash("");
