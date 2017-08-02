@@ -24,8 +24,6 @@ public class ApiController extends Controller
 	private final SessionsManager sessionsManager;
 	private final Utils utils;
 
-	// solved todo make API works
-
 	@Inject
 	public ApiController(SessionsManager sessionsManager, Utils utils)
 	{

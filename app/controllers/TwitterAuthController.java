@@ -110,8 +110,8 @@ public class TwitterAuthController
 									user.setName(jsonNode.get("name").asText());
 									user.setEmail(jsonNode.has("email") ? jsonNode.get("email").asText() : "");
 									user.setAvatarUrl(jsonNode.get("profile_image_url").asText());
-									user.setFacebookId(0);
-									user.setTwitterId(0);
+									user.setFacebookId(-1L * System.currentTimeMillis());
+									user.setTwitterId(jsonNode.get("id").asLong());
 
 									user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
 									user.setPasswordHash("");

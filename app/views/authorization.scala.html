@@ -4,6 +4,7 @@
 @main("Login") {
     <h1>Login</h1>
     @b3.form(action = routes.AuthorizationController.authorize()) {
+        @helper.CSRF.formField
         @b3.email(userForm("email"), '_label -> "E-mail")
         @b3.password(userForm("password"), '_label -> "Password")
         @b3.submit('class -> "btn btn-primary"){ Login }

@@ -62,7 +62,6 @@ public class FacebookAuthController extends Controller
 
 	private Http.Cookie authorization(JsonNode jsonNode)
 	{
-		// todo WTF is going on here???
 		Users user = Ebean.find(Users.class)
 				.where()
 				.eq("facebook_id", jsonNode.get("id").asLong())
@@ -84,7 +83,7 @@ public class FacebookAuthController extends Controller
 				user.setEmail(jsonNode.has("email") ? jsonNode.get("email").asText() : "");
 				user.setAvatarUrl(jsonNode.get("picture").get("data").get("url").asText());
 				user.setFacebookId(jsonNode.get("id").asLong());
-				user.setTwitterId(0);
+				user.setTwitterId(-1L * System.currentTimeMillis());
 
 				user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
 				user.setPasswordHash("");

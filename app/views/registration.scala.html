@@ -4,6 +4,7 @@
 @main("Registration") {
     <h1>Registration</h1>
     @b3.form(routes.RegistrationController.register) {
+        @helper.CSRF.formField
         @b3.text(userForm("name"), '_label -> "Name")
         @b3.email(userForm("email"), '_label -> "E-mail")
         @b3.password(userForm("password"), '_label -> "Password")
