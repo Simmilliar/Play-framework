@@ -10,34 +10,9 @@
         <a href="@routes.ForgotPasswordController.forgotPassword()" class="btn btn-default">Forgot password</a>
         <a href="@routes.HomeController.index()" class="btn btn-default">Go back</a>
     }
-    <!--HUGE Facebook part-->
+    <a href="@routes.TwitterAuthController.twitterAuth()" class="btn btn-primary" style="margin-top:15px;">Log in with Twitter</a>
     <div id="fb-root"></div>
-    <script>
-            (function(d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0];
-                if (d.getElementById(id)) return;
-                js = d.createElement(s); js.id = id;
-                js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.10&appId=133674077141287";
-                fjs.parentNode.insertBefore(js, fjs);
-            }(document, 'script', 'facebook-jssdk'));
-    </script>
-    <script>
-        function onFacebookLoginButtonClick() {
-            document.getElementById("facebookErrorMessage").style.visibility = "collapse";
-            FB.getLoginStatus(function(response) {
-                if (response.status === 'connected') {
-                    post('/facebook_auth', {
-                        accessToken: response.authResponse.accessToken,
-                        expiresIn: response.authResponse.expiresIn,
-                        signedRequest: response.authResponse.signedRequest,
-                        userID: response.authResponse.userID
-                    });
-                } else {
-                    document.getElementById("facebookErrorMessage").style.visibility = "visible";
-                }
-            });
-        }
-    </script>
+    <script src="@routes.Assets.versioned("javascripts/facebook_auth.js")"></script>
     <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="login_with"
         data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false" style="margin-top:15px;"
         scope="public_profile,email" onlogin="onFacebookLoginButtonClick();"></div>

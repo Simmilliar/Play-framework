@@ -79,6 +79,7 @@ public class RegistrationController extends Controller
 					new Assets.Asset(Utils.DEFAULT_AVATAR_ASSET)
 			).url()); // solved todo it's better, but please, use java constants
 			user.setFacebookId(0);
+			user.setTwitterId(0);
 
 			user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
 			user.setPasswordHash(utils.hashString(registrationData.getPassword(), user.getPasswordSalt()));

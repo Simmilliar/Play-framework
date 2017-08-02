@@ -16,12 +16,17 @@ public class Users extends Model
 
 	@Column(nullable = false)
 	private String name;
+	@Index
 	@Column(nullable = false, unique = true)
 	private String email;
 	@Column(nullable = false)
 	private String avatarUrl;
+	@Index
 	@Column(nullable = false, unique = true)
 	private long facebookId;
+	@Index
+	@Column(nullable = false, unique = true)
+	private long twitterId;
 
 	@Column(nullable = false)
 	private String passwordHash;
@@ -136,5 +141,15 @@ public class Users extends Model
 	public void setFacebookId(long facebookId)
 	{
 		this.facebookId = facebookId;
+	}
+
+	public long getTwitterId()
+	{
+		return twitterId;
+	}
+
+	public void setTwitterId(long twitterId)
+	{
+		this.twitterId = twitterId;
 	}
 }

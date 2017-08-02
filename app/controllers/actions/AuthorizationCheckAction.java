@@ -22,6 +22,8 @@ public class AuthorizationCheckAction extends play.mvc.Action.Simple
 			"/emailconfirm",
 			"/login",
 			"/facebook_auth",
+			"/twitter_auth",
+			"/twitter_auth/continue",
 			"/forgotpassword",
 			"/changepassword"
 	);

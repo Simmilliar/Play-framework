@@ -15,6 +15,7 @@ public class SessionsManager
 
 	public final String AUTH_TYPE_PASSWORD = "password";
 	public final String AUTH_TYPE_FACEBOOK = "facebook";
+	public final String AUTH_TYPE_TWITTER = "twitter";
 
 	@Inject
 	public SessionsManager(Utils utils)

@@ -12,15 +12,19 @@ POST    /login                      controllers.AuthorizationController.authoriz
 +nocsrf
 POST    /facebook_auth              controllers.FacebookAuthController.facebookAuth
 
+GET     /twitter_auth               controllers.TwitterAuthController.twitterAuth
+
+GET     /twitter_auth/continue      controllers.TwitterAuthController.authorization(oauth_token, oauth_verifier)
+
 GET     /logout                     controllers.AuthorizationController.logout
 
 GET     /editprofile                controllers.ProfileEditorController.profileEditor
 +nocsrf
 POST    /editprofile                controllers.ProfileEditorController.edit
 
-GET     /forgotpassword            controllers.ForgotPasswordController.forgotPassword
+GET     /forgotpassword             controllers.ForgotPasswordController.forgotPassword
 +nocsrf
-POST    /forgotpassword            controllers.ForgotPasswordController.sendForgotMail
+POST    /forgotpassword             controllers.ForgotPasswordController.sendForgotMail
 
 GET     /changepassword             controllers.ForgotPasswordController.changingPassword(key)
 +nocsrf

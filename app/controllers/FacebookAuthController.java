@@ -62,37 +62,42 @@ public class FacebookAuthController extends Controller
 
 	private Http.Cookie authorization(JsonNode jsonNode)
 	{
+		// todo WTF is going on here???
 		Users user = Ebean.find(Users.class)
 				.where()
 				.eq("facebook_id", jsonNode.get("id").asLong())
 				.findOne();
 		if (user == null)
 		{
-			user = Ebean.find(Users.class)
-					.where()
-					.eq("email", jsonNode.get("email").asText())
-					.findOne();
+			if (jsonNode.has("email"))
+			{
+				user = Ebean.find(Users.class)
+						.where()
+						.eq("email", jsonNode.get("email").asText())
+						.findOne();
+			}
 			if (user == null)
 			{
 				user = new Users();
+
+				user.setName(jsonNode.get("name").asText());
+				user.setEmail(jsonNode.has("email") ? jsonNode.get("email").asText() : "");
+				user.setAvatarUrl(jsonNode.get("picture").get("data").get("url").asText());
+				user.setFacebookId(jsonNode.get("id").asLong());
+				user.setTwitterId(0);
+
+				user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
+				user.setPasswordHash("");
+
+				user.setConfirmed(true);
+				user.setConfirmationKeyHash("");
+				user.setConfirmationKeyExpirationDate(System.currentTimeMillis());
+
+				user.save();
+
+				flash().put("notification", "You were successfully registered!");
 			}
 		}
-
-		user.setName(jsonNode.get("name").asText());
-		user.setEmail(jsonNode.has("email") ? jsonNode.get("email").asText() : "");
-		user.setAvatarUrl(jsonNode.get("picture").get("data").get("url").asText());
-		user.setFacebookId(jsonNode.get("id").asLong());
-
-		user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
-		user.setPasswordHash("");
-
-		user.setConfirmed(true);
-		user.setConfirmationKeyHash("");
-		user.setConfirmationKeyExpirationDate(System.currentTimeMillis());
-
-		user.save();
-
-		flash().put("notification", "You were successfully registered!");
 
 		String sessionToken = sessionsManager.registerSession(
 				sessionsManager.AUTH_TYPE_FACEBOOK,
