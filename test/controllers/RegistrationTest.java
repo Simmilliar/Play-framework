@@ -1,25 +1,8 @@
 package controllers;
 
-import controllers.utils.Utils;
-import io.ebean.Ebean;
-import models.data.Users;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
-import play.mvc.Http;
-import play.mvc.Result;
 import play.test.WithApplication;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static play.mvc.Http.Status.BAD_REQUEST;
-import static play.mvc.Http.Status.SEE_OTHER;
-import static play.test.Helpers.POST;
-import static play.test.Helpers.route;
 
 public class RegistrationTest extends WithApplication
 {
@@ -28,7 +11,7 @@ public class RegistrationTest extends WithApplication
 	{
 		return new GuiceApplicationBuilder().build();
 	}
-
+	/*
 	@Before
 	public void setupRegistration()
 	{
@@ -112,5 +95,5 @@ public class RegistrationTest extends WithApplication
 	public void clearRegistration()
 	{
 		Ebean.deleteAll(Ebean.find(Users.class).findList());
-	}
+	}*/
 }

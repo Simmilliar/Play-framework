@@ -7,7 +7,6 @@ import controllers.actions.AuthorizationCheckAction;
 import controllers.utils.SessionsManager;
 import io.ebean.Ebean;
 import models.data.Users;
-import play.Logger;
 import play.libs.concurrent.HttpExecutionContext;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
@@ -50,7 +49,8 @@ public class TwitterAuthController
 	public CompletionStage<Result> twitterAuth()
 	{
 		Map<String, String> parameters = new TreeMap<>();
-		parameters.put("oauth_callback", "http://localhost:9000/twitter_auth/continue");
+		String route = routes.TwitterAuthController.authorization("", "").absoluteURL(request());
+		parameters.put("oauth_callback", route.substring(0, route.indexOf('?')));
 		return twitterRequest("POST", "https://api.twitter.com/oauth/request_token", "", parameters)
 				.post("").thenApplyAsync(
 						wsr -> redirect("https://api.twitter.com/oauth/authenticate?" +
@@ -153,11 +153,6 @@ public class TwitterAuthController
 		parameters.put("oauth_timestamp", "" + (System.currentTimeMillis() / 1000L));
 		parameters.put("oauth_version", "1.0");
 
-		for (Map.Entry<String, String> entry : parameters.entrySet())
-		{
-			Logger.debug(entry.getKey() + "=" + entry.getValue());
-		}
-
 		//Build parameters string
 		String parameterString = String.join("&",
 				parameters.entrySet().stream().map(
@@ -165,19 +160,13 @@ public class TwitterAuthController
 				).collect(Collectors.toList())
 		);
 
-		Logger.debug(parameterString);
-
 		//Build base string
 		String baseString = String.format("%s&%s&%s", method,
 				throwlessURLEncoder(url.substring(0, url.indexOf('?') > 0 ? url.indexOf('?') : url.length())),
 				throwlessURLEncoder(parameterString));
 
-		Logger.debug(baseString);
-
 		//Build signing key
 		String signingKey = String.format("%s&%s", config.getString("twitterConsumerSecret"), tokenSecret) ;
-
-		Logger.debug(signingKey);
 
 		//Sign
 		byte[] hmacData = null;
@@ -201,8 +190,6 @@ public class TwitterAuthController
 						.map(entry -> String.format("%s=\"%s\"", entry.getKey(), throwlessURLEncoder(entry.getValue())))
 						.collect(Collectors.toList())
 		);
-
-		Logger.debug(authorizationHeader);
 
 		return wsClient.url(url).addHeader("Authorization", authorizationHeader);
 	}
