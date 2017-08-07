@@ -1,7 +1,6 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
-import controllers.utils.MailerService;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
@@ -84,17 +83,21 @@ public class RegistrationController extends Controller
 			user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
 			user.setPasswordHash(utils.hashString(registrationData.getPassword(), user.getPasswordSalt()));
 
-			user.setConfirmed(false);
+			//todo take everything back
+			//user.setConfirmed(false);
+			user.setConfirmed(true);
 			String confirmationKey = UUID.create();
 			user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
 			user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
 
 			try
 			{
+				/*
 				String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION,
 						routes.RegistrationController.confirmEmail(confirmationKey).absoluteURL(request()));
 				new MailerService(mailerClient)
 						.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
+				*/
 				flash().put("notification", "We'll send you an e-mail to confirm your registration.");
 			}
 			catch (Exception e)

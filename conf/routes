@@ -30,6 +30,12 @@ GET     /changepassword             controllers.ForgotPasswordController.changin
 
 POST    /changepassword             controllers.ForgotPasswordController.changePassword(key)
 
+GET     /cards                      controllers.CardsController.cards()
+
+POST    /cards/add                  controllers.CardsController.addCard()
+
+DELETE  /cards/delete               controllers.CardsController.deleteCard(card)
+
 
 
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

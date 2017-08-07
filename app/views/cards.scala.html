@@ -1,0 +1,75 @@
+@import views.html.helper.CSRF
+@(cards : List[models.data.Card])
+@main("Cards") {
+    <h1>Cards</h1>
+    <script>
+            $(function() {
+                $('form').submit(function(e) {
+                    e.preventDefault();
+                    $('#form-error').css("visibility", "hidden");
+
+                    var $fileUpload = $("input[type='file']");
+                    if (parseInt($fileUpload.get(0).files.length)>5){
+                        $('#form-error').css("visibility", "visible");
+                        $('#form-error').text("You can only upload a maximum of 5 files.");
+                    } else {
+                        var $form = $(this);
+                        var formData = new FormData(this);
+                        $("#card-form input").attr("disabled", true);
+                        $("#card-form textarea").attr("disabled", true);
+                        console.log($("#card-form input").attr("disabled"));
+                        $.ajax({
+                            type: $form.attr('method'),
+                            url: $form.attr('action'),
+                            data: formData,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                        }).done(function (renderedCard, textStatus, jqXHR) {
+                            insertCard(renderedCard);
+                            $('form')[0].reset();
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            $('#form-error').css("visibility", "visible");
+                            $('#form-error').text(jqXHR.responseText);
+                        }).always(function () {
+                            $("#card-form input").attr("disabled", false);
+                            $("#card-form textarea").attr("disabled", false);
+                        });
+                    }
+                });
+            });
+
+            function insertCard(renderedCard) {
+                $("#column-cards").prepend(renderedCard);
+            }
+
+            function removecard(uuid) {
+                $("#btn-" + uuid).attr("disabled", true);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/cards/delete?card=" + uuid + "&csrfToken=@CSRF.getToken.value"
+                }).done(function () {
+                    $("#" + uuid).remove();
+                }).always(function () {
+                    $("#btn-" + uuid).attr("disabled", false);
+                });
+            }
+    </script>
+    <div class="row">
+        <div id="column-form" class="col-sm-4">
+            <form id="card-form" action="@routes.CardsController.addCard()" method="post" enctype="multipart/form-data">
+                @helper.CSRF.formField
+                <input class="form-control" placeholder="Title" name="title"><br>
+                <textarea class="form-control" placeholder="Content goes here..." name="content"></textarea><br>
+                <input type="file" class="form-control-file" name="images" accept="image/*" multiple><br>
+                <input type="submit" class="btn btn-primary" value="Add">
+            </form><br>
+            <div id="form-error" class="bg-danger" style="padding:10px;visibility:hidden;color:white;">Error text!</div>
+        </div>
+        <div id="column-cards" class="col-sm-8">
+            @for(cardd : models.data.Card <- cards){
+                @card(cardd.getId().toString(), cardd.getTitle(), cardd.getContent(), cardd.getImages())
+            }
+        </div>
+    </div>
+}

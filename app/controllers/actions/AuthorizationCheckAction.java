@@ -51,16 +51,13 @@ public class AuthorizationCheckAction extends play.mvc.Action.Simple
 		{
 			return delegate.call(ctx);
 		}
+		else if ((user == null) == (unauthorizedOnly.contains(ctx.request().path())))
+		{
+			return delegate.call(ctx);
+		}
 		else
 		{
-			if (user != null && unauthorizedOnly.contains(ctx.request().path()))
-			{
-				return CompletableFuture.completedFuture(redirect(routes.HomeController.index()));
-			}
-			else
-			{
-				return delegate.call(ctx);
-			}
+			return CompletableFuture.completedFuture(redirect(routes.HomeController.index()));
 		}
 	}
 }
