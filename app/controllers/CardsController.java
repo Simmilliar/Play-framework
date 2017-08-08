@@ -56,6 +56,9 @@ public class CardsController extends Controller
 
 		if (title.length() > 0 && content.length() > 0)
 		{
+			if (filePartList.size() > 5){
+				return badRequest("Can't load more than 5 files in one card.");
+			}
 			List<String> imagesUrls = new ArrayList<>();
 			for(Http.MultipartFormData.FilePart<Object> filePart : filePartList)
 			{
