@@ -32,6 +32,8 @@ POST    /changepassword             controllers.ForgotPasswordController.changeP
 
 GET     /cards                      controllers.CardsController.cards()
 
+GET     /cards/load                 controllers.CardsController.loadCards()
+
 POST    /cards/add                  controllers.CardsController.addCard()
 
 DELETE  /cards/delete               controllers.CardsController.deleteCard(card)

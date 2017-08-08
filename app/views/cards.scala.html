@@ -1,75 +1,85 @@
 @import views.html.helper.CSRF
-@(cards : List[models.data.Card])
 @main("Cards") {
     <h1>Cards</h1>
-    <script>
-            $(function() {
-                $('form').submit(function(e) {
-                    e.preventDefault();
-                    $('#form-error').css("visibility", "hidden");
-
-                    var $fileUpload = $("input[type='file']");
-                    if (parseInt($fileUpload.get(0).files.length)>5){
-                        $('#form-error').css("visibility", "visible");
-                        $('#form-error').text("You can only upload a maximum of 5 files.");
-                    } else {
-                        var $form = $(this);
-                        var formData = new FormData(this);
-                        $("#card-form input").attr("disabled", true);
-                        $("#card-form textarea").attr("disabled", true);
-                        console.log($("#card-form input").attr("disabled"));
-                        $.ajax({
-                            type: $form.attr('method'),
-                            url: $form.attr('action'),
-                            data: formData,
-                            cache: false,
-                            contentType: false,
-                            processData: false,
-                        }).done(function (renderedCard, textStatus, jqXHR) {
-                            insertCard(renderedCard);
-                            $('form')[0].reset();
-                        }).fail(function (jqXHR, textStatus, errorThrown) {
-                            $('#form-error').css("visibility", "visible");
-                            $('#form-error').text(jqXHR.responseText);
-                        }).always(function () {
-                            $("#card-form input").attr("disabled", false);
-                            $("#card-form textarea").attr("disabled", false);
-                        });
-                    }
-                });
-            });
-
-            function insertCard(renderedCard) {
-                $("#column-cards").prepend(renderedCard);
-            }
-
-            function removecard(uuid) {
-                $("#btn-" + uuid).attr("disabled", true);
-                $.ajax({
-                    type: "DELETE",
-                    url: "/cards/delete?card=" + uuid + "&csrfToken=@CSRF.getToken.value"
-                }).done(function () {
-                    $("#" + uuid).remove();
-                }).always(function () {
-                    $("#btn-" + uuid).attr("disabled", false);
-                });
-            }
-    </script>
     <div class="row">
-        <div id="column-form" class="col-sm-4">
-            <form id="card-form" action="@routes.CardsController.addCard()" method="post" enctype="multipart/form-data">
+        <div class="col-sm-4">
+            <form data-bind="submit: addCard" enctype="multipart/form-data">
                 @helper.CSRF.formField
                 <input class="form-control" placeholder="Title" name="title"><br>
                 <textarea class="form-control" placeholder="Content goes here..." name="content"></textarea><br>
                 <input type="file" class="form-control-file" name="images" accept="image/*" multiple><br>
-                <input type="submit" class="btn btn-primary" value="Add">
-            </form><br>
-            <div id="form-error" class="bg-danger" style="padding:10px;visibility:hidden;color:white;">Error text!</div>
+                <button type="submit" class="btn btn-primary">Add</button>
+            </form>
+            <br>
+            <div class="bg-danger" style="padding:10px;color:white;margin-bottom:20px;"
+                data-bind="text: errorMsg, visible: errorMsg().length > 0">Error text!</div>
         </div>
-        <div id="column-cards" class="col-sm-8">
-            @for(cardd : models.data.Card <- cards){
-                @card(cardd.getId().toString(), cardd.getTitle(), cardd.getContent(), cardd.getImages())
-            }
+        <div class="col-sm-8", data-bind="foreach: cards">
+            <div class="card" style="width:100%;margin-bottom:15px;">
+                <div class="card-block">
+                    <div style="display:flex; align-items:flex-start;">
+                        <h4 class="card-title" style="flex:1;" data-bind="text: title"></h4>
+                        <button type="button" class="btn btn-default" data-bind="click: $parent.removeCard">Remove</button>
+                    </div>
+                    <p class="card-text" data-bind="text: content"></p>
+                </div>
+                <div style="display:flex;margin:0px;padding:0px;" data-bind="foreach: images">
+                    <div style="flex:1;margin:0px;padding:0px;">
+                        <img data-bind="attr: { src: $data }" style="width:100%;height:150px;object-fit:cover;">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <script type="text/javascript">
+        function Card(data) {
+            this.id = ko.observable(data.id);
+            this.title = ko.observable(data.title);
+            this.content = ko.observable(data.content);
+            this.images = ko.observableArray(data.images);
+        }
+        function CardListViewModel() {
+            var self = this;
+            self.cards = ko.observableArray([]);
+
+            self.errorMsg = ko.observable("");
+
+            self.addCard = function (form) {
+                var formData = new FormData(form);
+                $('form').find('*').attr('disabled', true);
+                self.errorMsg("");
+                $.ajax({
+                    type: "POST",
+                    url: "@routes.CardsController.addCard()",
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false
+                }).done(function (data) {
+                    self.cards.unshift(new Card(data));
+                    $('form')[0].reset();
+                }).fail(function (jqXHR) {
+                    self.errorMsg(jqXHR.responseText);
+                }).always(function () {
+                    $('form').find('*').attr('disabled', false);
+                });
+            };
+            self.removeCard = function (card, event) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "/cards/delete?card=" + card.id() + "&csrfToken=@CSRF.getToken.value"
+                }).done(function () {
+                    self.cards.remove(card);
+                });
+            };
+
+            $.getJSON("@routes.CardsController.loadCards()", function(allData) {
+                var mappedTasks = $.map(allData, function(item) {
+                    return new Card(item)
+                });
+                self.cards(mappedTasks);
+            });
+        }
+        ko.applyBindings(new CardListViewModel());
+    </script>
 }

@@ -8,6 +8,7 @@ import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
 import play.data.DynamicForm;
 import play.data.FormFactory;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -32,11 +33,17 @@ public class CardsController extends Controller
 
 	public Result cards()
 	{
-		return ok(views.html.cards.render(
+		return ok(views.html.cards.render());
+	}
+
+	public Result loadCards()
+	{
+		return ok(Ebean.json().toJson(
 				Ebean.find(Card.class)
-				.where()
-				.eq("owner_user_id", request().attrs().get(AuthorizationCheckAction.USER).getUserId())
-				.findList()
+						.select("id, title, content, images")
+						.where()
+						.eq("owner_user_id", request().attrs().get(AuthorizationCheckAction.USER).getUserId())
+						.findList()
 		));
 	}
 
@@ -84,7 +91,7 @@ public class CardsController extends Controller
 			card.setImages(imagesUrls);
 			card.save();
 
-			return ok(views.html.card.render(card.getId().toString(), title, content, imagesUrls).toString().replaceAll("[\n\r]", "").replaceAll(">\\s*<", "><"));
+			return ok(Json.toJson(card));
 		}
 		else
 		{
