@@ -29,37 +29,7 @@
             </div>
         </div>
     </div>
-    <style>
-        .error-box {
-            padding: 10px;
-            color: white;
-        }
-        .mycard {
-            margin-bottom: 15px;
-        }
-        .mycard-header {
-            display: flex;
-            align-items: flex-start;
-        }
-        .mycard-header h4 {
-            flex: 1;
-        }
-        .mycard-images {
-            display: flex;
-            margin: 0px;
-            padding: 0px;
-        }
-        .mycard-images div {
-            flex: 1;
-        }
-        .mycard-images div img {
-            width: 100%;
-            margin: 0px;
-            padding: 0px;
-            height: 150px;
-            object-fit: cover;
-        }
-    </style>
+
     <script type="text/javascript">
         function Card(data) {
             this.id = ko.observable(data.id);
@@ -86,7 +56,7 @@
                     contentType: false,
                     processData: false
                 }).done(function (data) {
-                    self.cards.unshift(new Card(data));
+                    self.cards.unshift(new Card(JSON.parse(data)));
                     $('form')[0].reset();
                 }).fail(function (jqXHR) {
                     self.errorMsg(jqXHR.responseText);
@@ -113,4 +83,36 @@
 
         ko.applyBindings(new CardListViewModel());
     </script>
+
+    <style>
+            .error-box {
+                padding: 10px;
+                color: white;
+            }
+            .mycard {
+                margin-bottom: 15px;
+            }
+            .mycard-header {
+                display: flex;
+                align-items: flex-start;
+            }
+            .mycard-header h4 {
+                flex: 1;
+            }
+            .mycard-images {
+                display: flex;
+                margin: 0px;
+                padding: 0px;
+            }
+            .mycard-images div {
+                flex: 1;
+            }
+            .mycard-images div img {
+                width: 100%;
+                margin: 0px;
+                padding: 0px;
+                height: 150px;
+                object-fit: cover;
+            }
+    </style>
 }

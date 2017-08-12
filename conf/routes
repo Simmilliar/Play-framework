@@ -1,42 +1,38 @@
 GET     /                           controllers.HomeController.index
 
 GET     /registration               controllers.RegistrationController.registration
-
 POST    /registration               controllers.RegistrationController.register
-
 GET     /emailconfirm               controllers.RegistrationController.confirmEmail(key)
 
 GET     /login                      controllers.AuthorizationController.authorization
-
 POST    /login                      controllers.AuthorizationController.authorize
 +nocsrf
 POST    /facebook_auth              controllers.FacebookAuthController.facebookAuth
-
 GET     /twitter_auth               controllers.TwitterAuthController.twitterAuth
-
 GET     /twitter_auth/continue      controllers.TwitterAuthController.authorization(oauth_token, oauth_verifier)
-
 GET     /logout                     controllers.AuthorizationController.logout
 
 GET     /editprofile                controllers.ProfileEditorController.profileEditor
-
 POST    /editprofile                controllers.ProfileEditorController.edit
 
 GET     /forgotpassword             controllers.ForgotPasswordController.forgotPassword
-
 POST    /forgotpassword             controllers.ForgotPasswordController.sendForgotMail
-
 GET     /changepassword             controllers.ForgotPasswordController.changingPassword(key)
-
 POST    /changepassword             controllers.ForgotPasswordController.changePassword(key)
 
-GET     /cards                      controllers.CardsController.cards()
-
-GET     /cards/load                 controllers.CardsController.loadCards()
-
-POST    /cards/add                  controllers.CardsController.addCard()
-
+GET     /cards                      controllers.CardsController.cards
+GET     /cards/load                 controllers.CardsController.loadCards
+POST    /cards/add                  controllers.CardsController.addCard
 DELETE  /cards/delete               controllers.CardsController.deleteCard(card)
+
+GET     /products                   controllers.ProductsController.products
+GET     /products/all               controllers.ProductsController.productsList
+GET     /products/mine              controllers.ProductsController.myProducts
+POST    /products/add               controllers.ProductsController.addProduct
+DELETE  /products/remove            controllers.ProductsController.removeProduct(product)
+POST    /products/change_price      controllers.ProductsController.changePrice
+GET     /products/buy               controllers.ProductsController.buyProduct(product)
+POST    /products/buy/payment       controllers.ProductsController.paying(product)
 
 
 

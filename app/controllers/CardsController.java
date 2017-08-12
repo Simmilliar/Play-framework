@@ -2,13 +2,14 @@ package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
 import io.ebean.Ebean;
+import io.ebean.text.PathProperties;
+import io.ebean.text.json.JsonWriteOptions;
 import models.data.Card;
 import models.data.S3File;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
 import play.data.DynamicForm;
 import play.data.FormFactory;
-import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -94,7 +95,10 @@ public class CardsController extends Controller
 			card.setImages(imagesUrls);
 			card.save();
 
-			return ok(Json.toJson(card));
+			JsonWriteOptions jwo = new JsonWriteOptions();
+			jwo.setPathProperties(PathProperties.parse("(id,title,content,images)"));
+
+			return ok(Ebean.json().toJson(card, jwo));
 		}
 		else
 		{

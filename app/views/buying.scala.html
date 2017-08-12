@@ -1,0 +1,19 @@
+@(product : models.data.Product, publicKey : String)
+@main("Buy product") {
+    <h1>@product.getTitle</h1>
+    <p>@product.getDescription</p>
+    <h5>₴@(product.getPrice / 100.0)</h5>
+    <form action="@routes.ProductsController.paying(product.getId.toString)" method="POST">
+        <script
+            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-key="@publicKey"
+            data-amount="@product.getPrice"
+            data-currency="UAH"
+            data-name="Play!"
+            data-description="Provide a valid payment information."
+            data-image="http://www.springpeople.com/media/catalog/product//p/l/play.png"
+            data-locale="auto">
+        </script>
+        @views.html.helper.CSRF.formField
+    </form>
+}

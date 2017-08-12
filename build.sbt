@@ -21,6 +21,7 @@ libraryDependencies += "com.typesafe.play" %% "play-mailer" % "6.0.0"
 libraryDependencies += "com.typesafe.play" %% "play-mailer-guice" % "6.0.0"
 
 libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.11.82"
+libraryDependencies += "com.stripe" % "stripe-java" % "5.4.0"
 
 libraryDependencies += "org.im4java" % "im4java" % "1.4.0"
 
