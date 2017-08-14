@@ -1,0 +1,104 @@
+@main("News") {
+    <h1>Xakep news</h1>
+    <ul class="columns">
+        <!-- ko foreach: news -->
+        <li class="news-card">
+            <img data-bind="attr: { src: imageUrl }">
+            <div>
+                <a data-bind="attr: { href: url }">
+                    <h4 data-bind="text: title"></h4>
+                </a>
+                <p data-bind="text: description"></p>
+            </div>
+        </li>
+        <!-- /ko -->
+        <li class="news-card" style="visibility: hidden;"></li>
+        <li class="news-card" style="visibility: hidden;"></li>
+        <li class="news-card" style="visibility: hidden;"></li>
+        <li class="news-card" style="visibility: hidden;"></li>
+    </ul>
+    <p class="loading-bar" data-bind="visible: loadMore"><strong>Loading...</strong></p>
+
+    <script>
+        function News(data) {
+            this.title = ko.observable(data.title);
+            this.description = ko.observable(data.description);
+            this.url = ko.observable(data.url);
+            this.imageUrl = ko.observable(data.imageUrl);
+        }
+
+        function NewsViewModel() {
+            var self = this;
+            self.news = ko.observableArray([]);
+            self.isLoading = ko.observable(false);
+            self.nextPage = ko.observable(0);
+            self.loadMore = ko.observable(true);
+
+            var win = $(window);
+            win.scroll(function() {
+                if (self.isLoading() === false && self.loadMore() === true) {
+                    if (win.scrollTop() > $(document).height() - win.height() - 200) {
+                        self.isLoading(true);
+                        $.getJSON("/news/get?count=10&offset=" + (10 * self.nextPage()), function (allData) {
+                            self.loadMore(allData.length > 0);
+                            $.map(allData, function (item) {
+                                self.news.push(item);
+                                return null;
+                            });
+                            self.nextPage(self.nextPage() + 1);
+                            self.isLoading(false);
+                        });
+                    }
+                }
+            });
+
+            self.isLoading(true);
+            $.getJSON("/news/get?count=10&offset=" + (10 * self.nextPage()), function (allData) {
+                self.loadMore(allData.length > 0);
+                $.map(allData, function (item) {
+                    self.news.push(item);
+                    return null;
+                });
+                self.nextPage(self.nextPage() + 1);
+                self.isLoading(false);
+            });
+        }
+
+        ko.applyBindings(new NewsViewModel());
+    </script>
+    <style>
+        h1 {
+            margin-top: 0.6em;
+            margin-bottom: 0.6em;
+        }
+
+        .columns {
+            display: flex;
+            flex-wrap: wrap;
+
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+        }
+
+        .news-card {
+            flex: 1 1 20em;
+            min-width: 20em;
+
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+            margin-bottom: 1em;
+            margin-right: 1em;
+        }
+        .news-card img {
+            width: 100%;
+        }
+        .news-card div {
+            padding: 1em;
+        }
+
+        .loading-bar {
+            font-size: 2em;
+        }
+    </style>
+}

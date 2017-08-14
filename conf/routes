@@ -34,6 +34,8 @@ POST    /products/change_price      controllers.ProductsController.changePrice
 GET     /products/buy               controllers.ProductsController.buyProduct(product)
 POST    /products/buy/payment       controllers.ProductsController.paying(product)
 
+GET     /news                       controllers.NewsController.news
+GET     /news/get                   controllers.NewsController.loadNews(count: Int ?= 20, offset : Int ?= 0)
 
 
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
