@@ -3,19 +3,15 @@ package controllers;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.utils.MailerService;
 import controllers.utils.Utils;
-import io.ebean.Ebean;
-import models.data.Users;
-import models.forms.ChangePasswordForm;
-import models.forms.ForgotPasswordForm;
-import play.data.Form;
+import models.Users;
+import play.data.DynamicForm;
 import play.data.FormFactory;
-import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import tyrex.services.UUID;
 
 import javax.inject.Inject;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -25,80 +21,84 @@ public class ForgotPasswordController extends Controller
 	private final FormFactory formFactory;
 	private final MailerService mailerService;
 	private final Utils utils;
+	private final UsersRepository usersRepository;
 
 	@Inject
-	public ForgotPasswordController(FormFactory formFactory, MailerService mailerService, Utils utils)
+	public ForgotPasswordController(FormFactory formFactory, MailerService mailerService, Utils utils,
+									UsersRepository usersRepository)
 	{
 		this.formFactory = formFactory;
 		this.mailerService = mailerService;
 		this.utils = utils;
+		this.usersRepository = usersRepository;
 	}
 
 	public Result forgotPassword()
 	{
-		return ok(views.html.forgotpassword.render(formFactory.form(ForgotPasswordForm.class)));
+		return ok(views.html.forgotpassword.render(formFactory.form()));
 	}
 
 	public Result sendForgotMail()
 	{
-		Form<ForgotPasswordForm> forgotPasswordForm = formFactory.form(ForgotPasswordForm.class).bindFromRequest();
-		if (forgotPasswordForm.hasErrors())
-		{
-			return badRequest(views.html.forgotpassword.render(forgotPasswordForm));
-		}
+		DynamicForm forgotPasswordForm = formFactory.form().bindFromRequest();
 
-		ForgotPasswordForm forgotPasswordData = forgotPasswordForm.get();
+		String email = forgotPasswordForm.get("email");
 
-		Users user = Ebean.find(Users.class)
-				.where()
-				.eq("email", forgotPasswordData.getEmail())
-				.findOne();
-		if (user == null || !user.isConfirmed())
-		{
-			forgotPasswordData.addError(new ValidationError("email", "No registered user with this e-mail."));
-		}
+		Users user = null;
 
-		if (forgotPasswordForm.hasErrors())
+		//SECTION BEGIN: Checking
+		if (email == null)
 		{
-			return badRequest(views.html.forgotpassword.render(forgotPasswordForm));
+			forgotPasswordForm = forgotPasswordForm.withError("", "Missing fields.");
 		}
 		else
 		{
-			String confirmationKey = UUID.create();
-			user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
-			user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
-
-			try
+			if (!email.matches(Utils.REGEX_EMAIL))
 			{
-				String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE,
-						routes.ForgotPasswordController.changingPassword(confirmationKey).absoluteURL(request()));
-				mailerService.sendEmail(forgotPasswordData.getEmail(), "Change password.", confirmationBodyText);
-				flash().put("notification", "We'll sen you an e-mail to change your password.");
+				forgotPasswordForm = forgotPasswordForm.withError("email", "Invalid e-mail address.");
 			}
-			catch (Exception e)
+			else
 			{
-				forgotPasswordData.getErrors().add(new ValidationError("email", "Unable to send confirmation email."));
-				return internalServerError(views.html.forgotpassword.render(forgotPasswordForm));
+				user = usersRepository.findByEmail(email);
+				if (user == null || !user.isConfirmed())
+				{
+					forgotPasswordForm = forgotPasswordForm.withError("email", "Unregistered user.");
+				}
 			}
-
-			user.save();
-
-			return redirect(routes.HomeController.index());
 		}
+		if (forgotPasswordForm.hasErrors())
+		{
+			return badRequest(views.html.forgotpassword.render(forgotPasswordForm));
+		}
+		//SECTION END: Checking
+
+		String confirmationKey = UUID.randomUUID().toString();
+		user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
+		user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
+
+		try
+		{
+			String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE,
+					routes.ForgotPasswordController.changingPassword(confirmationKey).absoluteURL(request()));
+			mailerService.sendEmail(email, "Change password.", confirmationBodyText);
+			flash().put("notification", "We'll sen you an e-mail to change your password.");
+		}
+		catch (Exception e)
+		{
+			return internalServerError(views.html.forgotpassword.render(
+					forgotPasswordForm.withError("email", "Unable to send confirmation email.")));
+		}
+
+		usersRepository.saveUser(user);
+
+		return redirect(routes.HomeController.index());
 	}
 
 	public Result changingPassword(String key)
 	{
-		if (Ebean.find(Users.class)
-				.where()
-				.and()
-				.eq("confirmation_key_hash", utils.hashString(key, key))
-				.eq("confirmed", true)
-				.gt("confirmation_key_expiration_date", System.currentTimeMillis())
-				.endAnd()
-				.findOne() != null)
+		if (usersRepository.findConfirmedByConfirmationKey(key) != null)
 		{
-			return ok(views.html.changepassword.render(formFactory.form(ChangePasswordForm.class), key));
+			return ok(views.html.changepassword.render(formFactory.form(), key));
 		}
 		else
 		{
@@ -108,37 +108,48 @@ public class ForgotPasswordController extends Controller
 
 	public Result changePassword(String key)
 	{
-		Users user = Ebean.find(Users.class)
-				.where()
-				.and()
-				.eq("confirmation_key_hash", utils.hashString(key, key))
-				.eq("confirmed", false)
-				.gt("confirmation_key_expiration_date", System.currentTimeMillis())
-				.endAnd()
-				.findOne();
+		Users user = usersRepository.findConfirmedByConfirmationKey(key);
+
 		if (user != null)
 		{
-			Form<ChangePasswordForm> changePasswordForm = formFactory.form(ChangePasswordForm.class).bindFromRequest();
+			DynamicForm changePasswordForm = formFactory.form().bindFromRequest();
+
+			String password = changePasswordForm.get("password");
+			String passwordConfirm = changePasswordForm.get("passwordConfirm");
+
+			//SECTION BEGIN: Checking
+			if (password == null || passwordConfirm == null)
+			{
+				changePasswordForm = changePasswordForm.withError("", "Missing fields.");
+			}
+			else
+			{
+				if (password.length() < 8)
+				{
+					changePasswordForm = changePasswordForm.withError("password", "Password must be at least 8 symbols long.");
+				}
+				else if (!passwordConfirm.equals(password))
+				{
+					changePasswordForm = changePasswordForm.withError("password", "Passwords does not match.");
+				}
+			}
 			if (changePasswordForm.hasErrors())
 			{
 				return badRequest(views.html.changepassword.render(changePasswordForm, key));
 			}
-			else
-			{
-				ChangePasswordForm changePasswordData = changePasswordForm.get();
+			//SECTION END: Checking
 
-				user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
-				user.setPasswordHash(utils.hashString(changePasswordData.getPassword(), user.getPasswordSalt()));
+			user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
+			user.setPasswordHash(utils.hashString(password, user.getPasswordSalt()));
 
-				user.setConfirmationKeyHash("");
-				user.setConfirmationKeyExpirationDate(System.currentTimeMillis());
+			user.setConfirmationKeyHash("");
+			user.setConfirmationKeyExpirationDate(System.currentTimeMillis());
 
-				user.save();
+			usersRepository.saveUser(user);
 
-				flash().put("notification", "Password had been changed successfully.");
+			flash().put("notification", "Password had been changed successfully.");
 
-				return redirect(routes.AuthorizationController.authorization());
-			}
+			return redirect(routes.AuthorizationController.authorization());
 		}
 		else
 		{

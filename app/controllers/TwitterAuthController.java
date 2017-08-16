@@ -5,8 +5,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.utils.SessionsManager;
-import io.ebean.Ebean;
-import models.data.Users;
+import models.Users;
 import play.libs.concurrent.HttpExecutionContext;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
@@ -37,13 +36,16 @@ public class TwitterAuthController
 	private final Config config = ConfigFactory.load();
 	private final HttpExecutionContext httpExecutionContext;
 	private final SessionsManager sessionsManager;
+	private final UsersRepository usersRepository;
 
 	@Inject
-	public TwitterAuthController(WSClient wsClient, HttpExecutionContext httpExecutionContext, SessionsManager sessionsManager)
+	public TwitterAuthController(WSClient wsClient, HttpExecutionContext httpExecutionContext,
+								 SessionsManager sessionsManager, UsersRepository usersRepository)
 	{
 		this.wsClient = wsClient;
 		this.httpExecutionContext = httpExecutionContext;
 		this.sessionsManager = sessionsManager;
+		this.usersRepository = usersRepository;
 	}
 
 	public CompletionStage<Result> twitterAuth()
@@ -74,10 +76,7 @@ public class TwitterAuthController
 								String[] keyval = param.split("=");
 								responseValues.put(keyval[0], keyval[1]);
 							}
-							Users user = Ebean.find(Users.class)
-									.where()
-									.eq("twitter_id", Long.parseLong(responseValues.get("user_id")))
-									.findOne();
+							Users user = usersRepository.findByTwitterId(Long.parseLong(responseValues.get("user_id")));
 							if (user == null)
 							{
 								parameters.clear();
@@ -98,14 +97,14 @@ public class TwitterAuthController
 
 								if (jsonNode.has("email") && jsonNode.get("email") != null)
 								{
-									user = Ebean.find(Users.class)
-											.where()
-											.eq("email", jsonNode.get("email").asText())
-											.findOne();
+									user = usersRepository.findByEmail(jsonNode.get("email").asText());
 								}
-								if (user == null)
+								if (user == null || !user.isConfirmed())
 								{
-									user = new Users();
+									if (user == null)
+									{
+										user = new Users();
+									}
 
 									user.setName(jsonNode.get("name").asText());
 									user.setEmail(jsonNode.has("email") ? jsonNode.get("email").asText() : "");
@@ -120,19 +119,15 @@ public class TwitterAuthController
 									user.setConfirmationKeyHash("");
 									user.setConfirmationKeyExpirationDate(System.currentTimeMillis());
 
-									user.save();
+									usersRepository.saveUser(user);
 
 									flash().put("notification", "You were successfully registered!");
 								}
 							}
 
-							String sessionToken = sessionsManager.registerSession(
-									sessionsManager.AUTH_TYPE_TWITTER,
-									request().header("User-Agent").get(), user.getUserId()
-							);
+							String sessionToken = sessionsManager.registerSession(sessionsManager.AUTH_TYPE_TWITTER, user.getUserId());
 							response().setCookie(Http.Cookie.builder("session_token", sessionToken)
-									.withMaxAge(java.time.Duration.ofMillis(sessionsManager.TOKEN_LIFETIME))
-									.build()
+									.withMaxAge(java.time.Duration.ofMillis(sessionsManager.TOKEN_LIFETIME)).build()
 							);
 
 							return redirect(routes.HomeController.index());

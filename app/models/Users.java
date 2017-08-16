@@ -1,4 +1,4 @@
-package models.data;
+package models;
 
 import io.ebean.Model;
 import io.ebean.annotation.Index;

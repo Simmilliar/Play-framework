@@ -1,16 +1,16 @@
 package controllers;
 
 import com.stripe.Stripe;
+import com.stripe.model.Charge;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import controllers.actions.AuthorizationCheckAction;
+import controllers.utils.ImageMagickService;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;
 import io.ebean.text.json.JsonWriteOptions;
-import models.data.Product;
-import models.data.S3File;
-import org.im4java.core.ConvertCmd;
-import org.im4java.core.IMOperation;
+import models.Product;
+import models.S3File;
 import play.Logger;
 import play.data.DynamicForm;
 import play.data.FormFactory;
@@ -28,11 +28,18 @@ public class ProductsController extends Controller
 {
 	private final FormFactory formFactory;
 	private final Config configFactory = ConfigFactory.load();
+	private final ProductRepository productRepository;
+	private final ImageMagickService imageMagickService;
+	private final S3FileRepository s3FileRepository;
 
 	@Inject
-	public ProductsController(FormFactory formFactory)
+	public ProductsController(FormFactory formFactory, ProductRepository productRepository,
+							  ImageMagickService imageMagickService, S3FileRepository s3FileRepository)
 	{
 		this.formFactory = formFactory;
+		this.productRepository = productRepository;
+		this.imageMagickService = imageMagickService;
+		this.s3FileRepository = s3FileRepository;
 	}
 
 	public Result products()
@@ -42,37 +49,42 @@ public class ProductsController extends Controller
 
 	public Result productsList()
 	{
-		return ok(Ebean.json().toJson(
-				Ebean.find(Product.class)
-						.select("id, title, description, price, images")
-						.where()
-						.ne("owner_user_id", request().attrs().get(AuthorizationCheckAction.USER).getUserId())
-						.findList()
+		JsonWriteOptions jwo = new JsonWriteOptions();
+		jwo.setPathProperties(PathProperties.parse("(id, title, description, price, images)"));
+		return ok(Ebean.json().toJson(productRepository.getNotMyProducts(
+				request().attrs().get(AuthorizationCheckAction.USER).getUserId())
 		));
 	}
 
 	public Result myProducts()
 	{
-		return ok(Ebean.json().toJson(
-				Ebean.find(Product.class)
-						.select("id, title, description, price, images")
-						.where()
-						.eq("owner_user_id", request().attrs().get(AuthorizationCheckAction.USER).getUserId())
-						.findList()
+		JsonWriteOptions jwo = new JsonWriteOptions();
+		jwo.setPathProperties(PathProperties.parse("(id, title, description, price, images)"));
+		return ok(Ebean.json().toJson(productRepository.getMyProducts(
+				request().attrs().get(AuthorizationCheckAction.USER).getUserId())
 		));
 	}
 
 	public Result addProduct()
 	{
 		DynamicForm requestData = formFactory.form().bindFromRequest();
+
 		String title = requestData.get("title");
 		String description = requestData.get("description");
-		if (requestData.get("price") == null || requestData.get("price").equals(""))
+		String priceString = requestData.get("price");
+
+		List<Http.MultipartFormData.FilePart<Object>> filePartList = request().body().asMultipartFormData().getFiles();
+
+		if (title == null || description == null || filePartList == null || priceString == null)
+		{
+			return badRequest("Missing fields");
+		}
+		else if (priceString.equals("") || !priceString.matches("([0-9]+)|([0-9]+\\.[0-9]{2})|([0-9]+,[0-9]{2})"))
 		{
 			return badRequest("Provide a valid price.");
 		}
-		int price = (int)Math.round(Double.parseDouble(requestData.get("price")) * 100);
-		List<Http.MultipartFormData.FilePart<Object>> filePartList = request().body().asMultipartFormData().getFiles();
+
+		int price = (int)Math.round(Double.parseDouble(priceString) * 100);
 
 		if (title.length() > 0 && description.length() > 0 && price > 0)
 		{
@@ -84,26 +96,16 @@ public class ProductsController extends Controller
 			{
 				if (filePart != null && ((File)filePart.getFile()).length() > 0)
 				{
-					try
+					if (!imageMagickService.shrinkImage(((File) filePart.getFile()).getAbsolutePath(), 1024))
 					{
-						ConvertCmd convertCmd = new ConvertCmd();
-						IMOperation imOperation = new IMOperation();
-						imOperation.addImage(((File) filePart.getFile()).getAbsolutePath());
-						imOperation.resize(1024, 1024, '>');
-						imOperation.addImage(((File) filePart.getFile()).getAbsolutePath());
-						convertCmd.run(imOperation);
-
-						S3File s3File = new S3File();
-						s3File.file = (File) filePart.getFile();
-						s3File.save();
-
-						imagesUrls.add(s3File.getUrl());
-					}
-					catch (Exception e)
-					{
-						e.printStackTrace();
 						return badRequest("Unable to read file as image.");
 					}
+
+					S3File s3File = new S3File();
+					s3File.file = (File) filePart.getFile();
+					s3FileRepository.saveFile(s3File);
+
+					imagesUrls.add(s3File.getUrl());
 				}
 			}
 
@@ -113,10 +115,10 @@ public class ProductsController extends Controller
 			product.setDescription(description);
 			product.setPrice(price);
 			product.setImages(imagesUrls);
-			product.save();
+			productRepository.saveProduct(product);
 
 			JsonWriteOptions jwo = new JsonWriteOptions();
-			jwo.setPathProperties(PathProperties.parse("(id,title,description,price,images)"));
+			jwo.setPathProperties(PathProperties.parse("(id, title, description, price, images)"));
 
 			return ok(Ebean.json().toJson(product, jwo));
 		}
@@ -128,7 +130,7 @@ public class ProductsController extends Controller
 
 	public Result removeProduct(String productId)
 	{
-		Product product = Ebean.find(Product.class, UUID.fromString(productId));
+		Product product = productRepository.findById(UUID.fromString(productId));
 		if (product == null || !product.getOwner().getUserId().toString().equals(
 				request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
 		{
@@ -136,7 +138,7 @@ public class ProductsController extends Controller
 		}
 		else
 		{
-			product.delete();
+			productRepository.saveProduct(product);
 			return ok("");
 		}
 	}
@@ -149,13 +151,13 @@ public class ProductsController extends Controller
 			String productId = requestData.get("productId");
 			int newPrice = (int)Math.round(Double.parseDouble(requestData.get("newPrice")) * 100);
 
-			Product product = Ebean.find(Product.class, UUID.fromString(productId));
+			Product product = productRepository.findById(UUID.fromString(productId));
 			if (product == null || !product.getOwner().getUserId().toString().equals(request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
 			{
 				return badRequest();
 			}
 			product.setPrice(newPrice);
-			product.save();
+			productRepository.saveProduct(product);
 
 			JsonWriteOptions jwo = new JsonWriteOptions();
 			jwo.setPathProperties(PathProperties.parse("(id,title,description,price,images)"));
@@ -170,7 +172,7 @@ public class ProductsController extends Controller
 
 	public Result buyProduct(String productId)
 	{
-		Product product = Ebean.find(Product.class, UUID.fromString(productId));
+		Product product = productRepository.findById(UUID.fromString(productId));
 		if (product != null
 				&& !product.getOwner().getUserId().toString().equals(request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
 		{
@@ -184,7 +186,7 @@ public class ProductsController extends Controller
 
 	public Result paying(String productId)
 	{
-		Product product = Ebean.find(Product.class, UUID.fromString(productId));
+		Product product = productRepository.findById(UUID.fromString(productId));
 		if (product != null
 				&& !product.getOwner().getUserId().toString().equals(request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
 		{
@@ -205,7 +207,7 @@ public class ProductsController extends Controller
 
 			try
 			{
-				// todo Charge charge = Charge.create(params);
+				Charge charge = Charge.create(params);
 			}
 			catch (Exception e)
 			{
@@ -213,7 +215,7 @@ public class ProductsController extends Controller
 				return badRequest("An error occured during payment.");
 			}
 			product.setOwner(request().attrs().get(AuthorizationCheckAction.USER));
-			product.save();
+			productRepository.saveProduct(product);
 			flash("notification", "Traiding success!");
 
 			return redirect(routes.ProductsController.products());

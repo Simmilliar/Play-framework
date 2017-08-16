@@ -3,12 +3,9 @@ package controllers;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
-import io.ebean.Ebean;
-import models.data.Users;
-import models.forms.AuthorizationForm;
-import play.data.Form;
+import models.Users;
+import play.data.DynamicForm;
 import play.data.FormFactory;
-import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -23,63 +20,69 @@ public class AuthorizationController extends Controller
 	private final FormFactory formFactory;
 	private final Utils utils;
 	private final SessionsManager sessionsManager;
+	private final UsersRepository usersRepository;
 
 	@Inject
-	public AuthorizationController(FormFactory formFactory, Utils utils, SessionsManager sessionsManager)
+	public AuthorizationController(FormFactory formFactory, Utils utils, SessionsManager sessionsManager,
+								   UsersRepository usersRepository)
 	{
 		this.formFactory = formFactory;
 		this.utils = utils;
 		this.sessionsManager = sessionsManager;
+		this.usersRepository = usersRepository;
 	}
 
 	public Result authorization()
 	{
-		return ok(views.html.authorization.render(formFactory.form(AuthorizationForm.class)));
+		return ok(views.html.authorization.render(formFactory.form()));
 	}
 
 	public Result authorize()
 	{
-		Form<AuthorizationForm> authorizationForm = formFactory.form(AuthorizationForm.class).bindFromRequest();
-		if (authorizationForm.hasErrors())
-		{
-			return badRequest(views.html.authorization.render(authorizationForm));
-		}
+		DynamicForm authorizationForm = formFactory.form().bindFromRequest();
 
-		AuthorizationForm authorizationData = authorizationForm.get();
+		String email = authorizationForm.get("email");
+		String password = authorizationForm.get("password");
 
-		Users foundedUser = Ebean.find(Users.class)
-				.where()
-				.eq("email", authorizationData.getEmail())
-				.findOne();
-		if (foundedUser == null || !foundedUser.isConfirmed())
+		Users user = null;
+
+		//SECTION BEGIN: Checking
+		if (email == null || password == null)
 		{
-			authorizationData.addError(new ValidationError("email", "Unregistered user."));
+			authorizationForm = authorizationForm.withError("", "Missing fields.");
 		}
 		else
 		{
-			String hash = utils.hashString(authorizationData.getPassword(), foundedUser.getPasswordSalt());
-			if (!foundedUser.getPasswordHash().equals(hash))
+			if (!email.matches(Utils.REGEX_EMAIL))
 			{
-				authorizationData.addError(new ValidationError("password", "Wrong password."));
+				authorizationForm = authorizationForm.withError("email", "Invalid e-mail address.");
+			}
+			else
+			{
+				user = usersRepository.findByEmail(email);
+				if (user == null || !user.isConfirmed())
+				{
+					authorizationForm = authorizationForm.withError("email", "Unregistered user.");
+				}
+				else
+				{
+					String hash = utils.hashString(password, user.getPasswordSalt());
+					if (!user.getPasswordHash().equals(hash))
+					{
+						authorizationForm = authorizationForm.withError("password", "Wrong password.");
+					}
+				}
 			}
 		}
-
 		if (authorizationForm.hasErrors())
 		{
 			return badRequest(views.html.authorization.render(authorizationForm));
 		}
-		else if (request().header("User-Agent").isPresent())
-		{
-			String sessionToken = sessionsManager.registerSession(
-					sessionsManager.AUTH_TYPE_PASSWORD,
-					request().header("User-Agent").get(), foundedUser.getUserId()
-			);
-			response().setCookie(
-					Http.Cookie.builder("session_token", sessionToken)
-					.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME))
-					.build()
-			);
-		}
+		//SECTION END: Checking
+
+		String sessionToken = sessionsManager.registerSession(sessionsManager.AUTH_TYPE_PASSWORD, user.getUserId());
+		response().setCookie(Http.Cookie.builder("session_token", sessionToken)
+				.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME)).build());
 		return redirect(routes.HomeController.index());
 	}
 

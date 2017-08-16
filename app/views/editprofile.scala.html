@@ -1,17 +1,21 @@
-@(userForm: play.data.Form[forms.ProfileEditorForm])
-@import b3.vertical.fieldConstructor
-
+@(userForm: DynamicForm)
 @main("Edit profile") {
     <h1>Edit profile</h1>
-    <img src="@userForm.get().getAvatarUrl()" alt="User avatar" style="width:200px;height:200px;border-radius:100px;">
-    @b3.form(routes.ProfileEditorController.edit, 'enctype -> "multipart/form-data") {
+    <img src="@userForm.get("avatarUrl")" alt="User avatar" style="width:200px;height:200px;border-radius:100px;">
+    <form action="@routes.ProfileEditorController.edit()" enctype="multipart/form-data">
         @helper.CSRF.formField
-        @b3.file(userForm("avatarFile"), '_label -> "Avatar")
-        @b3.text(userForm("name"), '_label -> "Name")
-        @b3.email(userForm("email"), '_label -> "E-mail", 'readonly -> "readonly")
-        @b3.password(userForm("password"), '_label -> "New password")
-        @b3.password(userForm("passwordConfirm"), '_label -> "Confirm new password")
-        @b3.submit('class -> "btn btn-primary"){ Submit }
-        <a href="@routes.HomeController.index()" class="btn btn-default">Go back</a>
-    }
+        <p>Change avatar: <input type="file" class="form-control form-control-file" name="avatarFile"></p>
+        <p><input class="form-control" placeholder="Name" name="name"
+            value="@userForm.get("name")"></p>
+        <p><input type="email" class="form-control" placeholder="Email" name="email"
+            value="@userForm.get("email")"></p>
+        <p><input type="password" class="form-control" placeholder="Password" name="password"
+            value="@userForm.get("password")"></p>
+        <p><input type="password" class="form-control" placeholder="Confirm password" name="passwordConfirm"
+            value="@userForm.get("passwordConfirm")"></p>
+        <p>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="@routes.HomeController.index()" class="btn btn-default">Go back</a>
+        </p>
+    </form>
 }

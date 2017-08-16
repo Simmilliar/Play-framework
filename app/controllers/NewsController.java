@@ -2,14 +2,23 @@ package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
 import io.ebean.Ebean;
-import models.data.News;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
 
+import javax.inject.Inject;
+
 @With(AuthorizationCheckAction.class)
 public class NewsController extends Controller
 {
+	private final NewsRepository newsRepository;
+
+	@Inject
+	public NewsController(NewsRepository newsRepository)
+	{
+		this.newsRepository = newsRepository;
+	}
+
 	public Result news()
 	{
 		return ok(views.html.news.render());
@@ -17,6 +26,6 @@ public class NewsController extends Controller
 
 	public Result loadNews(int count, int offset)
 	{
-		return ok(Ebean.json().toJson(Ebean.find(News.class).setFirstRow(offset).setMaxRows(count).findList()));
+		return ok(Ebean.json().toJson(newsRepository.getNews(offset, count)));
 	}
 }

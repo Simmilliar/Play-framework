@@ -4,3 +4,4 @@ project/project
 target
 conf/confidential.conf
 conf/evolutions
+/conf/application.test.conf

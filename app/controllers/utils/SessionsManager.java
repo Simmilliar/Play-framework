@@ -1,8 +1,8 @@
 package controllers.utils;
 
-import io.ebean.Ebean;
-import models.data.Session;
-import models.data.Users;
+import controllers.SessionRepository;
+import controllers.UsersRepository;
+import models.Session;
 
 import javax.inject.Inject;
 import java.util.UUID;
@@ -11,41 +11,46 @@ import java.util.concurrent.TimeUnit;
 public class SessionsManager
 {
 	public final long TOKEN_LIFETIME = TimeUnit.DAYS.toMillis(30);
-	public final Utils utils;
+	private final Utils utils;
+	private final SessionRepository sessionRepository;
+	private final UsersRepository usersRepository;
 
 	public final String AUTH_TYPE_PASSWORD = "password";
 	public final String AUTH_TYPE_FACEBOOK = "facebook";
 	public final String AUTH_TYPE_TWITTER = "twitter";
+	public final String AUTH_TYPE_API = "api";
 
 	@Inject
-	public SessionsManager(Utils utils)
+	public SessionsManager(Utils utils,SessionRepository sessionRepository, UsersRepository usersRepository)
 	{
 		this.utils = utils;
+		this.sessionRepository = sessionRepository;
+		this.usersRepository = usersRepository;
 	}
 
-	public String registerSession(String authType, String userAgent, UUID userId)
+	public String registerSession(String authType, UUID userId)
 	{
 		long expirationDate = System.currentTimeMillis() + TOKEN_LIFETIME;
 
-		String token = utils.hashString(userAgent + userId + expirationDate, "");
+		String token = utils.hashString("" + System.currentTimeMillis() + userId + expirationDate, "");
 
 		Session session = new Session();
-		session.setUser(Ebean.find(Users.class, userId));
+		session.setUser(usersRepository.findById(userId));
 		session.setExpirationDate(expirationDate);
 		session.setToken(token);
 		session.setAuthType(authType);
-		session.save();
+		sessionRepository.saveSession(session);
 
 		return token;
 	}
 
 	public void unregisterSession(String token)
 	{
-		Session session = Ebean.find(Session.class, token);
+		Session session = sessionRepository.findByToken(token);
 		if (session != null)
 		{
 			session.setExpirationDate(System.currentTimeMillis());
-			session.save();
+			sessionRepository.saveSession(session);
 		}
 	}
 }

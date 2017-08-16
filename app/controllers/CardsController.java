@@ -1,13 +1,12 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
+import controllers.utils.ImageMagickService;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;
 import io.ebean.text.json.JsonWriteOptions;
-import models.data.Card;
-import models.data.S3File;
-import org.im4java.core.ConvertCmd;
-import org.im4java.core.IMOperation;
+import models.Card;
+import models.S3File;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.mvc.Controller;
@@ -25,11 +24,18 @@ import java.util.UUID;
 public class CardsController extends Controller
 {
 	private final FormFactory formFactory;
+	private final CardRepository cardRepository;
+	private final ImageMagickService imageMagickService;
+	private final S3FileRepository s3FileRepository;
 
 	@Inject
-	public CardsController(FormFactory formFactory)
+	public CardsController(FormFactory formFactory, CardRepository cardRepository,
+						   ImageMagickService imageMagickService, S3FileRepository s3FileRepository)
 	{
 		this.formFactory = formFactory;
+		this.cardRepository = cardRepository;
+		this.imageMagickService = imageMagickService;
+		this.s3FileRepository = s3FileRepository;
 	}
 
 	public Result cards()
@@ -39,13 +45,11 @@ public class CardsController extends Controller
 
 	public Result loadCards()
 	{
-		return ok(Ebean.json().toJson(
-				Ebean.find(Card.class)
-						.select("id, title, content, images")
-						.where()
-						.eq("owner_user_id", request().attrs().get(AuthorizationCheckAction.USER).getUserId())
-						.findList()
-		));
+		JsonWriteOptions jwo = new JsonWriteOptions();
+		jwo.setPathProperties(PathProperties.parse("(id, title, content, images)"));
+		return ok(Ebean.json().toJson(cardRepository.findUsersCard(
+				request().attrs().get(AuthorizationCheckAction.USER).getUserId()
+		), jwo));
 	}
 
 	public Result addCard()
@@ -65,24 +69,16 @@ public class CardsController extends Controller
 			{
 				if (filePart != null && ((File)filePart.getFile()).length() > 0)
 				{
-					try
+					if (imageMagickService.shrinkImage(((File) filePart.getFile()).getAbsolutePath(), 1024))
 					{
-						ConvertCmd convertCmd = new ConvertCmd();
-						IMOperation imOperation = new IMOperation();
-						imOperation.addImage(((File) filePart.getFile()).getAbsolutePath());
-						imOperation.resize(1024, 1024, '>');
-						imOperation.addImage(((File) filePart.getFile()).getAbsolutePath());
-						convertCmd.run(imOperation);
-
 						S3File s3File = new S3File();
 						s3File.file = (File) filePart.getFile();
-						s3File.save();
+						s3FileRepository.saveFile(s3File);
 
 						imagesUrls.add(s3File.getUrl());
 					}
-					catch (Exception e)
+					else
 					{
-						e.printStackTrace();
 						return badRequest("Unable to read file as image.");
 					}
 				}
@@ -93,7 +89,7 @@ public class CardsController extends Controller
 			card.setTitle(title);
 			card.setContent(content);
 			card.setImages(imagesUrls);
-			card.save();
+			cardRepository.saveCard(card);
 
 			JsonWriteOptions jwo = new JsonWriteOptions();
 			jwo.setPathProperties(PathProperties.parse("(id,title,content,images)"));
@@ -108,7 +104,7 @@ public class CardsController extends Controller
 
 	public Result deleteCard(String cardId)
 	{
-		Card card = Ebean.find(Card.class, UUID.fromString(cardId));
+		Card card = cardRepository.findCardById(UUID.fromString(cardId));
 		if (card == null || !card.getOwner().getUserId().toString().equals(
 				request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
 		{
@@ -116,7 +112,7 @@ public class CardsController extends Controller
 		}
 		else
 		{
-			card.delete();
+			cardRepository.deleteCard(card);
 			return ok("");
 		}
 	}

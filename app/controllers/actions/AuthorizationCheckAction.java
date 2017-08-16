@@ -1,13 +1,14 @@
 package controllers.actions;
 
+import controllers.SessionRepository;
 import controllers.routes;
-import io.ebean.Ebean;
-import models.data.Session;
-import models.data.Users;
+import models.Session;
+import models.Users;
 import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +16,7 @@ import java.util.concurrent.CompletionStage;
 
 public class AuthorizationCheckAction extends play.mvc.Action.Simple
 {
+	private final SessionRepository sessionRepository;
 	public static final TypedKey<Users> USER = TypedKey.create("user");
 
 	private final List<String> unauthorizedOnly = Arrays.asList(
@@ -32,6 +34,12 @@ public class AuthorizationCheckAction extends play.mvc.Action.Simple
 			"/"
 	);
 
+	@Inject
+	public AuthorizationCheckAction(SessionRepository sessionRepository)
+	{
+		this.sessionRepository = sessionRepository;
+	}
+
 	public CompletionStage<Result> call(Http.Context ctx)
 	{
 		Users user = null;
@@ -39,7 +47,7 @@ public class AuthorizationCheckAction extends play.mvc.Action.Simple
 		Http.Cookie cookie = ctx.request().cookies().get("session_token");
 		if (cookie != null)
 		{
-			Session session = Ebean.find(Session.class, cookie.value());
+			Session session = sessionRepository.findByToken(cookie.value());
 			if (session != null && session.getExpirationDate() > System.currentTimeMillis())
 			{
 				user = session.getUser();

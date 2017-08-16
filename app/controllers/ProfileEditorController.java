@@ -1,15 +1,12 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
+import controllers.utils.ImageMagickService;
 import controllers.utils.Utils;
-import models.data.S3File;
-import models.data.Users;
-import models.forms.ProfileEditorForm;
-import org.im4java.core.ConvertCmd;
-import org.im4java.core.IMOperation;
-import play.data.Form;
+import models.S3File;
+import models.Users;
+import play.data.DynamicForm;
 import play.data.FormFactory;
-import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -26,22 +23,30 @@ public class ProfileEditorController extends Controller
 {
 	private final FormFactory formFactory;
 	private final Utils utils;
+	private final ImageMagickService imageMagickService;
+	private final S3FileRepository s3FileRepository;
+	private final UsersRepository usersRepository;
 
 	@Inject
-	public ProfileEditorController(FormFactory formFactory, Utils utils)
+	public ProfileEditorController(FormFactory formFactory, Utils utils, ImageMagickService imageMagickService,
+								   S3FileRepository s3FileRepository, UsersRepository usersRepository)
 	{
 		this.formFactory = formFactory;
 		this.utils = utils;
+		this.imageMagickService = imageMagickService;
+		this.s3FileRepository = s3FileRepository;
+		this.usersRepository = usersRepository;
 	}
 
 	public Result profileEditor()
 	{
 		Users user = request().attrs().get(AuthorizationCheckAction.USER);
+
 		Map<String, String> data = new HashMap<>();
 		data.put("email", user.getEmail());
 		data.put("name", user.getName());
 		data.put("avatarUrl", user.getAvatarUrl());
-		Form<ProfileEditorForm> form = formFactory.form(ProfileEditorForm.class).bind(data);
+		DynamicForm form = formFactory.form().bind(data);
 
 		return ok(views.html.editprofile.render(form));
 	}
@@ -50,68 +55,77 @@ public class ProfileEditorController extends Controller
 	{
 		Users user = request().attrs().get(AuthorizationCheckAction.USER);
 
-		Form<ProfileEditorForm> profileEditorForm = formFactory.form(ProfileEditorForm.class).bindFromRequest();
-		if (profileEditorForm.hasErrors())
-		{
-			return badRequest(views.html.editprofile.render(profileEditorForm));
-		}
-
-		ProfileEditorForm profileEditorData = profileEditorForm.get();
+		DynamicForm profileEditorForm = formFactory.form().bindFromRequest();
+		String name = profileEditorForm.get("name");
+		String email = profileEditorForm.get("email");
+		String password = profileEditorForm.get("password");
+		String passwordConfirm = profileEditorForm.get("passwordConfirm");
 		Http.MultipartFormData.FilePart avatarFilePart =
 				request().body().asMultipartFormData().getFile("avatarFile");
 
-		if (avatarFilePart != null && ((File)avatarFilePart.getFile()).length() > 0)
+		//SECTION BEGIN: Checking
+		if (name == null || email == null || password == null || passwordConfirm == null || avatarFilePart == null)
 		{
-			try
+			profileEditorForm = profileEditorForm.withError("", "Missing fields.");
+		}
+		else
+		{
+			if (!name.matches(Utils.REGEX_NAME))
 			{
-				ConvertCmd convertCmd = new ConvertCmd();
-				IMOperation imOperation = new IMOperation();
-				imOperation.addImage(((File) avatarFilePart.getFile()).getAbsolutePath());
-				imOperation.resize(100, 100, '^');
-				imOperation.gravity("Center");
-				imOperation.crop(100, 100, 0, 0);
-				imOperation.addImage(((File) avatarFilePart.getFile()).getAbsolutePath());
-				convertCmd.run(imOperation);
+				profileEditorForm = profileEditorForm.withError("name", "Invalid name.");
 			}
-			catch (Exception e)
+			else if (password.length() > 0 && password.length() < 8)
 			{
-				e.printStackTrace();
-				profileEditorData.addError(new ValidationError("avatarFile", "Unable to read file as image."));
+				profileEditorForm = profileEditorForm.withError("password", "Password must be at least 8 symbols long.");
+			}
+			else if (!passwordConfirm.equals(password))
+			{
+				profileEditorForm = profileEditorForm.withError("passwordConfirm", "Passwords does not match.");
+			}
+			else
+			{
+				if (((File)avatarFilePart.getFile()).length() > 0)
+				{
+					if (!imageMagickService.shrinkImage(((File) avatarFilePart.getFile()).getAbsolutePath(), 200))
+					{
+						profileEditorForm = profileEditorForm.withError("avatarFile", "Unable to read file as image.");
+					}
+				}
 			}
 		}
 		if (profileEditorForm.hasErrors())
 		{
 			return badRequest(views.html.editprofile.render(profileEditorForm));
 		}
-		else
-		{
-			boolean needToSave = false;
-			if (avatarFilePart != null && ((File)avatarFilePart.getFile()).length() > 0)
-			{
-				S3File s3File = new S3File();
-				s3File.file = (File) avatarFilePart.getFile();
-				s3File.save();
+		//SECTION END: Checking
 
-				user.setAvatarUrl(s3File.getUrl());
-				needToSave = true;
-			}
-			if (!user.getName().equals(profileEditorData.getName()))
-			{
-				user.setName(profileEditorData.getName());
-				needToSave = true;
-			}
-			if (!profileEditorData.getPassword().isEmpty())
-			{
-				user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
-				user.setPasswordHash(utils.hashString(profileEditorData.getPassword(), user.getPasswordSalt()));
-				needToSave = true;
-			}
-			if (needToSave)
-			{
-				user.save();
-				flash().put("notification", "Your profile info successfully changed.");
-			}
-			return redirect(routes.HomeController.index());
+		boolean needToSave = false;
+		if (((File)avatarFilePart.getFile()).length() > 0)
+		{
+			S3File s3File = new S3File();
+			s3File.file = (File) avatarFilePart.getFile();
+			s3FileRepository.saveFile(s3File);
+
+			user.setAvatarUrl(s3File.getUrl());
+			needToSave = true;
 		}
+		if (!user.getName().equals(name))
+		{
+			user.setName(name);
+			needToSave = true;
+		}
+		if (password.isEmpty())
+		{
+			user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
+			user.setPasswordHash(utils.hashString(password, user.getPasswordSalt()));
+			needToSave = true;
+		}
+		if (needToSave)
+		{
+			usersRepository.saveUser(user);
+			flash().put("notification", "Your profile info successfully changed.");
+		}
+
+		return redirect(routes.HomeController.index());
 	}
 }

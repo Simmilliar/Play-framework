@@ -5,9 +5,11 @@ import com.google.common.collect.Multimap;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
-import models.data.S3File;
-import models.data.Session;
-import models.data.Users;
+import io.ebean.text.PathProperties;
+import io.ebean.text.json.JsonWriteOptions;
+import models.S3File;
+import models.Session;
+import models.Users;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
 import play.libs.Json;
@@ -17,16 +19,24 @@ import play.mvc.Result;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ApiController extends Controller
 {
+	private final UsersRepository usersRepository;
+	private final SessionRepository sessionRepository;
 	private final SessionsManager sessionsManager;
 	private final Utils utils;
 
 	@Inject
-	public ApiController(SessionsManager sessionsManager, Utils utils)
+	public ApiController(UsersRepository usersRepository,
+						 SessionRepository sessionRepository,
+						 SessionsManager sessionsManager,
+						 Utils utils)
 	{
+		this.usersRepository = usersRepository;
+		this.sessionRepository = sessionRepository;
 		this.sessionsManager = sessionsManager;
 		this.utils = utils;
 	}
@@ -42,7 +52,7 @@ public class ApiController extends Controller
 		}
 		else
 		{
-			foundedUser = Ebean.find(Users.class, email);
+			foundedUser = usersRepository.findByEmail(email);
 			if (foundedUser == null || !foundedUser.isConfirmed())
 			{
 				errors.put("email", "Unregistered user.");
@@ -54,24 +64,18 @@ public class ApiController extends Controller
 				{
 					errors.put("password", "Wrong password.");
 				}
-				else if (!request().header("User-Agent").isPresent())
-				{
-					errors.put("user-agent", "Can't find User-Agent request header which is required for authorization.");
-				}
 			}
 		}
 
 		if (errors.isEmpty())
 		{
-			String sessionToken = sessionsManager.registerSession(
-					"api",
-					request().header("User-Agent").get(), foundedUser.getUserId()
-			);
+			String sessionToken = sessionsManager.registerSession(sessionsManager.AUTH_TYPE_API,
+					foundedUser.getUserId());
 			return ok(Json.toJson(sessionToken));
 		}
 		else
 		{
-			return badRequest(Json.toJson(errors));
+			return badRequest(Json.toJson(errors.asMap()));
 		}
 	}
 
@@ -79,7 +83,7 @@ public class ApiController extends Controller
 	{
 		Multimap<String, String> errors = ArrayListMultimap.create();
 
-		Session session = Ebean.find(Session.class, sessionToken);
+		Session session = sessionRepository.findByToken(sessionToken);
 		if (session == null || session.isExpired())
 		{
 			errors.put("session_token", "Invalid session token.");
@@ -99,20 +103,19 @@ public class ApiController extends Controller
 	{
 		Multimap<String, String> errors = ArrayListMultimap.create();
 
-		Session session = Ebean.find(Session.class, sessionToken);
+		Session session = sessionRepository.findByToken(sessionToken);
 		if (session == null || session.isExpired())
 		{
 			errors.put("session_token", "Invalid session token.");
 		}
 		if (errors.isEmpty())
 		{
-			return ok(Ebean.json().toJson(
-					Ebean.find(Users.class)
-							.select("name, email, avatarUrl")
-							.where()
-							.eq("confirmed", true)
-							.findList()
-			));
+			List<Users> users = usersRepository.usersList();
+
+			JsonWriteOptions jwo = new JsonWriteOptions();
+			jwo.setPathProperties(PathProperties.parse("(name, email, avatarUrl)"));
+
+			return ok(Ebean.json().toJson(users, jwo));
 		}
 		else
 		{
@@ -124,7 +127,7 @@ public class ApiController extends Controller
 	{
 		Multimap<String, String> errors = ArrayListMultimap.create();
 
-		Session session = Ebean.find(Session.class, sessionToken);
+		Session session = sessionRepository.findByToken(sessionToken);
 		if (session == null || session.isExpired())
 		{
 			errors.put("session_token", "Invalid session token.");
@@ -173,7 +176,7 @@ public class ApiController extends Controller
 		Multimap<String, String> errors = ArrayListMultimap.create();
 		Http.MultipartFormData.FilePart avatarFilePart = null;
 
-		Session session = Ebean.find(Session.class, sessionToken);
+		Session session = sessionRepository.findByToken(sessionToken);
 		if (session == null || session.isExpired())
 		{
 			errors.put("session_token", "Invalid session token.");

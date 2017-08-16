@@ -1,16 +1,23 @@
-@(userForm: play.data.Form[forms.RegistrationForm])
-@import b3.vertical.fieldConstructor
+@(userForm: DynamicForm)
 
 @main("Registration") {
     <h1>Registration</h1>
-
-    @b3.form(routes.RegistrationController.register) {
-        @helper.CSRF.formField
-        @b3.text(userForm("name"), '_label -> "Name")
-        @b3.email(userForm("email"), '_label -> "E-mail")
-        @b3.password(userForm("password"), '_label -> "Password")
-        @b3.password(userForm("passwordConfirm"), '_label -> "Confirm password")
-        @b3.submit('class -> "btn btn-primary"){ Register }
-        <a href="@routes.HomeController.index()" class="btn btn-default">Go back</a>
+    @for(error <- userForm.allErrors()){
+        <p class="bg-danger message-box">@error.message()</p>
     }
+    <form action="@routes.RegistrationController.register" method="POST">
+        @helper.CSRF.formField
+        <p><input class="form-control" placeholder="Name" name="name"
+            value="@userForm.get("name")"></p>
+        <p><input type="email" class="form-control" placeholder="Email" name="email"
+            value="@userForm.get("email")"></p>
+        <p><input type="password" class="form-control" placeholder="Password" name="password"
+            value="@userForm.get("password")"></p>
+        <p><input type="password" class="form-control" placeholder="Confirm password" name="passwordConfirm"
+            value="@userForm.get("passwordConfirm")"></p>
+        <p>
+            <button type="submit" class="btn btn-primary">Register</button>
+            <a href="@routes.HomeController.index()" class="btn btn-default">Go back</a>
+        </p>
+    </form>
 }

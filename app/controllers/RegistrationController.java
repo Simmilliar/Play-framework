@@ -1,23 +1,21 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
+import controllers.utils.MailerService;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
-import io.ebean.Ebean;
-import models.data.Users;
-import models.forms.RegistrationForm;
-import play.data.Form;
+import models.Users;
+import play.data.DynamicForm;
 import play.data.FormFactory;
-import play.data.validation.ValidationError;
 import play.libs.mailer.MailerClient;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.With;
-import tyrex.services.UUID;
 
 import javax.inject.Inject;
 import java.time.Duration;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -28,118 +26,124 @@ public class RegistrationController extends Controller
 	private final MailerClient mailerClient;
 	private final Utils utils;
 	private final SessionsManager sessionsManager;
+	private final UsersRepository usersRepository;
 
 	@Inject
-	public RegistrationController(FormFactory formFactory, MailerClient mailerClient, Utils utils, SessionsManager sessionsManager)
+	public RegistrationController(FormFactory formFactory, MailerClient mailerClient, Utils utils,
+								  SessionsManager sessionsManager, UsersRepository usersRepository)
 	{
 		this.formFactory = formFactory;
 		this.mailerClient = mailerClient;
 		this.utils = utils;
 		this.sessionsManager = sessionsManager;
+		this.usersRepository = usersRepository;
 	}
 
 	public Result registration()
 	{
-		return ok(views.html.registration.render(formFactory.form(RegistrationForm.class)));
+		return ok(views.html.registration.render(formFactory.form()));
 	}
 
 	public Result register()
 	{
-		Form<RegistrationForm> registrationForm = formFactory.form(RegistrationForm.class).bindFromRequest();
-		if (registrationForm.hasErrors())
-		{
-			return badRequest(views.html.registration.render(registrationForm));
-		}
+		DynamicForm registrationForm = formFactory.form().bindFromRequest();
 
-		RegistrationForm registrationData = registrationForm.get();
+		String name = registrationForm.get("name");
+		String email = registrationForm.get("email");
+		String password = registrationForm.get("password");
+		String passwordConfirm = registrationForm.get("passwordConfirm");
 
-		Users user = Ebean.find(Users.class)
-				.where()
-				.eq("email", registrationData.getEmail())
-				.findOne();
-		if (user != null && user.isConfirmed())
-		{
-			registrationData.addError(new ValidationError("email", "This e-mail is already registered."));
-		}
+		Users user = null;
 
-		if (registrationForm.hasErrors())
+		//SECTION BEGIN: Checking
+		if (name == null || email == null || password == null || passwordConfirm == null)
 		{
-			return badRequest(views.html.registration.render(registrationForm));
+			registrationForm = registrationForm.withError("", "Missing fields.");
 		}
 		else
 		{
-			if (user == null)
+			if (!name.matches(Utils.REGEX_NAME))
 			{
-				user = new Users();
+				registrationForm = registrationForm.withError("name", "Invalid name.");
 			}
-			user.setName(registrationData.getName());
-			user.setEmail(registrationData.getEmail());
-			user.setAvatarUrl(routes.Assets.versioned(
-					new Assets.Asset(Utils.DEFAULT_AVATAR_ASSET)
-			).url()); // solved todo it's better, but please, use java constants
-			user.setFacebookId(-1L * System.currentTimeMillis());
-			user.setTwitterId(-1L * System.currentTimeMillis());
-
-			user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
-			user.setPasswordHash(utils.hashString(registrationData.getPassword(), user.getPasswordSalt()));
-
-			//todo take everything back
-			//user.setConfirmed(false);
-			user.setConfirmed(true);
-			String confirmationKey = UUID.create();
-			user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
-			user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
-
-			try
+			else if (!email.matches(Utils.REGEX_EMAIL))
 			{
-				/*
-				String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION,
-						routes.RegistrationController.confirmEmail(confirmationKey).absoluteURL(request()));
-				new MailerService(mailerClient)
-						.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
-				*/
-				flash().put("notification", "We'll send you an e-mail to confirm your registration.");
+				registrationForm = registrationForm.withError("email", "Invalid e-mail address.");
 			}
-			catch (Exception e)
+			else if (password.length() < 8)
 			{
-				registrationData.addError(new ValidationError("email", "Unable to send confirmation email."));
-				return internalServerError(views.html.registration.render(registrationForm));
+				registrationForm = registrationForm.withError("password", "Password must be at least 8 symbols long.");
 			}
-
- 			user.save();
-
-			return redirect(routes.HomeController.index());
+			else if (!password.equals(passwordConfirm))
+			{
+				registrationForm = registrationForm.withError("passwordConfirm", "Passwords does not match.");
+			}
+			else
+			{
+				user = usersRepository.findByEmail(email);
+				if (user != null && user.isConfirmed())
+				{
+					registrationForm = registrationForm.withError("email", "This e-mail is already registered.");
+				}
+			}
 		}
+		if (registrationForm.hasErrors())
+		{
+			return badRequest(views.html.registration.render(registrationForm));
+		}
+		//SECTION END: Checking
+
+		if (user == null)
+		{
+			user = new Users();
+		}
+		user.setName(name);
+		user.setEmail(email);
+		user.setAvatarUrl(routes.Assets.versioned(new Assets.Asset(Utils.DEFAULT_AVATAR_ASSET)).url());
+		user.setFacebookId(-1L * System.currentTimeMillis());
+		user.setTwitterId(-1L * System.currentTimeMillis());
+
+		user.setPasswordSalt("" + ThreadLocalRandom.current().nextLong());
+		user.setPasswordHash(utils.hashString(password, user.getPasswordSalt()));
+
+		user.setConfirmed(false);
+		String confirmationKey = UUID.randomUUID().toString();
+		user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
+		user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
+
+		try
+		{
+			String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION,
+					routes.RegistrationController.confirmEmail(confirmationKey).absoluteURL(request()));
+			new MailerService(mailerClient)
+					.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
+			flash().put("notification", "We'll send you an e-mail to confirm your registration.");
+		}
+		catch (Exception e)
+		{
+			return internalServerError(views.html.registration.render(registrationForm.withError("email", "Unable to send confirmation email.")));
+		}
+
+		usersRepository.saveUser(user);
+
+		return redirect(routes.HomeController.index());
 	}
 
 	public Result confirmEmail(String key)
 	{
-		Users user = Ebean.find(Users.class)
-				.where()
-				.and()
-				.eq("confirmation_key_hash", utils.hashString(key, key))
-				.eq("confirmed", false)
-				.gt("confirmation_key_expiration_date", System.currentTimeMillis())
-				.endAnd()
-				.findOne();
-		if (user != null && request().header("User-Agent").isPresent())
+		Users user = usersRepository.findUnconfirmedByConfirmationKey(key);
+		if (user != null)
 		{
 			user.setConfirmed(true);
 			user.setConfirmationKeyHash("");
 			user.setConfirmationKeyExpirationDate(System.currentTimeMillis());
-			user.save();
+			usersRepository.saveUser(user);
 
 			flash().put("notification", "You were successfully registered!");
 
-			String sessionToken = sessionsManager.registerSession(
-					sessionsManager.AUTH_TYPE_PASSWORD,
-					request().header("User-Agent").get(), user.getUserId()
-			);
-			response().setCookie(
-					Http.Cookie.builder("session_token", sessionToken)
-					.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME))
-					.build()
-			);
+			String sessionToken = sessionsManager.registerSession(sessionsManager.AUTH_TYPE_PASSWORD, user.getUserId());
+			response().setCookie(Http.Cookie.builder("session_token", sessionToken)
+					.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME)).build());
 		}
 		return redirect(routes.HomeController.index());
 	}
