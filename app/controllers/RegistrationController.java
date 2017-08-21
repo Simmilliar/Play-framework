@@ -7,7 +7,6 @@ import controllers.utils.Utils;
 import models.Users;
 import play.data.DynamicForm;
 import play.data.FormFactory;
-import play.libs.mailer.MailerClient;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -23,17 +22,17 @@ import java.util.concurrent.TimeUnit;
 public class RegistrationController extends Controller
 {
 	private final FormFactory formFactory;
-	private final MailerClient mailerClient;
+	private final MailerService mailerService;
 	private final Utils utils;
 	private final SessionsManager sessionsManager;
 	private final UsersRepository usersRepository;
 
 	@Inject
-	public RegistrationController(FormFactory formFactory, MailerClient mailerClient, Utils utils,
+	public RegistrationController(FormFactory formFactory, MailerService mailerService, Utils utils,
 								  SessionsManager sessionsManager, UsersRepository usersRepository)
 	{
 		this.formFactory = formFactory;
-		this.mailerClient = mailerClient;
+		this.mailerService = mailerService;
 		this.utils = utils;
 		this.sessionsManager = sessionsManager;
 		this.usersRepository = usersRepository;
@@ -115,8 +114,7 @@ public class RegistrationController extends Controller
 		{
 			String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION,
 					routes.RegistrationController.confirmEmail(confirmationKey).absoluteURL(request()));
-			new MailerService(mailerClient)
-					.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
+			mailerService.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
 			flash().put("notification", "We'll send you an e-mail to confirm your registration.");
 		}
 		catch (Exception e)

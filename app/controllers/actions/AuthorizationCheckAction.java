@@ -4,7 +4,6 @@ import controllers.SessionRepository;
 import controllers.routes;
 import models.Session;
 import models.Users;
-import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -17,22 +16,10 @@ import java.util.concurrent.CompletionStage;
 public class AuthorizationCheckAction extends play.mvc.Action.Simple
 {
 	private final SessionRepository sessionRepository;
-	public static final TypedKey<Users> USER = TypedKey.create("user");
 
-	private final List<String> unauthorizedOnly = Arrays.asList(
-			"/registration",
-			"/emailconfirm",
-			"/login",
-			"/facebook_auth",
-			"/twitter_auth",
-			"/twitter_auth/continue",
-			"/forgotpassword",
-			"/changepassword"
-	);
-
-	private final List<String> forAll = Arrays.asList(
-			"/"
-	);
+	private final List<String> unauthorizedOnly = Arrays.asList("/registration", "/emailconfirm", "/login",
+			"/facebook_auth", "/twitter_auth", "/twitter_auth/continue", "/forgotpassword", "/changepassword");
+	private final List<String> forAll = Arrays.asList("/");
 
 	@Inject
 	public AuthorizationCheckAction(SessionRepository sessionRepository)
@@ -54,7 +41,7 @@ public class AuthorizationCheckAction extends play.mvc.Action.Simple
 			}
 		}
 
-		ctx = ctx.withRequest(ctx.request().addAttr(USER, user));
+		ctx.args.put("user", user);
 		if (forAll.contains(ctx.request().path()))
 		{
 			return delegate.call(ctx);

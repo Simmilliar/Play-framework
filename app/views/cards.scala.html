@@ -1,10 +1,9 @@
-@@import views.html.helper.CSRF
+
 @main("Cards") {
     <h1>Cards</h1>
     <div class="row">
         <div class="col-sm-4">
             <form data-bind="submit: addCard" enctype="multipart/form-data">
-                @helper.CSRF.formField
                 <p><input class="form-control" placeholder="Title" name="title"></p>
                 <p><textarea class="form-control" placeholder="Content goes here..." name="content"></textarea></p>
                 <p><input type="file" class="form-control-file" name="images" accept="image/*" multiple></p>
@@ -67,7 +66,7 @@
             self.removeCard = function (card, event) {
                 $.ajax({
                     type: "DELETE",
-                    url: "/cards/delete?card=" + card.id() + "&csrfToken=@CSRF.getToken.value"
+                    url: "/cards/delete?card=" + card.id()
                 }).done(function () {
                     self.cards.remove(card);
                 });

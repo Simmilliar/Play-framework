@@ -22,7 +22,7 @@ public class HomeController extends Controller
 
 	public Result index()
 	{
-		if (request().attrs().get(AuthorizationCheckAction.USER) != null)
+		if (ctx().args.get("user") != null)
 		{
 			List<Users> users = usersRepository.usersList();
 			return ok(views.html.userlist.render(users));

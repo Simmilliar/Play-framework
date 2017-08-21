@@ -6,7 +6,6 @@
         <p class="bg-danger message-box">@error.message()</p>
     }
     <form action="@routes.AuthorizationController.authorize()" method="POST">
-        @helper.CSRF.formField
         <p><input type="email" class="form-control" placeholder="Email" name="email"
             value="@userForm.get("email")"></p>
         <p><input type="password" class="form-control" placeholder="Password" name="password"

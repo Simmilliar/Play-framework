@@ -6,15 +6,12 @@
         <p class="bg-danger message-box">@error.message()</p>
     }
     <form action="@routes.RegistrationController.register" method="POST">
-        @helper.CSRF.formField
         <p><input class="form-control" placeholder="Name" name="name"
-            value="@userForm.get("name")"></p>
+            value="@userForm.value("name").orElse("")"></p>
         <p><input type="email" class="form-control" placeholder="Email" name="email"
-            value="@userForm.get("email")"></p>
-        <p><input type="password" class="form-control" placeholder="Password" name="password"
-            value="@userForm.get("password")"></p>
-        <p><input type="password" class="form-control" placeholder="Confirm password" name="passwordConfirm"
-            value="@userForm.get("passwordConfirm")"></p>
+            value="@userForm.value("email").orElse("")"></p>
+        <p><input type="password" class="form-control" placeholder="Password" name="password"></p>
+        <p><input type="password" class="form-control" placeholder="Confirm password" name="passwordConfirm"></p>
         <p>
             <button type="submit" class="btn btn-primary">Register</button>
             <a href="@routes.HomeController.index()" class="btn btn-default">Go back</a>

@@ -7,6 +7,7 @@ import io.ebean.text.PathProperties;
 import io.ebean.text.json.JsonWriteOptions;
 import models.Card;
 import models.S3File;
+import models.Users;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.mvc.Controller;
@@ -48,8 +49,7 @@ public class CardsController extends Controller
 		JsonWriteOptions jwo = new JsonWriteOptions();
 		jwo.setPathProperties(PathProperties.parse("(id, title, content, images)"));
 		return ok(Ebean.json().toJson(cardRepository.findUsersCard(
-				request().attrs().get(AuthorizationCheckAction.USER).getUserId()
-		), jwo));
+				((Users)ctx().args.get("user")).getUserId()), jwo));
 	}
 
 	public Result addCard()
@@ -85,7 +85,7 @@ public class CardsController extends Controller
 			}
 
 			Card card = new Card();
-			card.setOwner(request().attrs().get(AuthorizationCheckAction.USER));
+			card.setOwner(((Users)ctx().args.get("user")));
 			card.setTitle(title);
 			card.setContent(content);
 			card.setImages(imagesUrls);
@@ -106,7 +106,7 @@ public class CardsController extends Controller
 	{
 		Card card = cardRepository.findCardById(UUID.fromString(cardId));
 		if (card == null || !card.getOwner().getUserId().toString().equals(
-				request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
+				((Users)ctx().args.get("user")).getUserId().toString()))
 		{
 			return badRequest("Wrong card UUID");
 		}

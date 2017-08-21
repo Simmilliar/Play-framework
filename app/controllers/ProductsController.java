@@ -11,6 +11,7 @@ import io.ebean.text.PathProperties;
 import io.ebean.text.json.JsonWriteOptions;
 import models.Product;
 import models.S3File;
+import models.Users;
 import play.Logger;
 import play.data.DynamicForm;
 import play.data.FormFactory;
@@ -52,8 +53,7 @@ public class ProductsController extends Controller
 		JsonWriteOptions jwo = new JsonWriteOptions();
 		jwo.setPathProperties(PathProperties.parse("(id, title, description, price, images)"));
 		return ok(Ebean.json().toJson(productRepository.getNotMyProducts(
-				request().attrs().get(AuthorizationCheckAction.USER).getUserId())
-		));
+				((Users)ctx().args.get("user")).getUserId())));
 	}
 
 	public Result myProducts()
@@ -61,8 +61,7 @@ public class ProductsController extends Controller
 		JsonWriteOptions jwo = new JsonWriteOptions();
 		jwo.setPathProperties(PathProperties.parse("(id, title, description, price, images)"));
 		return ok(Ebean.json().toJson(productRepository.getMyProducts(
-				request().attrs().get(AuthorizationCheckAction.USER).getUserId())
-		));
+				((Users)ctx().args.get("user")).getUserId())));
 	}
 
 	public Result addProduct()
@@ -110,7 +109,7 @@ public class ProductsController extends Controller
 			}
 
 			Product product = new Product();
-			product.setOwner(request().attrs().get(AuthorizationCheckAction.USER));
+			product.setOwner(((Users)ctx().args.get("user")));
 			product.setTitle(title);
 			product.setDescription(description);
 			product.setPrice(price);
@@ -132,7 +131,7 @@ public class ProductsController extends Controller
 	{
 		Product product = productRepository.findById(UUID.fromString(productId));
 		if (product == null || !product.getOwner().getUserId().toString().equals(
-				request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
+				((Users)ctx().args.get("user")).getUserId().toString()))
 		{
 			return badRequest("Wrong product UUID");
 		}
@@ -152,7 +151,8 @@ public class ProductsController extends Controller
 			int newPrice = (int)Math.round(Double.parseDouble(requestData.get("newPrice")) * 100);
 
 			Product product = productRepository.findById(UUID.fromString(productId));
-			if (product == null || !product.getOwner().getUserId().toString().equals(request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
+			if (product == null || !product.getOwner().getUserId().toString()
+					.equals(((Users)ctx().args.get("user")).getUserId().toString()))
 			{
 				return badRequest();
 			}
@@ -173,8 +173,8 @@ public class ProductsController extends Controller
 	public Result buyProduct(String productId)
 	{
 		Product product = productRepository.findById(UUID.fromString(productId));
-		if (product != null
-				&& !product.getOwner().getUserId().toString().equals(request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
+		if (product != null && !product.getOwner().getUserId().toString()
+				.equals(((Users)ctx().args.get("user")).getUserId().toString()))
 		{
 			return ok(views.html.buying.render(product, configFactory.getString("stripePublicKey")));
 		}
@@ -187,8 +187,8 @@ public class ProductsController extends Controller
 	public Result paying(String productId)
 	{
 		Product product = productRepository.findById(UUID.fromString(productId));
-		if (product != null
-				&& !product.getOwner().getUserId().toString().equals(request().attrs().get(AuthorizationCheckAction.USER).getUserId().toString()))
+		if (product != null && !product.getOwner().getUserId().toString()
+				.equals(((Users)ctx().args.get("user")).getUserId().toString()))
 		{
 			Stripe.apiKey = configFactory.getString("stripeSecretKey");
 
@@ -214,7 +214,7 @@ public class ProductsController extends Controller
 				e.printStackTrace();
 				return badRequest("An error occured during payment.");
 			}
-			product.setOwner(request().attrs().get(AuthorizationCheckAction.USER));
+			product.setOwner(((Users)ctx().args.get("user")));
 			productRepository.saveProduct(product);
 			flash("notification", "Traiding success!");
 

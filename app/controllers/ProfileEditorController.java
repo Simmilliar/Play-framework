@@ -40,7 +40,7 @@ public class ProfileEditorController extends Controller
 
 	public Result profileEditor()
 	{
-		Users user = request().attrs().get(AuthorizationCheckAction.USER);
+		Users user = ((Users)ctx().args.get("user"));
 
 		Map<String, String> data = new HashMap<>();
 		data.put("email", user.getEmail());
@@ -53,7 +53,7 @@ public class ProfileEditorController extends Controller
 
 	public Result edit()
 	{
-		Users user = request().attrs().get(AuthorizationCheckAction.USER);
+		Users user = ((Users)ctx().args.get("user"));
 
 		DynamicForm profileEditorForm = formFactory.form().bindFromRequest();
 		String name = profileEditorForm.get("name");
@@ -86,7 +86,7 @@ public class ProfileEditorController extends Controller
 			{
 				if (((File)avatarFilePart.getFile()).length() > 0)
 				{
-					if (!imageMagickService.shrinkImage(((File) avatarFilePart.getFile()).getAbsolutePath(), 200))
+					if (!imageMagickService.cropImageSquared(((File) avatarFilePart.getFile()).getAbsolutePath(), 200))
 					{
 						profileEditorForm = profileEditorForm.withError("avatarFile", "Unable to read file as image.");
 					}
