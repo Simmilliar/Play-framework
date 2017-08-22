@@ -51,26 +51,23 @@ public class AuthorizationController extends Controller
 		{
 			authorizationForm = authorizationForm.withError("", "Missing fields.");
 		}
+		else if (!email.matches(Utils.REGEX_EMAIL))
+		{
+			authorizationForm = authorizationForm.withError("email", "Invalid e-mail address.");
+		}
 		else
 		{
-			if (!email.matches(Utils.REGEX_EMAIL))
+			user = usersRepository.findByEmail(email);
+			if (user == null || !user.isConfirmed())
 			{
-				authorizationForm = authorizationForm.withError("email", "Invalid e-mail address.");
+				authorizationForm = authorizationForm.withError("email", "Unregistered user.");
 			}
 			else
 			{
-				user = usersRepository.findByEmail(email);
-				if (user == null || !user.isConfirmed())
+				String hash = utils.hashString(password, user.getPasswordSalt());
+				if (!user.getPasswordHash().equals(hash))
 				{
-					authorizationForm = authorizationForm.withError("email", "Unregistered user.");
-				}
-				else
-				{
-					String hash = utils.hashString(password, user.getPasswordSalt());
-					if (!user.getPasswordHash().equals(hash))
-					{
-						authorizationForm = authorizationForm.withError("password", "Wrong password.");
-					}
+					authorizationForm = authorizationForm.withError("password", "Wrong password.");
 				}
 			}
 		}

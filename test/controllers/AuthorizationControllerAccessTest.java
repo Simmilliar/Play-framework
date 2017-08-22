@@ -18,14 +18,20 @@ import static play.inject.Bindings.bind;
 import static play.mvc.Http.Status.SEE_OTHER;
 import static play.test.Helpers.*;
 
-public class RegistrationControllerAccessTest extends WithApplication {
+public class AuthorizationControllerAccessTest extends WithApplication {
 
-	private final SessionRepository mockSessionRepository = mock(SessionRepository.class);
-	private final Session mockSession = mock(Session.class);
-	private final UsersRepository mockUsersRepository = mock(UsersRepository.class);
+	private SessionRepository mockSessionRepository;
+	private Session mockSession;
+	private UsersRepository mockUsersRepository;
+	private SessionsManager mockSessionsManager;
 
 	@Override
 	protected Application provideApplication() {
+		mockSessionRepository = mock(SessionRepository.class);
+		mockSession = mock(Session.class);
+		mockUsersRepository = mock(UsersRepository.class);
+		mockSessionsManager = mock(SessionsManager.class);
+
 		when(mockSession.getUser()).thenReturn(new Users());
 		when(mockSession.getExpirationDate()).thenReturn(System.currentTimeMillis() + 1000000L);
 		when(mockSessionRepository.findByToken("active_token")).thenReturn(mockSession);
@@ -34,61 +40,61 @@ public class RegistrationControllerAccessTest extends WithApplication {
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
 				.overrides(bind(UsersRepository.class).toInstance(mockUsersRepository))
 				.overrides(bind(MailerService.class).toInstance(mock(MailerService.class)))
-				.overrides(bind(SessionsManager.class).toInstance(mock(SessionsManager.class)))
+				.overrides(bind(SessionsManager.class).toInstance(mockSessionsManager))
 				.build();
 	}
 
 	@Test
-	public void accessRegistrationAuthorized() {
+	public void accessAuthorizationAuthorized() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
-				.uri(routes.RegistrationController.registration().url()));
+				.uri(routes.AuthorizationController.authorization().url()));
 		assertEquals(SEE_OTHER, result.status());
 	}
 
 	@Test
-	public void accessRegisterAuthorized() {
+	public void accessAuthorizeAuthorized() {
 		Result result = route(app, fakeRequest()
 				.method(POST)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
-				.uri(routes.RegistrationController.register().url()));
+				.uri(routes.AuthorizationController.authorize().url()));
 		assertEquals(SEE_OTHER, result.status());
 	}
 
 	@Test
-	public void accessConfirmEmailAuthorized() {
+	public void accessLogoutAuthorized() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
-				.uri(routes.RegistrationController.confirmEmail("").url()));
+				.uri(routes.AuthorizationController.logout().url()));
 		assertEquals(SEE_OTHER, result.status());
-		verify(mockUsersRepository, never()).findUnconfirmedByConfirmationKey(anyString());
+		verify(mockSessionsManager, atLeast(1)).unregisterSession(anyString());
 	}
 
 	@Test
-	public void accessRegistrationUnauthorized() {
+	public void accessAuthorizationUnauthorized() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
-				.uri(routes.RegistrationController.registration().url()));
+				.uri(routes.AuthorizationController.authorization().url()));
 		assertEquals(OK, result.status());
 	}
 
 	@Test
-	public void accessRegisterUnauthorized() {
+	public void accessAuthorizeUnauthorized() {
 		Result result = route(app, fakeRequest()
 				.method(POST)
-				.uri(routes.RegistrationController.register().url()));
+				.uri(routes.AuthorizationController.authorize().url()));
 		assertEquals(BAD_REQUEST, result.status());
 		assertTrue(contentAsString(result).contains("Missing fields."));
 	}
 
 	@Test
-	public void accessConfirmEmailUnauthorized() {
+	public void accessLogoutUnauthorized() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
-				.uri(routes.RegistrationController.confirmEmail("").url()));
+				.uri(routes.AuthorizationController.logout().url()));
 		assertEquals(SEE_OTHER, result.status());
-		verify(mockUsersRepository, atLeast(1)).findUnconfirmedByConfirmationKey(anyString());
+		verify(mockSessionsManager, never()).unregisterSession(anyString());
 	}
 }
