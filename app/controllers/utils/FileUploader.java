@@ -27,4 +27,15 @@ public class FileUploader {
 			return null;
 		}
 	}
+
+	public String uploadImageAndCropSquared(File image, int cropSize) {
+		if (imageMagickService.cropImageSquared(image.getAbsolutePath(), cropSize)) {
+			S3File s3File = new S3File();
+			s3File.file = image;
+			s3FileRepository.saveFile(s3File);
+			return s3File.getUrl();
+		} else {
+			return null;
+		}
+	}
 }

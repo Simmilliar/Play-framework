@@ -1,9 +1,8 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
-import controllers.utils.ImageMagickService;
+import controllers.utils.FileUploader;
 import controllers.utils.Utils;
-import models.S3File;
 import models.Users;
 import play.data.DynamicForm;
 import play.data.FormFactory;
@@ -23,19 +22,17 @@ public class ProfileEditorController extends Controller
 {
 	private final FormFactory formFactory;
 	private final Utils utils;
-	private final ImageMagickService imageMagickService;
-	private final S3FileRepository s3FileRepository;
 	private final UsersRepository usersRepository;
+	private final FileUploader fileUploader;
 
 	@Inject
-	public ProfileEditorController(FormFactory formFactory, Utils utils, ImageMagickService imageMagickService,
-								   S3FileRepository s3FileRepository, UsersRepository usersRepository)
+	public ProfileEditorController(FormFactory formFactory, Utils utils, UsersRepository usersRepository,
+								   FileUploader fileUploader)
 	{
 		this.formFactory = formFactory;
 		this.utils = utils;
-		this.imageMagickService = imageMagickService;
-		this.s3FileRepository = s3FileRepository;
 		this.usersRepository = usersRepository;
+		this.fileUploader = fileUploader;
 	}
 
 	public Result profileEditor()
@@ -57,19 +54,21 @@ public class ProfileEditorController extends Controller
 
 		DynamicForm profileEditorForm = formFactory.form().bindFromRequest();
 		String name = profileEditorForm.get("name");
-		String email = profileEditorForm.get("email");
 		String password = profileEditorForm.get("password");
 		String passwordConfirm = profileEditorForm.get("passwordConfirm");
-		Http.MultipartFormData.FilePart avatarFilePart =
-				request().body().asMultipartFormData().getFile("avatarFile");
+
+		String avatarUrl = null;
 
 		//SECTION BEGIN: Checking
-		if (name == null || email == null || password == null || passwordConfirm == null || avatarFilePart == null)
+		if (name == null || password == null || passwordConfirm == null ||
+				request().body().asMultipartFormData().getFile("avatarFile") == null)
 		{
 			profileEditorForm = profileEditorForm.withError("", "Missing fields.");
 		}
 		else
 		{
+			Http.MultipartFormData.FilePart avatarFilePart =
+					request().body().asMultipartFormData().getFile("avatarFile");
 			if (!name.matches(Utils.REGEX_NAME))
 			{
 				profileEditorForm = profileEditorForm.withError("name", "Invalid name.");
@@ -86,7 +85,8 @@ public class ProfileEditorController extends Controller
 			{
 				if (((File)avatarFilePart.getFile()).length() > 0)
 				{
-					if (!imageMagickService.cropImageSquared(((File) avatarFilePart.getFile()).getAbsolutePath(), 200))
+					avatarUrl = fileUploader.uploadImageAndCropSquared((File)avatarFilePart.getFile(), 200);
+					if (avatarUrl == null)
 					{
 						profileEditorForm = profileEditorForm.withError("avatarFile", "Unable to read file as image.");
 					}
@@ -100,13 +100,9 @@ public class ProfileEditorController extends Controller
 		//SECTION END: Checking
 
 		boolean needToSave = false;
-		if (((File)avatarFilePart.getFile()).length() > 0)
+		if (avatarUrl != null)
 		{
-			S3File s3File = new S3File();
-			s3File.file = (File) avatarFilePart.getFile();
-			s3FileRepository.saveFile(s3File);
-
-			user.setAvatarUrl(s3File.getUrl());
+			user.setAvatarUrl(avatarUrl);
 			needToSave = true;
 		}
 		if (!user.getName().equals(name))
@@ -114,7 +110,7 @@ public class ProfileEditorController extends Controller
 			user.setName(name);
 			needToSave = true;
 		}
-		if (password.isEmpty())
+		if (!password.isEmpty())
 		{
 			user.setPasswordSalt("" + ThreadLocalRandom.current().nextInt());
 			user.setPasswordHash(utils.hashString(password, user.getPasswordSalt()));

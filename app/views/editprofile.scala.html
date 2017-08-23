@@ -2,12 +2,15 @@
 @main("Edit profile") {
     <h1>Edit profile</h1>
     <img src="@userForm.get("avatarUrl")" alt="User avatar" style="width:200px;height:200px;border-radius:100px;">
+    @for(error <- userForm.allErrors()){
+        <p class="bg-danger message-box">@error.message()</p>
+    }
     <form action="@routes.ProfileEditorController.edit()" enctype="multipart/form-data" method="POST">
         <p>Change avatar: <input type="file" class="form-control form-control-file" name="avatarFile"></p>
         <p><input class="form-control" placeholder="Name" name="name"
             value="@userForm.get("name")"></p>
         <p><input type="email" class="form-control" placeholder="Email" name="email"
-            value="@userForm.get("email")"></p>
+            value="@userForm.get("email")" readonly></p>
         <p><input type="password" class="form-control" placeholder="Password" name="password"
             value="@userForm.get("password")"></p>
         <p><input type="password" class="form-control" placeholder="Confirm password" name="passwordConfirm"
