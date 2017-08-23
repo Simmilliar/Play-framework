@@ -41,8 +41,9 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 				.build();
 	}
 
+	// todo rename all tests
 	@Test
-	public void accessAuthorizationAuthorized() {
+	public void check_if_authorized_user_will_be_redirected() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())

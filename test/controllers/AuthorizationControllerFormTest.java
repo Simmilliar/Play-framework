@@ -37,7 +37,7 @@ public class AuthorizationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formValid() {
+	public void login_success() {
 		Users mockUser = mock(Users.class);
 		when(mockUser.isConfirmed()).thenReturn(true);
 		when(mockUser.getPasswordSalt()).thenReturn("12345678");
@@ -56,7 +56,7 @@ public class AuthorizationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formEmailMissing() {
+	public void login_failed_missed_email() {
 		Map<String, String> formData = new HashMap<>();
 		//formData.put("email", "valid@email.com");
 		formData.put("password", "longEnoughPassword");

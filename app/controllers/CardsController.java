@@ -100,7 +100,7 @@ public class CardsController extends Controller
 
 	public Result deleteCard(String cardId)
 	{
-		if (cardId == null || !cardId.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")) {
+		if (cardId == null || !cardId.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")) { //todo move to uuid validation utils
 			return badRequest("Wrong card UUID");
 		}
 		Card card = cardRepository.findCardById(UUID.fromString(cardId));
