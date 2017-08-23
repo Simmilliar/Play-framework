@@ -1,12 +1,11 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
-import controllers.utils.ImageMagickService;
+import controllers.utils.FileUploader;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;
 import io.ebean.text.json.JsonWriteOptions;
 import models.Card;
-import models.S3File;
 import models.Users;
 import play.data.DynamicForm;
 import play.data.FormFactory;
@@ -26,17 +25,14 @@ public class CardsController extends Controller
 {
 	private final FormFactory formFactory;
 	private final CardRepository cardRepository;
-	private final ImageMagickService imageMagickService;
-	private final S3FileRepository s3FileRepository;
+	private final FileUploader fileUploader;
 
 	@Inject
-	public CardsController(FormFactory formFactory, CardRepository cardRepository,
-						   ImageMagickService imageMagickService, S3FileRepository s3FileRepository)
+	public CardsController(FormFactory formFactory, CardRepository cardRepository, FileUploader fileUploader)
 	{
 		this.formFactory = formFactory;
 		this.cardRepository = cardRepository;
-		this.imageMagickService = imageMagickService;
-		this.s3FileRepository = s3FileRepository;
+		this.fileUploader = fileUploader;
 	}
 
 	public Result cards()
@@ -57,6 +53,12 @@ public class CardsController extends Controller
 		DynamicForm requestData = formFactory.form().bindFromRequest();
 		String title = requestData.get("title");
 		String content = requestData.get("content");
+
+		if (title == null || content == null || request().body().asMultipartFormData() == null)
+		{
+			return badRequest("Missing fields.");
+		}
+
 		List<Http.MultipartFormData.FilePart<Object>> filePartList = request().body().asMultipartFormData().getFiles();
 
 		if (title.length() > 0 && content.length() > 0)
@@ -69,16 +71,10 @@ public class CardsController extends Controller
 			{
 				if (filePart != null && ((File)filePart.getFile()).length() > 0)
 				{
-					if (imageMagickService.shrinkImage(((File) filePart.getFile()).getAbsolutePath(), 1024))
-					{
-						S3File s3File = new S3File();
-						s3File.file = (File) filePart.getFile();
-						s3FileRepository.saveFile(s3File);
-
-						imagesUrls.add(s3File.getUrl());
-					}
-					else
-					{
+					String imageUrl = fileUploader.uploadImageAndShrink((File)filePart.getFile(), 1024);
+					if (imageUrl != null) {
+						imagesUrls.add(imageUrl);
+					} else {
 						return badRequest("Unable to read file as image.");
 					}
 				}
@@ -104,6 +100,9 @@ public class CardsController extends Controller
 
 	public Result deleteCard(String cardId)
 	{
+		if (cardId == null || !cardId.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")) {
+			return badRequest("Wrong card UUID");
+		}
 		Card card = cardRepository.findCardById(UUID.fromString(cardId));
 		if (card == null || !card.getOwner().getUserId().toString().equals(
 				((Users)ctx().args.get("user")).getUserId().toString()))

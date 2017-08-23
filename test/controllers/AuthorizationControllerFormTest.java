@@ -141,7 +141,7 @@ public class AuthorizationControllerFormTest extends WithApplication {
 		when(mockUsersRepository.findByEmail("valid@email.com")).thenReturn(mockUser);
 
 		Map<String, String> formData = new HashMap<>();
-		formData.put("email", "valid@email");
+		formData.put("email", "valid@email.com");
 		formData.put("password", "invalidPassword");
 
 		Result result = route(app, fakeRequest()
@@ -149,6 +149,6 @@ public class AuthorizationControllerFormTest extends WithApplication {
 				.bodyForm(formData)
 				.uri(routes.AuthorizationController.authorize().url()));
 		assertEquals(BAD_REQUEST, result.status());
-		assertTrue(contentAsString(result).contains("Invalid e-mail address."));
+		assertTrue(contentAsString(result).contains("Wrong password."));
 	}
 }

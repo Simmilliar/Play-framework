@@ -48,9 +48,10 @@ public class Users extends Model
 		return email;
 	}
 
-	public void setEmail(String email)
+	public Users setEmail(String email)
 	{
 		this.email = email;
+		return this;
 	}
 
 	public String getName()
@@ -58,9 +59,10 @@ public class Users extends Model
 		return name;
 	}
 
-	public void setName(String name)
+	public Users setName(String name)
 	{
 		this.name = name;
+		return this;
 	}
 
 	public String getAvatarUrl()
@@ -68,9 +70,10 @@ public class Users extends Model
 		return avatarUrl;
 	}
 
-	public void setAvatarUrl(String avatarUrl)
+	public Users setAvatarUrl(String avatarUrl)
 	{
 		this.avatarUrl = avatarUrl;
+		return this;
 	}
 
 	public String getPasswordHash()
@@ -78,9 +81,10 @@ public class Users extends Model
 		return passwordHash;
 	}
 
-	public void setPasswordHash(String passwordHash)
+	public Users setPasswordHash(String passwordHash)
 	{
 		this.passwordHash = passwordHash;
+		return this;
 	}
 
 	public String getPasswordSalt()
@@ -88,9 +92,10 @@ public class Users extends Model
 		return passwordSalt;
 	}
 
-	public void setPasswordSalt(String passwordSalt)
+	public Users setPasswordSalt(String passwordSalt)
 	{
 		this.passwordSalt = passwordSalt;
+		return this;
 	}
 
 	public boolean isConfirmed()
@@ -98,9 +103,10 @@ public class Users extends Model
 		return confirmed;
 	}
 
-	public void setConfirmed(boolean confirmed)
+	public Users setConfirmed(boolean confirmed)
 	{
 		this.confirmed = confirmed;
+		return this;
 	}
 
 	public String getConfirmationKeyHash()
@@ -108,9 +114,10 @@ public class Users extends Model
 		return confirmationKeyHash;
 	}
 
-	public void setConfirmationKeyHash(String confirmationKeyHash)
+	public Users setConfirmationKeyHash(String confirmationKeyHash)
 	{
 		this.confirmationKeyHash = confirmationKeyHash;
+		return this;
 	}
 
 	public long getConfirmationKeyExpirationDate()
@@ -118,9 +125,10 @@ public class Users extends Model
 		return confirmationKeyExpirationDate;
 	}
 
-	public void setConfirmationKeyExpirationDate(long confirmationKeyExpirationDate)
+	public Users setConfirmationKeyExpirationDate(long confirmationKeyExpirationDate)
 	{
 		this.confirmationKeyExpirationDate = confirmationKeyExpirationDate;
+		return this;
 	}
 
 	public UUID getUserId()
@@ -128,9 +136,10 @@ public class Users extends Model
 		return userId;
 	}
 
-	public void setUserId(UUID userId)
+	public Users setUserId(UUID userId)
 	{
 		this.userId = userId;
+		return this;
 	}
 
 	public long getFacebookId()
@@ -138,9 +147,10 @@ public class Users extends Model
 		return facebookId;
 	}
 
-	public void setFacebookId(long facebookId)
+	public Users setFacebookId(long facebookId)
 	{
 		this.facebookId = facebookId;
+		return this;
 	}
 
 	public long getTwitterId()
@@ -148,8 +158,9 @@ public class Users extends Model
 		return twitterId;
 	}
 
-	public void setTwitterId(long twitterId)
+	public Users setTwitterId(long twitterId)
 	{
 		this.twitterId = twitterId;
+		return this;
 	}
 }

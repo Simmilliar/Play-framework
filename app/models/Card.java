@@ -31,9 +31,10 @@ public class Card extends Model
 		return id;
 	}
 
-	public void setId(UUID id)
+	public Card setId(UUID id)
 	{
 		this.id = id;
+		return this;
 	}
 
 	public Users getOwner()
@@ -41,9 +42,10 @@ public class Card extends Model
 		return owner;
 	}
 
-	public void setOwner(Users owner)
+	public Card setOwner(Users owner)
 	{
 		this.owner = owner;
+		return this;
 	}
 
 	public String getTitle()
@@ -51,9 +53,10 @@ public class Card extends Model
 		return title;
 	}
 
-	public void setTitle(String title)
+	public Card setTitle(String title)
 	{
 		this.title = title;
+		return this;
 	}
 
 	public String getContent()
@@ -61,9 +64,10 @@ public class Card extends Model
 		return content;
 	}
 
-	public void setContent(String content)
+	public Card setContent(String content)
 	{
 		this.content = content;
+		return this;
 	}
 
 	public List<String> getImages()
@@ -71,8 +75,9 @@ public class Card extends Model
 		return images;
 	}
 
-	public void setImages(List<String> images)
+	public Card setImages(List<String> images)
 	{
 		this.images = images;
+		return this;
 	}
 }
