@@ -26,9 +26,10 @@ public class News extends Model
 		return id;
 	}
 
-	public void setId(UUID id)
+	public News setId(UUID id)
 	{
 		this.id = id;
+		return this;
 	}
 
 	public String getUrl()
@@ -36,9 +37,10 @@ public class News extends Model
 		return url;
 	}
 
-	public void setUrl(String url)
+	public News setUrl(String url)
 	{
 		this.url = url;
+		return this;
 	}
 
 	public String getImageUrl()
@@ -46,9 +48,10 @@ public class News extends Model
 		return imageUrl;
 	}
 
-	public void setImageUrl(String imageUrl)
+	public News setImageUrl(String imageUrl)
 	{
 		this.imageUrl = imageUrl;
+		return this;
 	}
 
 	public String getTitle()
@@ -56,9 +59,10 @@ public class News extends Model
 		return title;
 	}
 
-	public void setTitle(String title)
+	public News setTitle(String title)
 	{
 		this.title = title;
+		return this;
 	}
 
 	public String getDescription()
@@ -66,8 +70,9 @@ public class News extends Model
 		return description;
 	}
 
-	public void setDescription(String description)
+	public News setDescription(String description)
 	{
 		this.description = description;
+		return this;
 	}
 }

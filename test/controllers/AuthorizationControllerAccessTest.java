@@ -20,16 +20,13 @@ import static play.test.Helpers.*;
 
 public class AuthorizationControllerAccessTest extends WithApplication {
 
-	private SessionRepository mockSessionRepository;
-	private Session mockSession;
-	private UsersRepository mockUsersRepository;
 	private SessionsManager mockSessionsManager;
 
 	@Override
 	protected Application provideApplication() {
-		mockSessionRepository = mock(SessionRepository.class);
-		mockSession = mock(Session.class);
-		mockUsersRepository = mock(UsersRepository.class);
+		SessionRepository mockSessionRepository = mock(SessionRepository.class);
+		Session mockSession = mock(Session.class);
+		UsersRepository mockUsersRepository = mock(UsersRepository.class);
 		mockSessionsManager = mock(SessionsManager.class);
 
 		when(mockSession.getUser()).thenReturn(new Users());

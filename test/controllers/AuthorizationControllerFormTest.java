@@ -23,12 +23,11 @@ import static play.test.Helpers.*;
 
 public class AuthorizationControllerFormTest extends WithApplication {
 
-	private SessionsManager mockSessionsManager;
 	private UsersRepository mockUsersRepository;
 
 	@Override
 	protected Application provideApplication() {
-		mockSessionsManager = mock(SessionsManager.class);
+		SessionsManager mockSessionsManager = mock(SessionsManager.class);
 		mockUsersRepository = mock(UsersRepository.class);
 
 		return new GuiceApplicationBuilder()

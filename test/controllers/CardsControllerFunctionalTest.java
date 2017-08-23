@@ -32,9 +32,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 
 	private CardRepository mockCardRepository;
 	private FileUploader mockFileUploader;
-	private SessionRepository mockSessionRepository;
 
-	private Session mockMySession;
 	private Users mockMyUser;
 
 	@Override
@@ -46,11 +44,11 @@ public class CardsControllerFunctionalTest extends WithApplication {
 		mockMyUser = mock(Users.class);
 		when(mockMyUser.getUserId()).thenReturn(UUID.randomUUID());
 
-		mockMySession = mock(Session.class);
+		Session mockMySession = mock(Session.class);
 		when(mockMySession.getExpirationDate()).thenReturn(System.currentTimeMillis() + 1000000L);
 		when(mockMySession.getUser()).thenReturn(mockMyUser);
 
-		mockSessionRepository = mock(SessionRepository.class);
+		SessionRepository mockSessionRepository = mock(SessionRepository.class);
 		when(mockSessionRepository.findByToken("my_token")).thenReturn(mockMySession);
 
 		mockCardRepository = mock(CardRepository.class);
