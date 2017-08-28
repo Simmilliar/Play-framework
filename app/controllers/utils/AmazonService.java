@@ -5,6 +5,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.typesafe.config.ConfigFactory;
 
+// todo move all files that ends with "Service" to services package, or rename them with "Util"
+// todo fix it, make it singletone at least, with getInstance() method
 public class AmazonService
 {
 	public static AmazonS3 amazonS3 = new AmazonS3Client(

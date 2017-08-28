@@ -34,7 +34,7 @@ public class S3File extends Model
 
 	public String getUrl()
 	{
-		return "https://s3.eu-central-1.amazonaws.com/" + bucket + "/" + id;
+		return "https://s3.eu-central-1.amazonaws.com/" + bucket + "/" + id; // todo move it to configs
 	}
 
 	@Override
