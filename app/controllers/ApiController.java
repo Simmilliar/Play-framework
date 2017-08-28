@@ -48,7 +48,7 @@ public class ApiController extends Controller
 		Multimap<String, String> errors = ArrayListMultimap.create();
 		Users foundedUser = null;
 
-		if (!email.matches(Utils.REGEX_EMAIL))
+		if (utils.isEmailValid(email))
 		{
 			errors.put("email", "Invalid e-mail address.");
 		}
@@ -136,7 +136,7 @@ public class ApiController extends Controller
 		}
 		else
 		{
-			if (!newName.isEmpty() && !newName.matches(Utils.REGEX_NAME))
+			if (!newName.isEmpty() && !utils.isNameValid(newName))
 			{
 				errors.put("name", "Invalid name.");
 			}

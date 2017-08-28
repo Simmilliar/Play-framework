@@ -48,7 +48,7 @@ public class ForgotPasswordController extends Controller {
 			return badRequest(views.html.forgotpassword.render(
 					forgotPasswordForm.withError("", "Missing fields.")));
 		}
-		if (!email.matches(Utils.REGEX_EMAIL)) {
+		if (!utils.isEmailValid(email)) {
 			return badRequest(views.html.forgotpassword.render(
 					forgotPasswordForm.withError("email", "Invalid e-mail address.")));
 		}

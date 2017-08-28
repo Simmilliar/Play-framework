@@ -56,11 +56,11 @@ public class RegistrationController extends Controller {
 			return badRequest(views.html.registration.render(
 					registrationForm.withError("", "Missing fields.")));
 		}
-		if (!name.matches(Utils.REGEX_NAME)) {
+		if (!utils.isNameValid(name)) {
 			return badRequest(views.html.registration.render(
 					registrationForm.withError("name", "Invalid name.")));
 		}
-		if (!email.matches(Utils.REGEX_EMAIL)) {
+		if (!utils.isEmailValid(email)) {
 			return badRequest(views.html.registration.render(
 					registrationForm.withError("email", "Invalid e-mail address.")));
 		}

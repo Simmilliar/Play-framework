@@ -52,7 +52,7 @@ public class AuthorizationController extends Controller
 		{
 			return badRequest(views.html.authorization.render(authorizationForm.withError("", "Missing fields.")));
 		}
-		if (!email.matches(Utils.REGEX_EMAIL))
+		if (!utils.isEmailValid(email))
 		{
 			return badRequest(views.html.authorization.render(authorizationForm.withError("email", "Invalid e-mail address.")));
 		}

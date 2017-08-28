@@ -43,7 +43,7 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 				.build();
 	}
 
-	// todo rename all tests
+	// solved todo rename all tests
 	@Test
 	public void redirect_authorized_user_to_home_page_on_authorization_page_request() {
 		Result result = route(app, fakeRequest()

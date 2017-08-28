@@ -68,7 +68,7 @@ public class ProfileEditorController extends Controller
 		}
 		Http.MultipartFormData.FilePart avatarFilePart =
 				request().body().asMultipartFormData().getFile("avatarFile");
-		if (!name.matches(Utils.REGEX_NAME))
+		if (!utils.isNameValid(name))
 		{
 			return badRequest(views.html.editprofile.render(profileEditorForm.withError("name", "Invalid name.")));
 		}

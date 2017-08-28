@@ -3,6 +3,7 @@ package controllers;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.CardRepository;
 import controllers.utils.FileUploader;
+import controllers.utils.Utils;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;
 import io.ebean.text.json.JsonWriteOptions;
@@ -21,21 +22,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static controllers.utils.Utils.REGEX_UUID;
-
 @With(AuthorizationCheckAction.class)
 public class CardsController extends Controller
 {
 	private final FormFactory formFactory;
 	private final CardRepository cardRepository;
 	private final FileUploader fileUploader;
+	private final Utils utils;
 
 	@Inject
-	public CardsController(FormFactory formFactory, CardRepository cardRepository, FileUploader fileUploader)
+	public CardsController(FormFactory formFactory, CardRepository cardRepository, FileUploader fileUploader,
+						   Utils utils)
 	{
 		this.formFactory = formFactory;
 		this.cardRepository = cardRepository;
 		this.fileUploader = fileUploader;
+		this.utils = utils;
 	}
 
 	public Result cards()
@@ -103,7 +105,7 @@ public class CardsController extends Controller
 
 	public Result deleteCard(String cardId)
 	{
-		if (cardId == null || !cardId.matches(REGEX_UUID)) { //solved todo move to uuid validation utils
+		if (cardId == null || !utils.isUUIDValid(cardId)) { //solved todo move to uuid validation utils
 			return badRequest("Wrong card UUID");
 		}
 		Card card = cardRepository.findCardById(UUID.fromString(cardId));
