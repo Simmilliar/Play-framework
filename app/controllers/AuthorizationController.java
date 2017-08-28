@@ -47,7 +47,7 @@ public class AuthorizationController extends Controller
 
 		Users user = null;
 
-		// solved todo return right after error, or collect errors into array
+		// todo remove else, it's not needed any more
 		//SECTION BEGIN: Checking
 		if (email == null || password == null)
 		{

@@ -5,7 +5,6 @@ import models.Card;
 
 import java.util.List;
 import java.util.UUID;
-// solved todo move repositories to repository package
 public class CardRepositoryImpl implements CardRepository
 {
 	@Override
