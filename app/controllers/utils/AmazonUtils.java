@@ -4,7 +4,6 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.typesafe.config.ConfigFactory;
-import play.Logger;
 
 import javax.inject.Singleton;
 
@@ -13,15 +12,24 @@ import javax.inject.Singleton;
 @Singleton
 public class AmazonUtils
 {
-	public final AmazonS3 amazonS3 = new AmazonS3Client(
-			new BasicAWSCredentials(
-					ConfigFactory.load().getString("AWS_ACCESS_KEY"),
-					ConfigFactory.load().getString("AWS_SECRET_KEY")
-			)
-	);
-	public final String s3Bucket = ConfigFactory.load().getString("AWS_S3_BUCKET");
+	private final AmazonS3 amazonS3;
+	private final String s3Bucket;
 
 	public AmazonUtils() {
-		Logger.debug("Amazon utils created");
+		amazonS3 = new AmazonS3Client(
+				new BasicAWSCredentials(
+						ConfigFactory.load().getString("AWS_ACCESS_KEY"),
+						ConfigFactory.load().getString("AWS_SECRET_KEY")
+				)
+		);
+		s3Bucket = ConfigFactory.load().getString("AWS_S3_BUCKET");
+	}
+
+	public AmazonS3 getAmazonS3() {
+		return amazonS3;
+	}
+
+	public String getS3Bucket() {
+		return s3Bucket;
 	}
 }

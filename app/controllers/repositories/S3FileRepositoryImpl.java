@@ -20,32 +20,32 @@ public class S3FileRepositoryImpl implements S3FileRepository
 	@Override
 	public void saveFile(S3File file)
 	{
-		if (amazonUtils.amazonS3 == null)
+		if (amazonUtils.getAmazonS3() == null)
 		{
 			Logger.error("Could not save because amazonS3 was null");
 			throw new RuntimeException("Could not save");
 		}
 		else
 		{
-			file.setBucket(amazonUtils.s3Bucket);
+			file.setBucket(amazonUtils.getS3Bucket());
 			file.save();
 			PutObjectRequest putObjectRequest =
-					new PutObjectRequest(amazonUtils.s3Bucket, file.getId().toString(), file.getFile());
+					new PutObjectRequest(amazonUtils.getS3Bucket(), file.getId().toString(), file.getFile());
 			putObjectRequest.withCannedAcl(CannedAccessControlList.PublicRead);
-			amazonUtils.amazonS3.putObject(putObjectRequest);
+			amazonUtils.getAmazonS3().putObject(putObjectRequest);
 		}
 	}
 
 	@Override
 	public boolean deleteFile(S3File file) {
-		if (amazonUtils.amazonS3 == null)
+		if (amazonUtils.getAmazonS3() == null)
 		{
 			Logger.error("Could not delete because amazonS3 was null");
 			return false;
 		}
 		else
 		{
-			amazonUtils.amazonS3.deleteObject(amazonUtils.s3Bucket, file.getId().toString());
+			amazonUtils.getAmazonS3().deleteObject(amazonUtils.getS3Bucket(), file.getId().toString());
 			file.delete();
 			return true;
 		}
