@@ -66,35 +66,29 @@ public class ProfileEditorController extends Controller
 		{
 			return badRequest(views.html.editprofile.render(profileEditorForm.withError("", "Missing fields.")));
 		}
-		else
+		Http.MultipartFormData.FilePart avatarFilePart =
+				request().body().asMultipartFormData().getFile("avatarFile");
+		if (!name.matches(Utils.REGEX_NAME))
 		{
-			Http.MultipartFormData.FilePart avatarFilePart =
-					request().body().asMultipartFormData().getFile("avatarFile");
-			if (!name.matches(Utils.REGEX_NAME))
-			{
-				return badRequest(views.html.editprofile.render(profileEditorForm.withError("name", "Invalid name.")));
-			}
-			else if (password.length() > 0 && password.length() < 8)
+			return badRequest(views.html.editprofile.render(profileEditorForm.withError("name", "Invalid name.")));
+		}
+		if (password.length() > 0 && password.length() < 8)
+		{
+			return badRequest(views.html.editprofile.render(
+					profileEditorForm.withError("password", "Password must be at least 8 symbols long.")));
+		}
+		if (!passwordConfirm.equals(password))
+		{
+			return badRequest(views.html.editprofile.render(
+					profileEditorForm.withError("passwordConfirm", "Passwords does not match.")));
+		}
+		if (((File)avatarFilePart.getFile()).length() > 0)
+		{
+			avatarUrl = fileUploader.uploadImageAndCropSquared((File)avatarFilePart.getFile(), 200);
+			if (avatarUrl == null)
 			{
 				return badRequest(views.html.editprofile.render(
-						profileEditorForm.withError("password", "Password must be at least 8 symbols long.")));
-			}
-			else if (!passwordConfirm.equals(password))
-			{
-				return badRequest(views.html.editprofile.render(
-						profileEditorForm.withError("passwordConfirm", "Passwords does not match.")));
-			}
-			else
-			{
-				if (((File)avatarFilePart.getFile()).length() > 0)
-				{
-					avatarUrl = fileUploader.uploadImageAndCropSquared((File)avatarFilePart.getFile(), 200);
-					if (avatarUrl == null)
-					{
-						return badRequest(views.html.editprofile.render(
-								profileEditorForm.withError("avatarFile", "Unable to read file as image.")));
-					}
-				}
+						profileEditorForm.withError("avatarFile", "Unable to read file as image.")));
 			}
 		}
 		//SECTION END: Checking

@@ -2,6 +2,7 @@ package models;
 
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.typesafe.config.ConfigFactory;
 import controllers.utils.AmazonService;
 import io.ebean.Model;
 import play.Logger;
@@ -34,7 +35,7 @@ public class S3File extends Model
 
 	public String getUrl()
 	{
-		return "https://s3.eu-central-1.amazonaws.com/" + bucket + "/" + id; // todo move it to configs
+		return "https://" + ConfigFactory.load().getString("s3-server-domain") + "/" + bucket + "/" + id; // solved todo move it to configs
 	}
 
 	@Override

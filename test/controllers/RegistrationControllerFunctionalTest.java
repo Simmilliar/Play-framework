@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static controllers.utils.Utils.REGEX_UUID;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static play.inject.Bindings.bind;
@@ -83,7 +84,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 		verify(mockMailerService, times(1)).sendEmail(eq("valid@email.com"),
 				eq("Registration confirmation."), mailCaptor.capture());
 		assertTrue(mailCaptor.getValue().contains("To complete your registration you need to confirm your e-mail address by following this link:"));
-		Matcher mailMatcher = Pattern.compile("([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})")
+		Matcher mailMatcher = Pattern.compile(REGEX_UUID)
 				.matcher(mailCaptor.getValue());
 		assertTrue(mailMatcher.find());
 		Logger.debug(mailCaptor.getValue());
@@ -118,7 +119,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 		verify(mockMailerService, times(1)).sendEmail(eq("not-confirmed@email.com"),
 				eq("Registration confirmation."), mailCaptor.capture());
 		assertTrue(mailCaptor.getValue().contains("To complete your registration you need to confirm your e-mail address by following this link:"));
-		Matcher mailMatcher = Pattern.compile("([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})")
+		Matcher mailMatcher = Pattern.compile(REGEX_UUID)
 				.matcher(mailCaptor.getValue());
 		assertTrue(mailMatcher.find());
 		Logger.debug(mailCaptor.getValue());

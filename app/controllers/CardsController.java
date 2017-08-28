@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static controllers.utils.Utils.REGEX_UUID;
+
 @With(AuthorizationCheckAction.class)
 public class CardsController extends Controller
 {
@@ -101,7 +103,7 @@ public class CardsController extends Controller
 
 	public Result deleteCard(String cardId)
 	{
-		if (cardId == null || !cardId.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")) { //todo move to uuid validation utils
+		if (cardId == null || !cardId.matches(REGEX_UUID)) { //solved todo move to uuid validation utils
 			return badRequest("Wrong card UUID");
 		}
 		Card card = cardRepository.findCardById(UUID.fromString(cardId));

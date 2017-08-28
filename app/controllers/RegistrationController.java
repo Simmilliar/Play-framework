@@ -20,8 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @With(AuthorizationCheckAction.class)
-public class RegistrationController extends Controller
-{
+public class RegistrationController extends Controller {
 	private final FormFactory formFactory;
 	private final MailerService mailerService;
 	private final Utils utils;
@@ -30,8 +29,7 @@ public class RegistrationController extends Controller
 
 	@Inject
 	public RegistrationController(FormFactory formFactory, MailerService mailerService, Utils utils,
-								  SessionsManager sessionsManager, UsersRepository usersRepository)
-	{
+								  SessionsManager sessionsManager, UsersRepository usersRepository) {
 		this.formFactory = formFactory;
 		this.mailerService = mailerService;
 		this.utils = utils;
@@ -39,13 +37,11 @@ public class RegistrationController extends Controller
 		this.usersRepository = usersRepository;
 	}
 
-	public Result registration()
-	{
+	public Result registration() {
 		return ok(views.html.registration.render(formFactory.form()));
 	}
 
-	public Result register()
-	{
+	public Result register() {
 		DynamicForm registrationForm = formFactory.form().bindFromRequest();
 
 		String name = registrationForm.get("name");
@@ -56,47 +52,35 @@ public class RegistrationController extends Controller
 		Users user = null;
 
 		//SECTION BEGIN: Checking
-		if (name == null || email == null || password == null || passwordConfirm == null)
-		{
+		if (name == null || email == null || password == null || passwordConfirm == null) {
 			return badRequest(views.html.registration.render(
 					registrationForm.withError("", "Missing fields.")));
 		}
-		else
-		{
-			if (!name.matches(Utils.REGEX_NAME))
-			{
-				return badRequest(views.html.registration.render(
-						registrationForm.withError("name", "Invalid name.")));
-			}
-			else if (!email.matches(Utils.REGEX_EMAIL))
-			{
-				return badRequest(views.html.registration.render(
-						registrationForm.withError("email", "Invalid e-mail address.")));
-			}
-			else if (password.length() < 8)
-			{
-				return badRequest(views.html.registration.render(
-						registrationForm.withError("password", "Password must be at least 8 symbols long.")));
-			}
-			else if (!password.equals(passwordConfirm))
-			{
-				return badRequest(views.html.registration.render(
-						registrationForm.withError("passwordConfirm", "Passwords does not match.")));
-			}
-			else
-			{
-				user = usersRepository.findByEmail(email);
-				if (user != null && user.isConfirmed())
-				{
-					return badRequest(views.html.registration.render(
-							registrationForm.withError("email", "This e-mail is already registered.")));
-				}
-			}
+		if (!name.matches(Utils.REGEX_NAME)) {
+			return badRequest(views.html.registration.render(
+					registrationForm.withError("name", "Invalid name.")));
+		}
+		if (!email.matches(Utils.REGEX_EMAIL)) {
+			return badRequest(views.html.registration.render(
+					registrationForm.withError("email", "Invalid e-mail address.")));
+		}
+		if (password.length() < 8) {
+			return badRequest(views.html.registration.render(
+					registrationForm.withError("password", "Password must be at least 8 symbols long.")));
+		}
+		if (!password.equals(passwordConfirm)) {
+			return badRequest(views.html.registration.render(
+					registrationForm.withError("passwordConfirm", "Passwords does not match.")));
+		}
+
+		user = usersRepository.findByEmail(email);
+		if (user != null && user.isConfirmed()) {
+			return badRequest(views.html.registration.render(
+					registrationForm.withError("email", "This e-mail is already registered.")));
 		}
 		//SECTION END: Checking
 
-		if (user == null)
-		{
+		if (user == null) {
 			user = new Users();
 		}
 		user.setName(name);
@@ -113,15 +97,12 @@ public class RegistrationController extends Controller
 		user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
 		user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
 
-		try
-		{
+		try {
 			String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION,
 					routes.RegistrationController.confirmEmail(confirmationKey).absoluteURL(request()));
 			mailerService.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
 			flash().put("notification", "We'll send you an e-mail to confirm your registration.");
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			return internalServerError(views.html.registration.render(registrationForm.withError("email", "Unable to send confirmation email.")));
 		}
 
@@ -130,11 +111,9 @@ public class RegistrationController extends Controller
 		return redirect(routes.HomeController.index());
 	}
 
-	public Result confirmEmail(String key)
-	{
+	public Result confirmEmail(String key) {
 		Users user = usersRepository.findUnconfirmedByConfirmationKey(key);
-		if (user != null)
-		{
+		if (user != null) {
 			user.setConfirmed(true);
 			user.setConfirmationKeyHash("");
 			user.setConfirmationKeyExpirationDate(System.currentTimeMillis());

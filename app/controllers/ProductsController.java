@@ -6,13 +6,11 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.ProductRepository;
-import controllers.repositories.S3FileRepository;
-import controllers.utils.ImageMagickService;
+import controllers.utils.FileUploader;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;
 import io.ebean.text.json.JsonWriteOptions;
 import models.Product;
-import models.S3File;
 import models.Users;
 import play.Logger;
 import play.data.DynamicForm;
@@ -32,17 +30,14 @@ public class ProductsController extends Controller
 	private final FormFactory formFactory;
 	private final Config configFactory = ConfigFactory.load();
 	private final ProductRepository productRepository;
-	private final ImageMagickService imageMagickService;
-	private final S3FileRepository s3FileRepository;
+	private final FileUploader fileUploader;
 
 	@Inject
-	public ProductsController(FormFactory formFactory, ProductRepository productRepository,
-							  ImageMagickService imageMagickService, S3FileRepository s3FileRepository)
+	public ProductsController(FormFactory formFactory, ProductRepository productRepository, FileUploader fileUploader)
 	{
 		this.formFactory = formFactory;
 		this.productRepository = productRepository;
-		this.imageMagickService = imageMagickService;
-		this.s3FileRepository = s3FileRepository;
+		this.fileUploader = fileUploader;
 	}
 
 	public Result products()
@@ -80,7 +75,7 @@ public class ProductsController extends Controller
 		{
 			return badRequest("Missing fields");
 		}
-		else if (priceString.equals("") || !priceString.matches("([0-9]+)|([0-9]+\\.[0-9]{2})|([0-9]+,[0-9]{2})"))
+		if (priceString.equals("") || !priceString.matches("([0-9]+)|([0-9]+\\.[0-9]{2})|([0-9]+,[0-9]{2})"))
 		{
 			return badRequest("Provide a valid price.");
 		}
@@ -97,16 +92,12 @@ public class ProductsController extends Controller
 			{
 				if (filePart != null && ((File)filePart.getFile()).length() > 0)
 				{
-					if (!imageMagickService.shrinkImage(((File) filePart.getFile()).getAbsolutePath(), 1024))
+					String imageUrl = fileUploader.uploadImageAndShrink((File) filePart.getFile(), 1024);
+					if (imageUrl == null)
 					{
 						return badRequest("Unable to read file as image.");
 					}
-
-					S3File s3File = new S3File();
-					s3File.file = (File) filePart.getFile();
-					s3FileRepository.saveFile(s3File);
-
-					imagesUrls.add(s3File.getUrl());
+					imagesUrls.add(imageUrl);
 				}
 			}
 

@@ -47,17 +47,15 @@ public class ForgotPasswordController extends Controller {
 		if (email == null) {
 			return badRequest(views.html.forgotpassword.render(
 					forgotPasswordForm.withError("", "Missing fields.")));
-		} else {
-			if (!email.matches(Utils.REGEX_EMAIL)) {
-				return badRequest(views.html.forgotpassword.render(
-						forgotPasswordForm.withError("email", "Invalid e-mail address.")));
-			} else {
-				user = usersRepository.findByEmail(email);
-				if (user == null || !user.isConfirmed()) {
-					return badRequest(views.html.forgotpassword.render(
-							forgotPasswordForm.withError("email", "Unregistered user.")));
-				}
-			}
+		}
+		if (!email.matches(Utils.REGEX_EMAIL)) {
+			return badRequest(views.html.forgotpassword.render(
+					forgotPasswordForm.withError("email", "Invalid e-mail address.")));
+		}
+		user = usersRepository.findByEmail(email);
+		if (user == null || !user.isConfirmed()) {
+			return badRequest(views.html.forgotpassword.render(
+					forgotPasswordForm.withError("email", "Unregistered user.")));
 		}
 		//SECTION END: Checking
 
@@ -101,14 +99,14 @@ public class ForgotPasswordController extends Controller {
 			if (password == null || passwordConfirm == null) {
 				return badRequest(views.html.changepassword.render(
 						changePasswordForm.withError("", "Missing fields."), key));
-			} else {
-				if (password.length() < 8) {
-					return badRequest(views.html.changepassword.render(changePasswordForm.withError("password",
-							"Password must be at least 8 symbols long."), key));
-				} else if (!passwordConfirm.equals(password)) {
-					return badRequest(views.html.changepassword.render(changePasswordForm.withError("password",
-							"Passwords does not match."), key));
-				}
+			}
+			if (password.length() < 8) {
+				return badRequest(views.html.changepassword.render(changePasswordForm.withError("password",
+						"Password must be at least 8 symbols long."), key));
+			}
+			if (!passwordConfirm.equals(password)) {
+				return badRequest(views.html.changepassword.render(changePasswordForm.withError("password",
+						"Passwords does not match."), key));
 			}
 			//SECTION END: Checking
 

@@ -47,31 +47,25 @@ public class AuthorizationController extends Controller
 
 		Users user = null;
 
-		// todo remove else, it's not needed any more
+		// solved todo remove else, it's not needed any more
 		//SECTION BEGIN: Checking
 		if (email == null || password == null)
 		{
 			return badRequest(views.html.authorization.render(authorizationForm.withError("", "Missing fields.")));
 		}
-		else if (!email.matches(Utils.REGEX_EMAIL))
+		if (!email.matches(Utils.REGEX_EMAIL))
 		{
 			return badRequest(views.html.authorization.render(authorizationForm.withError("email", "Invalid e-mail address.")));
 		}
-		else
+		user = usersRepository.findByEmail(email);
+		if (user == null || !user.isConfirmed())
 		{
-			user = usersRepository.findByEmail(email);
-			if (user == null || !user.isConfirmed())
-			{
-				return badRequest(views.html.authorization.render(authorizationForm.withError("email", "Unregistered user.")));
-			}
-			else
-			{
-				String hash = utils.hashString(password, user.getPasswordSalt());
-				if (!user.getPasswordHash().equals(hash))
-				{
-					return badRequest(views.html.authorization.render(authorizationForm.withError("password", "Wrong password.")));
-				}
-			}
+			return badRequest(views.html.authorization.render(authorizationForm.withError("email", "Unregistered user.")));
+		}
+		String hash = utils.hashString(password, user.getPasswordSalt());
+		if (!user.getPasswordHash().equals(hash))
+		{
+			return badRequest(views.html.authorization.render(authorizationForm.withError("password", "Wrong password.")));
 		}
 		//SECTION END: Checking
 
