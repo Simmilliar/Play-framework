@@ -7,8 +7,7 @@ import com.typesafe.config.ConfigFactory;
 
 import javax.inject.Singleton;
 
-// solved todo move all files that ends with "Service" to services package, or rename them with "Util"
-// solved todo fix it, make it singletone at least, with getInstance() method
+// looks fantastico
 @Singleton
 public class AmazonUtils
 {
