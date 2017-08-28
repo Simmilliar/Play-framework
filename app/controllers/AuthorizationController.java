@@ -47,7 +47,6 @@ public class AuthorizationController extends Controller
 
 		Users user = null;
 
-		// solved todo remove else, it's not needed any more
 		//SECTION BEGIN: Checking
 		if (email == null || password == null)
 		{
