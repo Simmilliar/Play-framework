@@ -1,5 +1,7 @@
 package controllers;
 
+import controllers.repositories.SessionRepository;
+import controllers.repositories.UsersRepository;
 import controllers.utils.FileUploader;
 import models.Session;
 import models.Users;

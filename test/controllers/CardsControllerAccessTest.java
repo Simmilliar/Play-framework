@@ -1,5 +1,8 @@
 package controllers;
 
+import controllers.repositories.CardRepository;
+import controllers.repositories.S3FileRepository;
+import controllers.repositories.SessionRepository;
 import controllers.utils.ImageMagickService;
 import models.Session;
 import models.Users;

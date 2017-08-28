@@ -2,6 +2,8 @@ package controllers;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import controllers.repositories.SessionRepository;
+import controllers.repositories.UsersRepository;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import io.ebean.Ebean;

@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
+import controllers.repositories.UsersRepository;
 import models.Users;
 import play.mvc.Controller;
 import play.mvc.Result;

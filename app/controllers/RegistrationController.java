@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
+import controllers.repositories.UsersRepository;
 import controllers.utils.MailerService;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;

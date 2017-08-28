@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
+import controllers.repositories.NewsRepository;
 import io.ebean.Ebean;
 import play.mvc.Controller;
 import play.mvc.Result;

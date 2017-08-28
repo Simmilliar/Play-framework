@@ -1,4 +1,4 @@
-package controllers;
+package controllers.repositories;
 
 import com.google.inject.ImplementedBy;
 import models.Product;

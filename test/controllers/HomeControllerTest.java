@@ -1,5 +1,7 @@
 package controllers;
 
+import controllers.repositories.SessionRepository;
+import controllers.repositories.UsersRepository;
 import models.Session;
 import models.Users;
 import org.junit.Test;

@@ -3,6 +3,8 @@ package controllers;
 import akka.stream.javadsl.FileIO;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
+import controllers.repositories.SessionRepository;
+import controllers.repositories.UsersRepository;
 import controllers.utils.FileUploader;
 import models.Session;
 import models.Users;

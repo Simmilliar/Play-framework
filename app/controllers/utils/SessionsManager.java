@@ -1,7 +1,7 @@
 package controllers.utils;
 
-import controllers.SessionRepository;
-import controllers.UsersRepository;
+import controllers.repositories.SessionRepository;
+import controllers.repositories.UsersRepository;
 import models.Session;
 
 import javax.inject.Inject;

@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.repositories.UsersRepository;
 import controllers.utils.SessionsManager;
 import controllers.utils.Utils;
 import models.Users;

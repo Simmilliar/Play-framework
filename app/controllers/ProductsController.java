@@ -5,6 +5,8 @@ import com.stripe.model.Charge;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import controllers.actions.AuthorizationCheckAction;
+import controllers.repositories.ProductRepository;
+import controllers.repositories.S3FileRepository;
 import controllers.utils.ImageMagickService;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;

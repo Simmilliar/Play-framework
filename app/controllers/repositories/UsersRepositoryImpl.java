@@ -1,4 +1,4 @@
-package controllers;
+package controllers.repositories;
 
 import controllers.utils.Utils;
 import io.ebean.Ebean;

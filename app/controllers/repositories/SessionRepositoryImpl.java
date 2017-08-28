@@ -1,4 +1,4 @@
-package controllers;
+package controllers.repositories;
 
 import io.ebean.Ebean;
 import models.Session;

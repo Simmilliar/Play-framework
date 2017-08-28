@@ -1,11 +1,11 @@
-package controllers;
+package controllers.repositories;
 
 import io.ebean.Ebean;
 import models.Card;
 
 import java.util.List;
 import java.util.UUID;
-// todo move repositories to repository package
+// solved todo move repositories to repository package
 public class CardRepositoryImpl implements CardRepository
 {
 	@Override

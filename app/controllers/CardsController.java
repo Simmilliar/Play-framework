@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
+import controllers.repositories.CardRepository;
 import controllers.utils.FileUploader;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;

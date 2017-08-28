@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import controllers.actions.AuthorizationCheckAction;
+import controllers.repositories.UsersRepository;
 import controllers.utils.SessionsManager;
 import models.Users;
 import play.libs.concurrent.HttpExecutionContext;

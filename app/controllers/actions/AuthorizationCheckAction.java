@@ -1,6 +1,6 @@
 package controllers.actions;
 
-import controllers.SessionRepository;
+import controllers.repositories.SessionRepository;
 import controllers.routes;
 import models.Session;
 import models.Users;

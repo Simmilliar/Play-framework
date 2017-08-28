@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
+import controllers.repositories.UsersRepository;
 import controllers.utils.FileUploader;
 import controllers.utils.Utils;
 import models.Users;

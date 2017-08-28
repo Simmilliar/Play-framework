@@ -1,4 +1,4 @@
-package controllers;
+package controllers.repositories;
 
 import models.S3File;
 

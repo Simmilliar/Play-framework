@@ -1,6 +1,6 @@
 package controllers.utils;
 
-import controllers.S3FileRepository;
+import controllers.repositories.S3FileRepository;
 import models.S3File;
 
 import javax.inject.Inject;
