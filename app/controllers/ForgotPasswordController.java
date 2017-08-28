@@ -16,8 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @With(AuthorizationCheckAction.class)
-public class ForgotPasswordController extends Controller
-{
+public class ForgotPasswordController extends Controller {
 	private final FormFactory formFactory;
 	private final MailerService mailerService;
 	private final Utils utils;
@@ -25,21 +24,18 @@ public class ForgotPasswordController extends Controller
 
 	@Inject
 	public ForgotPasswordController(FormFactory formFactory, MailerService mailerService, Utils utils,
-									UsersRepository usersRepository)
-	{
+									UsersRepository usersRepository) {
 		this.formFactory = formFactory;
 		this.mailerService = mailerService;
 		this.utils = utils;
 		this.usersRepository = usersRepository;
 	}
 
-	public Result forgotPassword()
-	{
+	public Result forgotPassword() {
 		return ok(views.html.forgotpassword.render(formFactory.form()));
 	}
 
-	public Result sendForgotMail()
-	{
+	public Result sendForgotMail() {
 		DynamicForm forgotPasswordForm = formFactory.form().bindFromRequest();
 
 		String email = forgotPasswordForm.get("email");
@@ -47,28 +43,20 @@ public class ForgotPasswordController extends Controller
 		Users user = null;
 
 		//SECTION BEGIN: Checking
-		if (email == null)
-		{
-			forgotPasswordForm = forgotPasswordForm.withError("", "Missing fields.");
-		}
-		else
-		{
-			if (!email.matches(Utils.REGEX_EMAIL))
-			{
-				forgotPasswordForm = forgotPasswordForm.withError("email", "Invalid e-mail address.");
-			}
-			else
-			{
+		if (email == null) {
+			return badRequest(views.html.forgotpassword.render(
+					forgotPasswordForm.withError("", "Missing fields.")));
+		} else {
+			if (!email.matches(Utils.REGEX_EMAIL)) {
+				return badRequest(views.html.forgotpassword.render(
+						forgotPasswordForm.withError("email", "Invalid e-mail address.")));
+			} else {
 				user = usersRepository.findByEmail(email);
-				if (user == null || !user.isConfirmed())
-				{
-					forgotPasswordForm = forgotPasswordForm.withError("email", "Unregistered user.");
+				if (user == null || !user.isConfirmed()) {
+					return badRequest(views.html.forgotpassword.render(
+							forgotPasswordForm.withError("email", "Unregistered user.")));
 				}
 			}
-		}
-		if (forgotPasswordForm.hasErrors())
-		{
-			return badRequest(views.html.forgotpassword.render(forgotPasswordForm));
 		}
 		//SECTION END: Checking
 
@@ -76,15 +64,12 @@ public class ForgotPasswordController extends Controller
 		user.setConfirmationKeyHash(utils.hashString(confirmationKey, confirmationKey));
 		user.setConfirmationKeyExpirationDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1));
 
-		try
-		{
+		try {
 			String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE,
 					routes.ForgotPasswordController.changingPassword(confirmationKey).absoluteURL(request()));
 			mailerService.sendEmail(email, "Change password.", confirmationBodyText);
 			flash().put("notification", "We'll sen you an e-mail to change your password.");
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			return internalServerError(views.html.forgotpassword.render(
 					forgotPasswordForm.withError("email", "Unable to send confirmation email.")));
 		}
@@ -94,48 +79,35 @@ public class ForgotPasswordController extends Controller
 		return redirect(routes.HomeController.index());
 	}
 
-	public Result changingPassword(String key)
-	{
-		if (usersRepository.findConfirmedByConfirmationKey(key) != null)
-		{
+	public Result changingPassword(String key) {
+		if (usersRepository.findConfirmedByConfirmationKey(key) != null) {
 			return ok(views.html.changepassword.render(formFactory.form(), key));
-		}
-		else
-		{
+		} else {
 			return redirect(routes.HomeController.index());
 		}
 	}
 
-	public Result changePassword(String key)
-	{
+	public Result changePassword(String key) {
 		Users user = usersRepository.findConfirmedByConfirmationKey(key);
 
-		if (user != null)
-		{
+		if (user != null) {
 			DynamicForm changePasswordForm = formFactory.form().bindFromRequest();
 
 			String password = changePasswordForm.get("password");
 			String passwordConfirm = changePasswordForm.get("passwordConfirm");
 
 			//SECTION BEGIN: Checking
-			if (password == null || passwordConfirm == null)
-			{
-				changePasswordForm = changePasswordForm.withError("", "Missing fields.");
-			}
-			else
-			{
-				if (password.length() < 8)
-				{
-					changePasswordForm = changePasswordForm.withError("password", "Password must be at least 8 symbols long.");
+			if (password == null || passwordConfirm == null) {
+				return badRequest(views.html.changepassword.render(
+						changePasswordForm.withError("", "Missing fields."), key));
+			} else {
+				if (password.length() < 8) {
+					return badRequest(views.html.changepassword.render(changePasswordForm.withError("password",
+							"Password must be at least 8 symbols long."), key));
+				} else if (!passwordConfirm.equals(password)) {
+					return badRequest(views.html.changepassword.render(changePasswordForm.withError("password",
+							"Passwords does not match."), key));
 				}
-				else if (!passwordConfirm.equals(password))
-				{
-					changePasswordForm = changePasswordForm.withError("password", "Passwords does not match.");
-				}
-			}
-			if (changePasswordForm.hasErrors())
-			{
-				return badRequest(views.html.changepassword.render(changePasswordForm, key));
 			}
 			//SECTION END: Checking
 
@@ -150,9 +122,7 @@ public class ForgotPasswordController extends Controller
 			flash().put("notification", "Password had been changed successfully.");
 
 			return redirect(routes.AuthorizationController.authorization());
-		}
-		else
-		{
+		} else {
 			return redirect(routes.HomeController.index());
 		}
 	}

@@ -63,7 +63,7 @@ public class ProfileEditorController extends Controller
 		if (name == null || password == null || passwordConfirm == null ||
 				request().body().asMultipartFormData().getFile("avatarFile") == null)
 		{
-			profileEditorForm = profileEditorForm.withError("", "Missing fields.");
+			return badRequest(views.html.editprofile.render(profileEditorForm.withError("", "Missing fields.")));
 		}
 		else
 		{
@@ -71,15 +71,17 @@ public class ProfileEditorController extends Controller
 					request().body().asMultipartFormData().getFile("avatarFile");
 			if (!name.matches(Utils.REGEX_NAME))
 			{
-				profileEditorForm = profileEditorForm.withError("name", "Invalid name.");
+				return badRequest(views.html.editprofile.render(profileEditorForm.withError("name", "Invalid name.")));
 			}
 			else if (password.length() > 0 && password.length() < 8)
 			{
-				profileEditorForm = profileEditorForm.withError("password", "Password must be at least 8 symbols long.");
+				return badRequest(views.html.editprofile.render(
+						profileEditorForm.withError("password", "Password must be at least 8 symbols long.")));
 			}
 			else if (!passwordConfirm.equals(password))
 			{
-				profileEditorForm = profileEditorForm.withError("passwordConfirm", "Passwords does not match.");
+				return badRequest(views.html.editprofile.render(
+						profileEditorForm.withError("passwordConfirm", "Passwords does not match.")));
 			}
 			else
 			{
@@ -88,14 +90,11 @@ public class ProfileEditorController extends Controller
 					avatarUrl = fileUploader.uploadImageAndCropSquared((File)avatarFilePart.getFile(), 200);
 					if (avatarUrl == null)
 					{
-						profileEditorForm = profileEditorForm.withError("avatarFile", "Unable to read file as image.");
+						return badRequest(views.html.editprofile.render(
+								profileEditorForm.withError("avatarFile", "Unable to read file as image.")));
 					}
 				}
 			}
-		}
-		if (profileEditorForm.hasErrors())
-		{
-			return badRequest(views.html.editprofile.render(profileEditorForm));
 		}
 		//SECTION END: Checking
 

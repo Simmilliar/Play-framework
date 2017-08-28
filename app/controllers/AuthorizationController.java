@@ -46,35 +46,31 @@ public class AuthorizationController extends Controller
 
 		Users user = null;
 
-		// todo return right after error, or collect errors into array
+		// solved todo return right after error, or collect errors into array
 		//SECTION BEGIN: Checking
 		if (email == null || password == null)
 		{
-			authorizationForm = authorizationForm.withError("", "Missing fields.");
+			return badRequest(views.html.authorization.render(authorizationForm.withError("", "Missing fields.")));
 		}
 		else if (!email.matches(Utils.REGEX_EMAIL))
 		{
-			authorizationForm = authorizationForm.withError("email", "Invalid e-mail address.");
+			return badRequest(views.html.authorization.render(authorizationForm.withError("email", "Invalid e-mail address.")));
 		}
 		else
 		{
 			user = usersRepository.findByEmail(email);
 			if (user == null || !user.isConfirmed())
 			{
-				authorizationForm = authorizationForm.withError("email", "Unregistered user.");
+				return badRequest(views.html.authorization.render(authorizationForm.withError("email", "Unregistered user.")));
 			}
 			else
 			{
 				String hash = utils.hashString(password, user.getPasswordSalt());
 				if (!user.getPasswordHash().equals(hash))
 				{
-					authorizationForm = authorizationForm.withError("password", "Wrong password.");
+					return badRequest(views.html.authorization.render(authorizationForm.withError("password", "Wrong password.")));
 				}
 			}
-		}
-		if (authorizationForm.hasErrors())
-		{
-			return badRequest(views.html.authorization.render(authorizationForm));
 		}
 		//SECTION END: Checking
 

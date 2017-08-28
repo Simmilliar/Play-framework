@@ -57,38 +57,40 @@ public class RegistrationController extends Controller
 		//SECTION BEGIN: Checking
 		if (name == null || email == null || password == null || passwordConfirm == null)
 		{
-			registrationForm = registrationForm.withError("", "Missing fields.");
+			return badRequest(views.html.registration.render(
+					registrationForm.withError("", "Missing fields.")));
 		}
 		else
 		{
 			if (!name.matches(Utils.REGEX_NAME))
 			{
-				registrationForm = registrationForm.withError("name", "Invalid name.");
+				return badRequest(views.html.registration.render(
+						registrationForm.withError("name", "Invalid name.")));
 			}
 			else if (!email.matches(Utils.REGEX_EMAIL))
 			{
-				registrationForm = registrationForm.withError("email", "Invalid e-mail address.");
+				return badRequest(views.html.registration.render(
+						registrationForm.withError("email", "Invalid e-mail address.")));
 			}
 			else if (password.length() < 8)
 			{
-				registrationForm = registrationForm.withError("password", "Password must be at least 8 symbols long.");
+				return badRequest(views.html.registration.render(
+						registrationForm.withError("password", "Password must be at least 8 symbols long.")));
 			}
 			else if (!password.equals(passwordConfirm))
 			{
-				registrationForm = registrationForm.withError("passwordConfirm", "Passwords does not match.");
+				return badRequest(views.html.registration.render(
+						registrationForm.withError("passwordConfirm", "Passwords does not match.")));
 			}
 			else
 			{
 				user = usersRepository.findByEmail(email);
 				if (user != null && user.isConfirmed())
 				{
-					registrationForm = registrationForm.withError("email", "This e-mail is already registered.");
+					return badRequest(views.html.registration.render(
+							registrationForm.withError("email", "This e-mail is already registered.")));
 				}
 			}
-		}
-		if (registrationForm.hasErrors())
-		{
-			return badRequest(views.html.registration.render(registrationForm));
 		}
 		//SECTION END: Checking
 
