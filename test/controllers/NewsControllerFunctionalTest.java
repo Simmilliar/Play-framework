@@ -45,7 +45,7 @@ public class NewsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void openPage() {
+	public void test_open_news_page() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -55,7 +55,7 @@ public class NewsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void loadNews() {
+	public void test_load_news() {
 		when(mockNewsRepository.getNews(0, 2)).thenReturn(Arrays.asList(
 				new News().setTitle("A").setDescription("a").setImageUrl("a").setUrl("a")
 						.setId(UUID.fromString("6bae2388-da35-4b88-91f4-76d9e836c45a")),

@@ -45,7 +45,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formValid() {
+	public void registration_success() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "valid@email.com");
@@ -60,7 +60,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formNameMissing() {
+	public void registration_failed_name_missing() {
 		Map<String, String> formData = new HashMap<>();
 		//formData.put("name", "");
 		formData.put("email", "valid@email.com");
@@ -76,7 +76,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formNameInvalid() {
+	public void registration_failed_name_invalid() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "!nval1d Name");
 		formData.put("email", "valid@email.com");
@@ -92,7 +92,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formEmailMissing() {
+	public void registration_failed_email_missing() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		//formData.put("email", "valid@email.com");
@@ -108,7 +108,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formEmailInvalid() {
+	public void registration_failed_email_invalid() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "invalid@email");
@@ -124,7 +124,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formEmailRegistered() {
+	public void registration_failed_email_already_registered() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "registered@email.com");
@@ -140,7 +140,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formEmailUnconfirmed() {
+	public void registration_success_email_registered_but_unconfirmed() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "not-confirmed@email.com");
@@ -155,7 +155,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordMissing() {
+	public void registration_failed_password_missing() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "valid@email.com");
@@ -171,7 +171,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordInvalid() {
+	public void registration_failed_password_short() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "valid@email.com");
@@ -187,7 +187,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordConfirmMissing() {
+	public void registration_failed_password_confirm_missing() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "valid@email.com");
@@ -203,7 +203,7 @@ public class RegistrationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordConfirmInvalid() {
+	public void registration_failed_password_confirm_not_match() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "valid@email.com");

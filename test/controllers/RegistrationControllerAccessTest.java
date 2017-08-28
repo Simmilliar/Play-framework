@@ -41,7 +41,7 @@ public class RegistrationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessRegistrationAuthorized() {
+	public void redirect_authorized_user_to_home_page_on_registration_page_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -50,7 +50,7 @@ public class RegistrationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessRegisterAuthorized() {
+	public void redirect_authorized_user_to_home_page_on_register_request() {
 		Result result = route(app, fakeRequest()
 				.method(POST)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -59,7 +59,7 @@ public class RegistrationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessConfirmEmailAuthorized() {
+	public void redirect_authorized_user_to_home_page_on_email_confirmation_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -69,7 +69,7 @@ public class RegistrationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessRegistrationUnauthorized() {
+	public void accept_unauthorized_user_on_registration_page_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.uri(routes.RegistrationController.registration().url()));
@@ -77,7 +77,7 @@ public class RegistrationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessRegisterUnauthorized() {
+	public void accept_unauthorized_user_on_register_request() {
 		Result result = route(app, fakeRequest()
 				.method(POST)
 				.uri(routes.RegistrationController.register().url()));
@@ -86,7 +86,7 @@ public class RegistrationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessConfirmEmailUnauthorized() {
+	public void accept_unauthorized_user_on_email_confirmation_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.uri(routes.RegistrationController.confirmEmail("").url()));

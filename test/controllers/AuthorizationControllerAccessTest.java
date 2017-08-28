@@ -45,7 +45,7 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 
 	// todo rename all tests
 	@Test
-	public void check_if_authorized_user_will_be_redirected() {
+	public void redirect_authorized_user_to_home_page_on_authorization_page_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -54,7 +54,7 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessAuthorizeAuthorized() {
+	public void redirect_authorized_user_to_home_page_on_authorizing_post_request() {
 		Result result = route(app, fakeRequest()
 				.method(POST)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -63,7 +63,7 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessLogoutAuthorized() {
+	public void accept_authorized_user_on_logout_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -73,7 +73,7 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessAuthorizationUnauthorized() {
+	public void accept_unauthorized_user_on_authorization_page_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.uri(routes.AuthorizationController.authorization().url()));
@@ -81,7 +81,7 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessAuthorizeUnauthorized() {
+	public void accept_unauthorized_user_on_authorizing_post_request() {
 		Result result = route(app, fakeRequest()
 				.method(POST)
 				.uri(routes.AuthorizationController.authorize().url()));
@@ -90,7 +90,7 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessLogoutUnauthorized() {
+	public void redirect_unauthorized_user_to_home_page_on_logout_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.uri(routes.AuthorizationController.logout().url()));

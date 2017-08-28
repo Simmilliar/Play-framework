@@ -58,7 +58,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void registerUnregistered() {
+	public void test_register_unregistered_email() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "valid@email.com");
@@ -94,7 +94,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void registerUnconfirmed() {
+	public void test_register_registered_but_unconfirmed_email() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "not-confirmed@email.com");
@@ -129,7 +129,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void emailFailure() {
+	public void test_on_email_sending_exception() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("name", "Valid Name");
 		formData.put("email", "valid@email.com");
@@ -146,7 +146,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void emailConfirmationValid() {
+	public void test_valid_email_confirmation_data() {
 		when(mockUsersRepository.findUnconfirmedByConfirmationKey("confirmation_key")).thenReturn(new Users());
 
 		Result result = route(app, fakeRequest()
@@ -165,7 +165,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void emailConfirmationInalid() {
+	public void test_invalid_email_confirmation_data() {
 		when(mockUsersRepository.findUnconfirmedByConfirmationKey("invalid_confirmation_key")).thenReturn(null);
 
 		Result result = route(app, fakeRequest()

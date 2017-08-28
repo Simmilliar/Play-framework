@@ -55,7 +55,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formValid() {
+	public void add_card_success() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -73,7 +73,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formTitleMissing() {
+	public void add_card_failed_missed_title() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
 				new Http.MultipartFormData.DataPart("content", "Lorem ipsum dolor sit amet");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> filePart = new Http.MultipartFormData.FilePart<>("key",
@@ -90,7 +90,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formTitleInvalid() {
+	public void add_card_failed_empty_title() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -109,7 +109,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formContentMissing() {
+	public void add_card_failed_missed_content() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> filePart = new Http.MultipartFormData.FilePart<>("key",
@@ -126,7 +126,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formContentInvalid() {
+	public void add_card_failed_empty_content() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -145,7 +145,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formFileToMany() {
+	public void add_card_failed_more_than_5_files() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -175,7 +175,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formFileToLarge() {
+	public void add_card_failed_too_large_files() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -193,7 +193,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formFileNotImage() {
+	public void add_card_failed_file_not_a_image() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -211,7 +211,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formCardIdNull() {
+	public void delete_card_failed_missed_id() {
 		Result result = route(app, fakeRequest()
 				.method(DELETE)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -221,7 +221,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formCardIdInvalid() {
+	public void delete_card_failed_invalid_id() {
 		Result result = route(app, fakeRequest()
 				.method(DELETE)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -231,7 +231,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formCardNotOwner() {
+	public void delete_card_failed_foreign_card() {
 		Card mockCard = mock(Card.class);
 		Users mockOtherUser = mock(Users.class);
 		when(mockOtherUser.getUserId()).thenReturn(UUID.randomUUID());
@@ -247,7 +247,7 @@ public class CardsControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formCardIdValid() {
+	public void delete_card_success() {
 		Card mockCard = mock(Card.class);
 		when(mockCard.getOwner()).thenReturn(mockUser);
 		when(mockCardRepository.findCardById(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))).thenReturn(mockCard);

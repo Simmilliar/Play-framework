@@ -38,7 +38,7 @@ public class NewsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessNewsAuthorized() {
+	public void accept_authorized_user_on_news_page_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -47,7 +47,7 @@ public class NewsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessLoadNewsAuthorized() {
+	public void accept_authorized_user_on_news_load_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -56,7 +56,7 @@ public class NewsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessNewsUnauthorized() {
+	public void redirect_unauthorized_user_to_home_page_on_news_page_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.uri(routes.NewsController.news().url()));
@@ -64,7 +64,7 @@ public class NewsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessLoadNewsUnauthorized() {
+	public void redirect_unauthorized_user_to_home_page_on_news_load_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.uri(routes.NewsController.loadNews(20, 0).url()));

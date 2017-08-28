@@ -63,7 +63,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void loadCards() {
+	public void cards_loading_test() {
 		when(mockCardRepository.findUsersCard(mockMyUser.getUserId())).thenReturn(
 				Arrays.asList(
 						new Card().setTitle("My card 1").setContent("1").setImages(Collections.emptyList())
@@ -91,7 +91,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void addCardNoImages() {
+	public void test_adding_card_with_no_images() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -116,7 +116,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void addCard1Image() {
+	public void test_adding_card_with_one_image() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -144,7 +144,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void addCard3Images() {
+	public void test_adding_card_with_three_images() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -176,7 +176,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void addCard5Images() {
+	public void test_adding_card_with_five_images() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> titlePart =
 				new Http.MultipartFormData.DataPart("title", "Valid title");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> contentPart =
@@ -212,7 +212,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void deleteMyCard() {
+	public void test_delete_owners_card() {
 		when(mockCardRepository.findCardById(UUID.fromString("42a651db-77aa-4884-ac74-f2f4b49601da")))
 				.thenReturn(new Card().setTitle("My card").setContent("1").setImages(Collections.emptyList())
 						.setOwner(mockMyUser).setId(UUID.fromString("42a651db-77aa-4884-ac74-f2f4b49601da")));
@@ -228,7 +228,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void deleteNotMyCard() {
+	public void test_delete_foreign_card() {
 		when(mockCardRepository.findCardById(UUID.fromString("42a651db-77aa-4884-ac74-f2f4b49601da")))
 				.thenReturn(new Card().setTitle("Not my card").setContent("1").setImages(Collections.emptyList())
 						.setOwner(new Users().setUserId(UUID.randomUUID()))
@@ -244,7 +244,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void deleteNonExistentCard() {
+	public void test_delete_non_existent_card() {
 		when(mockCardRepository.findCardById(UUID.fromString("42a651db-77aa-4884-ac74-f2f4b49601da"))).thenReturn(null);
 
 		Result result = route(app, fakeRequest()

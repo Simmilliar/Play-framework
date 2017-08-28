@@ -44,7 +44,7 @@ public class AuthorizationControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void testAuthorize(){
+	public void authorization_verifying(){
 		Users mockUser = mock(Users.class);
 		when(mockUser.isConfirmed()).thenReturn(true);
 		when(mockUser.getUserId()).thenReturn(UUID.randomUUID());
@@ -67,7 +67,7 @@ public class AuthorizationControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void testLogout(){
+	public void logout_verifying(){
 		Session mockSession = mock(Session.class);
 		when(mockSession.getExpirationDate()).thenReturn(System.currentTimeMillis() + 1000000L);
 		when(mockSession.getUser()).thenReturn(new Users());

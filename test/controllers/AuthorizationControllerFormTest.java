@@ -71,7 +71,7 @@ public class AuthorizationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formEmailInvalid() {
+	public void login_failed_invalid_email() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("email", "invalid@email");
 		formData.put("password", "longEnoughPassword");
@@ -85,7 +85,7 @@ public class AuthorizationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formEmailUnregistered() {
+	public void login_failed_unregistered_email() {
 		when(mockUsersRepository.findByEmail("unregistered@email.com")).thenReturn(null);
 
 		Map<String, String> formData = new HashMap<>();
@@ -101,7 +101,7 @@ public class AuthorizationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formEmailUnconfirmed() {
+	public void login_failed_unconfirmed_email() {
 		Users mockUser = mock(Users.class);
 		when(mockUser.isConfirmed()).thenReturn(false);
 		when(mockUsersRepository.findByEmail("unregistered@email.com")).thenReturn(mockUser);
@@ -119,7 +119,7 @@ public class AuthorizationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordMissing() {
+	public void login_failed_missed_password() {
 		Map<String, String> formData = new HashMap<>();
 		formData.put("email", "valid@email.com");
 		//formData.put("password", "longEnoughPassword");
@@ -133,7 +133,7 @@ public class AuthorizationControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordInvalid() {
+	public void login_failed_wrong_password() {
 		Users mockUser = mock(Users.class);
 		when(mockUser.isConfirmed()).thenReturn(true);
 		when(mockUser.getPasswordSalt()).thenReturn("12345678");

@@ -57,7 +57,7 @@ public class ProfileEditorControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void changeAll() {
+	public void test_change_all_fields() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -86,7 +86,7 @@ public class ProfileEditorControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void changeName() {
+	public void test_change_name_only() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -114,7 +114,7 @@ public class ProfileEditorControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void changePassword() {
+	public void test_change_password_only() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Yaroslav");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -142,7 +142,7 @@ public class ProfileEditorControllerFunctionalTest extends WithApplication {
 	}
 
 	@Test
-	public void changeAvatar() {
+	public void test_change_avatar_only() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Yaroslav");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =

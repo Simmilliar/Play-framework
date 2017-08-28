@@ -53,7 +53,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formValid() {
+	public void edit_profile_form_success() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -75,7 +75,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formNameMissing() {
+	public void edit_profile_form_failed_missed_name() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
 				new Http.MultipartFormData.DataPart("password", "longEnoughPassword");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordConfirmPart =
@@ -96,7 +96,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formNameEmpty() {
+	public void edit_profile_form_failed_empty_name() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -119,7 +119,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formNameInvalid() {
+	public void edit_profile_form_failed_invalid_name() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Inavlid~name");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -142,7 +142,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordMissing() {
+	public void edit_profile_form_failed_missed_password() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordConfirmPart =
@@ -162,7 +162,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordEmpty() {
+	public void edit_profile_form_success_empty_password() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -184,7 +184,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordInvalid() {
+	public void edit_profile_form_failed_short_password() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -207,7 +207,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordConfirmMissing() {
+	public void edit_profile_form_failed_missed_password_confirmation() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -227,7 +227,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formPasswordConfirmNotMatch() {
+	public void edit_profile_form_failed_password_confirmation_not_match() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -250,7 +250,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formAvatarMissing() {
+	public void edit_profile_form_failed_avatar_missing() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -270,7 +270,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formAvatarEmpty() {
+	public void edit_profile_form_success_avatar_empty() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -291,7 +291,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formAvatarTooLarge() {
+	public void edit_profile_form_failed_avatar_file_too_large() {
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");
 		Http.MultipartFormData.Part<Source<ByteString, ?>> passwordPart =
@@ -313,7 +313,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 	}
 
 	@Test
-	public void formAvatarNotImage() {
+	public void edit_profile_form_failed_avatar_file_not_a_image() {
 		when(mockFileUploader.uploadImageAndCropSquared(any(File.class), anyInt())).thenReturn(null);
 
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =

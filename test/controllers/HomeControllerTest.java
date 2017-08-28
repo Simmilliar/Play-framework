@@ -41,7 +41,7 @@ public class HomeControllerTest extends WithApplication
 	}
 
 	@Test
-	public void testUnauthorized()
+	public void render_welcome_screen_for_unauthorized_user()
 	{
 		Http.RequestBuilder request = new Http.RequestBuilder()
 				.method(GET)
@@ -54,7 +54,7 @@ public class HomeControllerTest extends WithApplication
 	}
 
 	@Test
-	public void testAuthorized()
+	public void render_users_list_for_authorized_user()
 	{
 		when(mockSession.getExpirationDate()).thenReturn(System.currentTimeMillis() + 1000000L);
 		when(mockSession.getUser()).thenReturn(new Users());

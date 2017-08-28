@@ -45,7 +45,7 @@ public class CardsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessCardsAuthorized() {
+	public void accept_authorized_user_on_cards_page_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -54,7 +54,7 @@ public class CardsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessLoadCardsAuthorized() {
+	public void accept_authorized_user_on_cards_list_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -63,7 +63,7 @@ public class CardsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessAddCardAuthorized() {
+	public void accept_authorized_user_on_add_card_request() {
 		Result result = route(app, fakeRequest()
 				.method(POST)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -73,7 +73,7 @@ public class CardsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessDeleteCardAuthorized() {
+	public void accept_authorized_user_on_delete_card_request() {
 		Result result = route(app, fakeRequest()
 				.method(DELETE)
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
@@ -83,7 +83,7 @@ public class CardsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessCardsUnauthorized() {
+	public void redirect_unauthorized_user_to_home_page_on_cards_page_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.uri(routes.CardsController.cards().url()));
@@ -91,7 +91,7 @@ public class CardsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessLoadCardsUnauthorized() {
+	public void redirect_unauthorized_user_to_home_page_on_cards_list_request() {
 		Result result = route(app, fakeRequest()
 				.method(GET)
 				.uri(routes.CardsController.loadCards().url()));
@@ -99,7 +99,7 @@ public class CardsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessAddCardUnauthorized() {
+	public void redirect_unauthorized_user_to_home_page_on_add_card_request() {
 		Result result = route(app, fakeRequest()
 				.method(POST)
 				.uri(routes.CardsController.addCard().url()));
@@ -107,7 +107,7 @@ public class CardsControllerAccessTest extends WithApplication {
 	}
 
 	@Test
-	public void accessDeleteCardUnauthorized() {
+	public void redirect_unauthorized_user_to_home_page_on_delete_card_request() {
 		Result result = route(app, fakeRequest()
 				.method(DELETE)
 				.uri(routes.CardsController.deleteCard("").url()));
