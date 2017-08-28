@@ -105,7 +105,7 @@ public class CardsController extends Controller
 
 	public Result deleteCard(String cardId)
 	{
-		if (cardId == null || !utils.isUUIDValid(cardId)) { //solved todo move to uuid validation utils
+		if (cardId == null || !utils.isUUIDValid(cardId)) {
 			return badRequest("Wrong card UUID");
 		}
 		Card card = cardRepository.findCardById(UUID.fromString(cardId));
