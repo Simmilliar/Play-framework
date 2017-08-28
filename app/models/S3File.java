@@ -35,7 +35,7 @@ public class S3File extends Model
 
 	public String getUrl()
 	{
-		return "https://" + ConfigFactory.load().getString("s3-server-domain") + "/" + bucket + "/" + id; // solved todo move it to configs
+		return "https://" + ConfigFactory.load().getString("s3-server-domain") + "/" + bucket + "/" + id;
 	}
 
 	@Override
