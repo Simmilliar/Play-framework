@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.UsersRepository;
-import controllers.utils.FileUploader;
+import controllers.utils.FileUploadUtils;
 import controllers.utils.Utils;
 import models.Users;
 import play.data.DynamicForm;
@@ -24,16 +24,16 @@ public class ProfileEditorController extends Controller
 	private final FormFactory formFactory;
 	private final Utils utils;
 	private final UsersRepository usersRepository;
-	private final FileUploader fileUploader;
+	private final FileUploadUtils fileUploadUtils;
 
 	@Inject
 	public ProfileEditorController(FormFactory formFactory, Utils utils, UsersRepository usersRepository,
-								   FileUploader fileUploader)
+								   FileUploadUtils fileUploadUtils)
 	{
 		this.formFactory = formFactory;
 		this.utils = utils;
 		this.usersRepository = usersRepository;
-		this.fileUploader = fileUploader;
+		this.fileUploadUtils = fileUploadUtils;
 	}
 
 	public Result profileEditor()
@@ -84,7 +84,7 @@ public class ProfileEditorController extends Controller
 		}
 		if (((File)avatarFilePart.getFile()).length() > 0)
 		{
-			avatarUrl = fileUploader.uploadImageAndCropSquared((File)avatarFilePart.getFile(), 200);
+			avatarUrl = fileUploadUtils.uploadImageAndCropSquared((File)avatarFilePart.getFile(), 200);
 			if (avatarUrl == null)
 			{
 				return badRequest(views.html.editprofile.render(

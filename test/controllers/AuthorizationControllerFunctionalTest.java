@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.repositories.SessionRepository;
 import controllers.repositories.UsersRepository;
-import controllers.utils.SessionsManager;
+import controllers.utils.SessionsUtils;
 import controllers.utils.Utils;
 import models.Session;
 import models.Users;
@@ -26,19 +26,19 @@ import static play.test.Helpers.*;
 
 public class AuthorizationControllerFunctionalTest extends WithApplication {
 
-	private SessionsManager mockSessionsManager;
+	private SessionsUtils mockSessionsUtils;
 	private SessionRepository mockSessionRepository;
 	private UsersRepository mockUsersRepository;
 
 	@Override
 	protected Application provideApplication() {
 		mockSessionRepository = mock(SessionRepository.class);
-		mockSessionsManager = mock(SessionsManager.class);
+		mockSessionsUtils = mock(SessionsUtils.class);
 		mockUsersRepository = mock(UsersRepository.class);
 
 		return new GuiceApplicationBuilder()
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
-				.overrides(bind(SessionsManager.class).toInstance(mockSessionsManager))
+				.overrides(bind(SessionsUtils.class).toInstance(mockSessionsUtils))
 				.overrides(bind(UsersRepository.class).toInstance(mockUsersRepository))
 				.build();
 	}
@@ -51,7 +51,7 @@ public class AuthorizationControllerFunctionalTest extends WithApplication {
 		when(mockUser.getPasswordSalt()).thenReturn("12345678");
 		when(mockUser.getPasswordHash()).thenReturn(new Utils().hashString("longEnoughPassword", "12345678"));
 		when(mockUsersRepository.findByEmail("valid@email.com")).thenReturn(mockUser);
-		when(mockSessionsManager.registerSession(anyString(), any(UUID.class))).thenReturn("active_token");
+		when(mockSessionsUtils.registerSession(anyString(), any(UUID.class))).thenReturn("active_token");
 
 		Map<String, String> formData = new HashMap<>();
 		formData.put("email", "valid@email.com");
@@ -62,7 +62,7 @@ public class AuthorizationControllerFunctionalTest extends WithApplication {
 				.bodyForm(formData)
 				.uri(routes.AuthorizationController.authorize().url()));
 		assertEquals(SEE_OTHER, result.status());
-		verify(mockSessionsManager, times(1)).registerSession("password", mockUser.getUserId());
+		verify(mockSessionsUtils, times(1)).registerSession("password", mockUser.getUserId());
 		assertTrue(result.cookies().get("session_token").value().equals("active_token"));
 	}
 
@@ -78,7 +78,7 @@ public class AuthorizationControllerFunctionalTest extends WithApplication {
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
 				.uri(routes.AuthorizationController.logout().url()));
 		assertEquals(SEE_OTHER, result.status());
-		verify(mockSessionsManager, times(1)).unregisterSession(eq("active_token"));
+		verify(mockSessionsUtils, times(1)).unregisterSession(eq("active_token"));
 		assertTrue(result.cookies().get("session_token").value().equals(""));
 	}
 }

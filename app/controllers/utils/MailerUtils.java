@@ -5,12 +5,12 @@ import play.libs.mailer.MailerClient;
 
 import javax.inject.Inject;
 
-public class MailerService
+public class MailerUtils
 {
 	private MailerClient mailerClient;
 
 	@Inject
-	public MailerService(MailerClient mailerClient)
+	public MailerUtils(MailerClient mailerClient)
 	{
 		this.mailerClient = mailerClient;
 	}

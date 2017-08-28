@@ -5,7 +5,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.UsersRepository;
-import controllers.utils.SessionsManager;
+import controllers.utils.SessionsUtils;
 import models.Users;
 import play.libs.concurrent.HttpExecutionContext;
 import play.libs.ws.WSClient;
@@ -36,16 +36,16 @@ public class TwitterAuthController
 	private final WSClient wsClient;
 	private final Config config = ConfigFactory.load();
 	private final HttpExecutionContext httpExecutionContext;
-	private final SessionsManager sessionsManager;
+	private final SessionsUtils sessionsUtils;
 	private final UsersRepository usersRepository;
 
 	@Inject
 	public TwitterAuthController(WSClient wsClient, HttpExecutionContext httpExecutionContext,
-								 SessionsManager sessionsManager, UsersRepository usersRepository)
+								 SessionsUtils sessionsUtils, UsersRepository usersRepository)
 	{
 		this.wsClient = wsClient;
 		this.httpExecutionContext = httpExecutionContext;
-		this.sessionsManager = sessionsManager;
+		this.sessionsUtils = sessionsUtils;
 		this.usersRepository = usersRepository;
 	}
 
@@ -126,9 +126,9 @@ public class TwitterAuthController
 								}
 							}
 
-							String sessionToken = sessionsManager.registerSession(sessionsManager.AUTH_TYPE_TWITTER, user.getUserId());
+							String sessionToken = sessionsUtils.registerSession(sessionsUtils.AUTH_TYPE_TWITTER, user.getUserId());
 							response().setCookie(Http.Cookie.builder("session_token", sessionToken)
-									.withMaxAge(java.time.Duration.ofMillis(sessionsManager.TOKEN_LIFETIME)).build()
+									.withMaxAge(java.time.Duration.ofMillis(sessionsUtils.TOKEN_LIFETIME)).build()
 							);
 
 							return redirect(routes.HomeController.index());

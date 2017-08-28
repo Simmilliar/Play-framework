@@ -5,7 +5,7 @@ import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import controllers.repositories.CardRepository;
 import controllers.repositories.SessionRepository;
-import controllers.utils.FileUploader;
+import controllers.utils.FileUploadUtils;
 import models.Card;
 import models.Session;
 import models.Users;
@@ -33,14 +33,14 @@ import static play.test.Helpers.*;
 public class CardsControllerFunctionalTest extends WithApplication {
 
 	private CardRepository mockCardRepository;
-	private FileUploader mockFileUploader;
+	private FileUploadUtils mockFileUploadUtils;
 
 	private Users mockMyUser;
 
 	@Override
 	protected Application provideApplication() {
-		mockFileUploader = mock(FileUploader.class);
-		when(mockFileUploader.uploadImageAndShrink(any(File.class), anyInt()))
+		mockFileUploadUtils = mock(FileUploadUtils.class);
+		when(mockFileUploadUtils.uploadImageAndShrink(any(File.class), anyInt()))
 				.thenReturn("a").thenReturn("b").thenReturn("c").thenReturn("d").thenReturn("e");
 
 		mockMyUser = mock(Users.class);
@@ -57,7 +57,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 
 		return new GuiceApplicationBuilder()
 				.overrides(bind(CardRepository.class).toInstance(mockCardRepository))
-				.overrides(bind(FileUploader.class).toInstance(mockFileUploader))
+				.overrides(bind(FileUploadUtils.class).toInstance(mockFileUploadUtils))
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
 				.build();
 	}
@@ -134,7 +134,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 		assertEquals("{\"id\":null,\"title\":\"Valid title\",\"content\":\"Lorem ipsum dolor sit amet\"," +
 				"\"images\":[\"a\"]}", contentAsString(result));
 		ArgumentCaptor<Card> cardCaptor = ArgumentCaptor.forClass(Card.class);
-		verify(mockFileUploader, times(1)).uploadImageAndShrink(any(File.class), anyInt());
+		verify(mockFileUploadUtils, times(1)).uploadImageAndShrink(any(File.class), anyInt());
 		verify(mockCardRepository, times(1)).saveCard(cardCaptor.capture());
 		Card savedCard = cardCaptor.getValue();
 		assertEquals(savedCard.getOwner().getUserId(), mockMyUser.getUserId());
@@ -166,7 +166,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 		assertEquals("{\"id\":null,\"title\":\"Valid title\",\"content\":\"Lorem ipsum dolor sit amet\"," +
 				"\"images\":[\"a\",\"b\",\"c\"]}", contentAsString(result));
 		ArgumentCaptor<Card> cardCaptor = ArgumentCaptor.forClass(Card.class);
-		verify(mockFileUploader, times(3)).uploadImageAndShrink(any(File.class), anyInt());
+		verify(mockFileUploadUtils, times(3)).uploadImageAndShrink(any(File.class), anyInt());
 		verify(mockCardRepository, times(1)).saveCard(cardCaptor.capture());
 		Card savedCard = cardCaptor.getValue();
 		assertEquals(savedCard.getOwner().getUserId(), mockMyUser.getUserId());
@@ -202,7 +202,7 @@ public class CardsControllerFunctionalTest extends WithApplication {
 		assertEquals("{\"id\":null,\"title\":\"Valid title\",\"content\":\"Lorem ipsum dolor sit amet\"," +
 				"\"images\":[\"a\",\"b\",\"c\",\"d\",\"e\"]}", contentAsString(result));
 		ArgumentCaptor<Card> cardCaptor = ArgumentCaptor.forClass(Card.class);
-		verify(mockFileUploader, times(5)).uploadImageAndShrink(any(File.class), anyInt());
+		verify(mockFileUploadUtils, times(5)).uploadImageAndShrink(any(File.class), anyInt());
 		verify(mockCardRepository, times(1)).saveCard(cardCaptor.capture());
 		Card savedCard = cardCaptor.getValue();
 		assertEquals(savedCard.getOwner().getUserId(), mockMyUser.getUserId());

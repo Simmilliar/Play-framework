@@ -5,7 +5,7 @@ import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import controllers.repositories.SessionRepository;
 import controllers.repositories.UsersRepository;
-import controllers.utils.FileUploader;
+import controllers.utils.FileUploadUtils;
 import controllers.utils.Utils;
 import models.Session;
 import models.Users;
@@ -37,12 +37,12 @@ public class ProfileEditorControllerFunctionalTest extends WithApplication {
 
 	@Override
 	protected Application provideApplication() {
-		FileUploader mockFileUploader = mock(FileUploader.class);
+		FileUploadUtils mockFileUploadUtils = mock(FileUploadUtils.class);
 		mockUsersRepository = mock(UsersRepository.class);
 		SessionRepository mockSessionRepository = mock(SessionRepository.class);
 		Session mockSession = mock(Session.class);
 
-		when(mockFileUploader.uploadImageAndCropSquared(any(File.class), anyInt())).thenReturn("a");
+		when(mockFileUploadUtils.uploadImageAndCropSquared(any(File.class), anyInt())).thenReturn("a");
 		when(mockSession.getUser()).thenReturn(new Users().setName("Yaroslav").setEmail("valid@email.com")
 				.setAvatarUrl("b").setPasswordSalt("12345").setPasswordHash(new Utils()
 						.hashString("longEnoughPassword","12345")).setConfirmed(true));
@@ -52,7 +52,7 @@ public class ProfileEditorControllerFunctionalTest extends WithApplication {
 		return new GuiceApplicationBuilder()
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
 				.overrides(bind(UsersRepository.class).toInstance(mockUsersRepository))
-				.overrides(bind(FileUploader.class).toInstance(mockFileUploader))
+				.overrides(bind(FileUploadUtils.class).toInstance(mockFileUploadUtils))
 				.build();
 	}
 

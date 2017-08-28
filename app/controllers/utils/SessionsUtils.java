@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class SessionsManager
+public class SessionsUtils
 {
 	public final long TOKEN_LIFETIME = TimeUnit.DAYS.toMillis(30);
 	private final Utils utils;
@@ -21,7 +21,7 @@ public class SessionsManager
 	public final String AUTH_TYPE_API = "api";
 
 	@Inject
-	public SessionsManager(Utils utils,SessionRepository sessionRepository, UsersRepository usersRepository)
+	public SessionsUtils(Utils utils, SessionRepository sessionRepository, UsersRepository usersRepository)
 	{
 		this.utils = utils;
 		this.sessionRepository = sessionRepository;

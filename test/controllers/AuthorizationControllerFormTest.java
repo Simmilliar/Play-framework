@@ -1,7 +1,7 @@
 package controllers;
 
 import controllers.repositories.UsersRepository;
-import controllers.utils.SessionsManager;
+import controllers.utils.SessionsUtils;
 import controllers.utils.Utils;
 import models.Users;
 import org.junit.Test;
@@ -28,11 +28,11 @@ public class AuthorizationControllerFormTest extends WithApplication {
 
 	@Override
 	protected Application provideApplication() {
-		SessionsManager mockSessionsManager = mock(SessionsManager.class);
+		SessionsUtils mockSessionsUtils = mock(SessionsUtils.class);
 		mockUsersRepository = mock(UsersRepository.class);
 
 		return new GuiceApplicationBuilder()
-				.overrides(bind(SessionsManager.class).toInstance(mockSessionsManager))
+				.overrides(bind(SessionsUtils.class).toInstance(mockSessionsUtils))
 				.overrides(bind(UsersRepository.class).toInstance(mockUsersRepository))
 				.build();
 	}

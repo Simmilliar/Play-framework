@@ -5,7 +5,7 @@ import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import controllers.repositories.SessionRepository;
 import controllers.repositories.UsersRepository;
-import controllers.utils.FileUploader;
+import controllers.utils.FileUploadUtils;
 import models.Session;
 import models.Users;
 import org.junit.Test;
@@ -31,16 +31,16 @@ import static play.test.Helpers.*;
 
 public class ProfileEditorControllerFormTest extends WithApplication {
 
-	private FileUploader mockFileUploader;
+	private FileUploadUtils mockFileUploadUtils;
 
 	@Override
 	protected Application provideApplication() {
-		mockFileUploader = mock(FileUploader.class);
+		mockFileUploadUtils = mock(FileUploadUtils.class);
 		UsersRepository mockUsersRepository = mock(UsersRepository.class);
 		SessionRepository mockSessionRepository = mock(SessionRepository.class);
 		Session mockSession = mock(Session.class);
 
-		when(mockFileUploader.uploadImageAndCropSquared(any(File.class), anyInt())).thenReturn("a");
+		when(mockFileUploadUtils.uploadImageAndCropSquared(any(File.class), anyInt())).thenReturn("a");
 		when(mockSession.getUser()).thenReturn(new Users().setName("Yaroslav"));
 		when(mockSession.getExpirationDate()).thenReturn(System.currentTimeMillis() + 1000000L);
 		when(mockSessionRepository.findByToken("active_token")).thenReturn(mockSession);
@@ -48,7 +48,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 		return new GuiceApplicationBuilder()
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
 				.overrides(bind(UsersRepository.class).toInstance(mockUsersRepository))
-				.overrides(bind(FileUploader.class).toInstance(mockFileUploader))
+				.overrides(bind(FileUploadUtils.class).toInstance(mockFileUploadUtils))
 				.build();
 	}
 
@@ -314,7 +314,7 @@ public class ProfileEditorControllerFormTest extends WithApplication {
 
 	@Test
 	public void edit_profile_form_failed_avatar_file_not_a_image() {
-		when(mockFileUploader.uploadImageAndCropSquared(any(File.class), anyInt())).thenReturn(null);
+		when(mockFileUploadUtils.uploadImageAndCropSquared(any(File.class), anyInt())).thenReturn(null);
 
 		Http.MultipartFormData.Part<Source<ByteString, ?>> namePart =
 				new Http.MultipartFormData.DataPart("name", "Anatoliy");

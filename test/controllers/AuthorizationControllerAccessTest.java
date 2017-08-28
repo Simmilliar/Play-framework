@@ -2,8 +2,8 @@ package controllers;
 
 import controllers.repositories.SessionRepository;
 import controllers.repositories.UsersRepository;
-import controllers.utils.MailerService;
-import controllers.utils.SessionsManager;
+import controllers.utils.MailerUtils;
+import controllers.utils.SessionsUtils;
 import models.Session;
 import models.Users;
 import org.junit.Test;
@@ -22,14 +22,14 @@ import static play.test.Helpers.*;
 
 public class AuthorizationControllerAccessTest extends WithApplication {
 
-	private SessionsManager mockSessionsManager;
+	private SessionsUtils mockSessionsUtils;
 
 	@Override
 	protected Application provideApplication() {
 		SessionRepository mockSessionRepository = mock(SessionRepository.class);
 		Session mockSession = mock(Session.class);
 		UsersRepository mockUsersRepository = mock(UsersRepository.class);
-		mockSessionsManager = mock(SessionsManager.class);
+		mockSessionsUtils = mock(SessionsUtils.class);
 
 		when(mockSession.getUser()).thenReturn(new Users());
 		when(mockSession.getExpirationDate()).thenReturn(System.currentTimeMillis() + 1000000L);
@@ -38,8 +38,8 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 		return new GuiceApplicationBuilder()
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
 				.overrides(bind(UsersRepository.class).toInstance(mockUsersRepository))
-				.overrides(bind(MailerService.class).toInstance(mock(MailerService.class)))
-				.overrides(bind(SessionsManager.class).toInstance(mockSessionsManager))
+				.overrides(bind(MailerUtils.class).toInstance(mock(MailerUtils.class)))
+				.overrides(bind(SessionsUtils.class).toInstance(mockSessionsUtils))
 				.build();
 	}
 
@@ -69,7 +69,7 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 				.cookie(Http.Cookie.builder("session_token", "active_token").build())
 				.uri(routes.AuthorizationController.logout().url()));
 		assertEquals(SEE_OTHER, result.status());
-		verify(mockSessionsManager, atLeast(1)).unregisterSession(anyString());
+		verify(mockSessionsUtils, atLeast(1)).unregisterSession(anyString());
 	}
 
 	@Test
@@ -95,6 +95,6 @@ public class AuthorizationControllerAccessTest extends WithApplication {
 				.method(GET)
 				.uri(routes.AuthorizationController.logout().url()));
 		assertEquals(SEE_OTHER, result.status());
-		verify(mockSessionsManager, never()).unregisterSession(anyString());
+		verify(mockSessionsUtils, never()).unregisterSession(anyString());
 	}
 }

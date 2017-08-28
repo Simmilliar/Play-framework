@@ -5,7 +5,7 @@ import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import controllers.repositories.CardRepository;
 import controllers.repositories.SessionRepository;
-import controllers.utils.FileUploader;
+import controllers.utils.FileUploadUtils;
 import models.Card;
 import models.Session;
 import models.Users;
@@ -40,7 +40,7 @@ public class CardsControllerFormTest extends WithApplication {
 		mockUser = mock(Users.class);
 		SessionRepository mockSessionRepository = mock(SessionRepository.class);
 		Session mockSession = mock(Session.class);
-		FileUploader mockFileUploader = mock(FileUploader.class);
+		FileUploadUtils mockFileUploadUtils = mock(FileUploadUtils.class);
 
 		when(mockUser.getUserId()).thenReturn(UUID.randomUUID());
 		when(mockSession.getUser()).thenReturn(mockUser);
@@ -49,7 +49,7 @@ public class CardsControllerFormTest extends WithApplication {
 
 		return new GuiceApplicationBuilder()
 				.overrides(bind(CardRepository.class).toInstance(mockCardRepository))
-				.overrides(bind(FileUploader.class).toInstance(mockFileUploader))
+				.overrides(bind(FileUploadUtils.class).toInstance(mockFileUploadUtils))
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
 				.build();
 	}

@@ -2,8 +2,8 @@ package controllers;
 
 import controllers.repositories.SessionRepository;
 import controllers.repositories.UsersRepository;
-import controllers.utils.MailerService;
-import controllers.utils.SessionsManager;
+import controllers.utils.MailerUtils;
+import controllers.utils.SessionsUtils;
 import models.Session;
 import models.Users;
 import org.junit.Test;
@@ -35,8 +35,8 @@ public class RegistrationControllerAccessTest extends WithApplication {
 		return new GuiceApplicationBuilder()
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
 				.overrides(bind(UsersRepository.class).toInstance(mockUsersRepository))
-				.overrides(bind(MailerService.class).toInstance(mock(MailerService.class)))
-				.overrides(bind(SessionsManager.class).toInstance(mock(SessionsManager.class)))
+				.overrides(bind(MailerUtils.class).toInstance(mock(MailerUtils.class)))
+				.overrides(bind(SessionsUtils.class).toInstance(mock(SessionsUtils.class)))
 				.build();
 	}
 

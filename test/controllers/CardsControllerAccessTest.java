@@ -3,7 +3,7 @@ package controllers;
 import controllers.repositories.CardRepository;
 import controllers.repositories.S3FileRepository;
 import controllers.repositories.SessionRepository;
-import controllers.utils.ImageMagickService;
+import controllers.utils.ImageMagickUtils;
 import models.Session;
 import models.Users;
 import org.junit.Test;
@@ -27,7 +27,7 @@ public class CardsControllerAccessTest extends WithApplication {
 	@Override
 	protected Application provideApplication() {
 		CardRepository mockCardRepository = mock(CardRepository.class);
-		ImageMagickService mockMagickService = mock(ImageMagickService.class);
+		ImageMagickUtils mockMagickService = mock(ImageMagickUtils.class);
 		S3FileRepository mockS3FileRepository = mock(S3FileRepository.class);
 		SessionRepository mockSessionRepository = mock(SessionRepository.class);
 		Session mockSession = mock(Session.class);
@@ -38,7 +38,7 @@ public class CardsControllerAccessTest extends WithApplication {
 
 		return new GuiceApplicationBuilder()
 				.overrides(bind(CardRepository.class).toInstance(mockCardRepository))
-				.overrides(bind(ImageMagickService.class).toInstance(mockMagickService))
+				.overrides(bind(ImageMagickUtils.class).toInstance(mockMagickService))
 				.overrides(bind(S3FileRepository.class).toInstance(mockS3FileRepository))
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
 				.build();

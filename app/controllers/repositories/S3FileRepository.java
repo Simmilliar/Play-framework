@@ -7,4 +7,5 @@ import models.S3File;
 public interface S3FileRepository
 {
 	void saveFile(S3File file);
+	boolean deleteFile(S3File file);
 }

@@ -3,7 +3,7 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.UsersRepository;
-import controllers.utils.SessionsManager;
+import controllers.utils.SessionsUtils;
 import models.Users;
 import play.data.DynamicForm;
 import play.data.FormFactory;
@@ -26,18 +26,18 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 public class FacebookAuthController extends Controller
 {
 	private final FormFactory formFactory;
-	private final SessionsManager sessionsManager;
+	private final SessionsUtils sessionsUtils;
 	private final WSClient wsClient;
 	private final HttpExecutionContext httpExecutionContext;
 	private final UsersRepository usersRepository;
 
 	@Inject
-	public FacebookAuthController(FormFactory formFactory, SessionsManager sessionsManager,
+	public FacebookAuthController(FormFactory formFactory, SessionsUtils sessionsUtils,
 								  WSClient wsClient, HttpExecutionContext httpExecutionContext,
 								  UsersRepository usersRepository)
 	{
 		this.formFactory = formFactory;
-		this.sessionsManager = sessionsManager;
+		this.sessionsUtils = sessionsUtils;
 		this.wsClient = wsClient;
 		this.httpExecutionContext = httpExecutionContext;
 		this.usersRepository = usersRepository;
@@ -99,8 +99,8 @@ public class FacebookAuthController extends Controller
 			}
 		}
 
-		String sessionToken = sessionsManager.registerSession(sessionsManager.AUTH_TYPE_FACEBOOK, user.getUserId());
+		String sessionToken = sessionsUtils.registerSession(sessionsUtils.AUTH_TYPE_FACEBOOK, user.getUserId());
 		return Http.Cookie.builder("session_token", sessionToken)
-				.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME)).build();
+				.withMaxAge(Duration.ofMillis(sessionsUtils.TOKEN_LIFETIME)).build();
 	}
 }

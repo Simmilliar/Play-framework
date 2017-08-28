@@ -6,7 +6,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.ProductRepository;
-import controllers.utils.FileUploader;
+import controllers.utils.FileUploadUtils;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;
 import io.ebean.text.json.JsonWriteOptions;
@@ -30,14 +30,14 @@ public class ProductsController extends Controller
 	private final FormFactory formFactory;
 	private final Config configFactory = ConfigFactory.load();
 	private final ProductRepository productRepository;
-	private final FileUploader fileUploader;
+	private final FileUploadUtils fileUploadUtils;
 
 	@Inject
-	public ProductsController(FormFactory formFactory, ProductRepository productRepository, FileUploader fileUploader)
+	public ProductsController(FormFactory formFactory, ProductRepository productRepository, FileUploadUtils fileUploadUtils)
 	{
 		this.formFactory = formFactory;
 		this.productRepository = productRepository;
-		this.fileUploader = fileUploader;
+		this.fileUploadUtils = fileUploadUtils;
 	}
 
 	public Result products()
@@ -92,7 +92,7 @@ public class ProductsController extends Controller
 			{
 				if (filePart != null && ((File)filePart.getFile()).length() > 0)
 				{
-					String imageUrl = fileUploader.uploadImageAndShrink((File) filePart.getFile(), 1024);
+					String imageUrl = fileUploadUtils.uploadImageAndShrink((File) filePart.getFile(), 1024);
 					if (imageUrl == null)
 					{
 						return badRequest("Unable to read file as image.");

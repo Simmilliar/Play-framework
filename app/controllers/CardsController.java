@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.CardRepository;
-import controllers.utils.FileUploader;
+import controllers.utils.FileUploadUtils;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;
@@ -27,16 +27,16 @@ public class CardsController extends Controller
 {
 	private final FormFactory formFactory;
 	private final CardRepository cardRepository;
-	private final FileUploader fileUploader;
+	private final FileUploadUtils fileUploadUtils;
 	private final Utils utils;
 
 	@Inject
-	public CardsController(FormFactory formFactory, CardRepository cardRepository, FileUploader fileUploader,
+	public CardsController(FormFactory formFactory, CardRepository cardRepository, FileUploadUtils fileUploadUtils,
 						   Utils utils)
 	{
 		this.formFactory = formFactory;
 		this.cardRepository = cardRepository;
-		this.fileUploader = fileUploader;
+		this.fileUploadUtils = fileUploadUtils;
 		this.utils = utils;
 	}
 
@@ -76,7 +76,7 @@ public class CardsController extends Controller
 			{
 				if (filePart != null && ((File)filePart.getFile()).length() > 0)
 				{
-					String imageUrl = fileUploader.uploadImageAndShrink((File)filePart.getFile(), 1024);
+					String imageUrl = fileUploadUtils.uploadImageAndShrink((File)filePart.getFile(), 1024);
 					if (imageUrl != null) {
 						imagesUrls.add(imageUrl);
 					} else {

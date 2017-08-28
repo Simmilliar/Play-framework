@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.UsersRepository;
-import controllers.utils.SessionsManager;
+import controllers.utils.SessionsUtils;
 import controllers.utils.Utils;
 import models.Users;
 import play.data.DynamicForm;
@@ -20,16 +20,16 @@ public class AuthorizationController extends Controller
 {
 	private final FormFactory formFactory;
 	private final Utils utils;
-	private final SessionsManager sessionsManager;
+	private final SessionsUtils sessionsUtils;
 	private final UsersRepository usersRepository;
 
 	@Inject
-	public AuthorizationController(FormFactory formFactory, Utils utils, SessionsManager sessionsManager,
+	public AuthorizationController(FormFactory formFactory, Utils utils, SessionsUtils sessionsUtils,
 								   UsersRepository usersRepository)
 	{
 		this.formFactory = formFactory;
 		this.utils = utils;
-		this.sessionsManager = sessionsManager;
+		this.sessionsUtils = sessionsUtils;
 		this.usersRepository = usersRepository;
 	}
 
@@ -68,15 +68,15 @@ public class AuthorizationController extends Controller
 		}
 		//SECTION END: Checking
 
-		String sessionToken = sessionsManager.registerSession(sessionsManager.AUTH_TYPE_PASSWORD, user.getUserId());
+		String sessionToken = sessionsUtils.registerSession(sessionsUtils.AUTH_TYPE_PASSWORD, user.getUserId());
 		response().setCookie(Http.Cookie.builder("session_token", sessionToken)
-				.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME)).build());
+				.withMaxAge(Duration.ofMillis(sessionsUtils.TOKEN_LIFETIME)).build());
 		return redirect(routes.HomeController.index());
 	}
 
 	public Result logout()
 	{
-		sessionsManager.unregisterSession(request().cookies().get("session_token").value());
+		sessionsUtils.unregisterSession(request().cookies().get("session_token").value());
 		response().discardCookie("session_token");
 		return redirect(routes.HomeController.index());
 	}

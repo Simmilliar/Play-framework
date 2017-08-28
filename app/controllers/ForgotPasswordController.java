@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.UsersRepository;
-import controllers.utils.MailerService;
+import controllers.utils.MailerUtils;
 import controllers.utils.Utils;
 import models.Users;
 import play.data.DynamicForm;
@@ -19,15 +19,15 @@ import java.util.concurrent.TimeUnit;
 @With(AuthorizationCheckAction.class)
 public class ForgotPasswordController extends Controller {
 	private final FormFactory formFactory;
-	private final MailerService mailerService;
+	private final MailerUtils mailerUtils;
 	private final Utils utils;
 	private final UsersRepository usersRepository;
 
 	@Inject
-	public ForgotPasswordController(FormFactory formFactory, MailerService mailerService, Utils utils,
+	public ForgotPasswordController(FormFactory formFactory, MailerUtils mailerUtils, Utils utils,
 									UsersRepository usersRepository) {
 		this.formFactory = formFactory;
-		this.mailerService = mailerService;
+		this.mailerUtils = mailerUtils;
 		this.utils = utils;
 		this.usersRepository = usersRepository;
 	}
@@ -66,7 +66,7 @@ public class ForgotPasswordController extends Controller {
 		try {
 			String confirmationBodyText = String.format(Utils.EMAIL_PASSWORD_CHANGE,
 					routes.ForgotPasswordController.changingPassword(confirmationKey).absoluteURL(request()));
-			mailerService.sendEmail(email, "Change password.", confirmationBodyText);
+			mailerUtils.sendEmail(email, "Change password.", confirmationBodyText);
 			flash().put("notification", "We'll sen you an e-mail to change your password.");
 		} catch (Exception e) {
 			return internalServerError(views.html.forgotpassword.render(

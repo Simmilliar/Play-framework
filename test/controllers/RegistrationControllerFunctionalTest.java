@@ -2,8 +2,8 @@ package controllers;
 
 import controllers.repositories.SessionRepository;
 import controllers.repositories.UsersRepository;
-import controllers.utils.MailerService;
-import controllers.utils.SessionsManager;
+import controllers.utils.MailerUtils;
+import controllers.utils.SessionsUtils;
 import controllers.utils.Utils;
 import models.Users;
 import org.junit.Test;
@@ -28,16 +28,16 @@ import static play.test.Helpers.*;
 public class RegistrationControllerFunctionalTest extends WithApplication {
 
 	private UsersRepository mockUsersRepository;
-	private MailerService mockMailerService;
-	private SessionsManager mockSessionsManager;
+	private MailerUtils mockMailerUtils;
+	private SessionsUtils mockSessionsUtils;
 	private ArgumentCaptor<Users> usersCaptor;
 	private ArgumentCaptor<String> mailCaptor;
 
 	@Override
 	protected Application provideApplication() {
 		mockUsersRepository  = mock(UsersRepository.class);
-		mockMailerService = mock(MailerService.class);
-		mockSessionsManager = mock(SessionsManager.class);
+		mockMailerUtils = mock(MailerUtils.class);
+		mockSessionsUtils = mock(SessionsUtils.class);
 		usersCaptor = ArgumentCaptor.forClass(Users.class);
 		mailCaptor = ArgumentCaptor.forClass(String.class);
 		Users spyUnconfirmedUser = spy(new Users());
@@ -48,8 +48,8 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 
 		return new GuiceApplicationBuilder()
 				.overrides(bind(SessionRepository.class).toInstance(mock(SessionRepository.class)))
-				.overrides(bind(MailerService.class).toInstance(mockMailerService))
-				.overrides(bind(SessionsManager.class).toInstance(mockSessionsManager))
+				.overrides(bind(MailerUtils.class).toInstance(mockMailerUtils))
+				.overrides(bind(SessionsUtils.class).toInstance(mockSessionsUtils))
 				.overrides(bind(UsersRepository.class).toInstance(mockUsersRepository))
 				.build();
 	}
@@ -78,7 +78,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 		assertTrue(savedUser.getPasswordSalt().matches("^-*[0-9]+$"));
 		assertEquals(savedUser.getPasswordHash(), new Utils().hashString("longEnoughPassword", savedUser.getPasswordSalt()));
 		assertFalse(savedUser.isConfirmed());
-		verify(mockMailerService, times(1)).sendEmail(eq("valid@email.com"),
+		verify(mockMailerUtils, times(1)).sendEmail(eq("valid@email.com"),
 				eq("Registration confirmation."), mailCaptor.capture());
 		assertTrue(mailCaptor.getValue().contains("To complete your registration you need to confirm your e-mail address by following this link:"));
 		String confirmationKey = new Utils().fetchUUID(mailCaptor.getValue());
@@ -110,7 +110,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 		assertTrue(savedUser.getPasswordSalt().matches("^-*[0-9]+$"));
 		assertEquals(savedUser.getPasswordHash(), new Utils().hashString("longEnoughPassword", savedUser.getPasswordSalt()));
 		assertFalse(savedUser.isConfirmed());
-		verify(mockMailerService, times(1)).sendEmail(eq("not-confirmed@email.com"),
+		verify(mockMailerUtils, times(1)).sendEmail(eq("not-confirmed@email.com"),
 				eq("Registration confirmation."), mailCaptor.capture());
 		assertTrue(mailCaptor.getValue().contains("To complete your registration you need to confirm your e-mail address by following this link:"));
 		String confirmationKey = new Utils().fetchUUID(mailCaptor.getValue());
@@ -127,7 +127,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 		formData.put("password", "longEnoughPassword");
 		formData.put("passwordConfirm", "longEnoughPassword");
 
-		doThrow(new RuntimeException()).when(mockMailerService).sendEmail(anyString(), anyString(), anyString());
+		doThrow(new RuntimeException()).when(mockMailerUtils).sendEmail(anyString(), anyString(), anyString());
 		Result result = route(app, fakeRequest()
 				.method(POST)
 				.bodyForm(formData)
@@ -148,7 +148,7 @@ public class RegistrationControllerFunctionalTest extends WithApplication {
 		assertTrue(usersCaptor.getValue().isConfirmed());
 		assertEquals("", usersCaptor.getValue().getConfirmationKeyHash());
 		assertTrue(usersCaptor.getValue().getConfirmationKeyExpirationDate() < System.currentTimeMillis());
-		verify(mockSessionsManager, times(1))
+		verify(mockSessionsUtils, times(1))
 				.registerSession(eq("password"), eq(usersCaptor.getValue().getUserId()));
 		assertTrue(result.cookies().get("session_token") != null);
 		//for some reasons this didn't work

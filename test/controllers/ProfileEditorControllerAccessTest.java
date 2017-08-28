@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.repositories.SessionRepository;
 import controllers.repositories.UsersRepository;
-import controllers.utils.FileUploader;
+import controllers.utils.FileUploadUtils;
 import models.Session;
 import models.Users;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class ProfileEditorControllerAccessTest extends WithApplication {
 		return new GuiceApplicationBuilder()
 				.overrides(bind(SessionRepository.class).toInstance(mockSessionRepository))
 				.overrides(bind(UsersRepository.class).toInstance(mock(UsersRepository.class)))
-				.overrides(bind(FileUploader.class).toInstance(mock(FileUploader.class)))
+				.overrides(bind(FileUploadUtils.class).toInstance(mock(FileUploadUtils.class)))
 				.build();
 	}
 

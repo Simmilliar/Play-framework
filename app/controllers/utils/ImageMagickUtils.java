@@ -3,7 +3,7 @@ package controllers.utils;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
 
-public class ImageMagickService
+public class ImageMagickUtils
 {
 	public boolean shrinkImage(String fileUrl, int maxDimen)
 	{

@@ -1,11 +1,7 @@
 package models;
 
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.typesafe.config.ConfigFactory;
-import controllers.utils.AmazonService;
 import io.ebean.Model;
-import play.Logger;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -21,7 +17,7 @@ public class S3File extends Model
 	private String bucket;
 
 	@Transient
-	public File file;
+	private File file;
 
 	public UUID getId()
 	{
@@ -38,39 +34,15 @@ public class S3File extends Model
 		return "https://" + ConfigFactory.load().getString("s3-server-domain") + "/" + bucket + "/" + id;
 	}
 
-	@Override
-	public void save()
-	{
-		if (AmazonService.amazonS3 == null)
-		{
-			Logger.error("Could not save because amazonS3 was null");
-			throw new RuntimeException("Could not save");
-		}
-		else
-		{
-			this.bucket = AmazonService.s3Bucket;
-
-			super.save();
-
-			PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, id.toString(), file);
-			putObjectRequest.withCannedAcl(CannedAccessControlList.PublicRead);
-			AmazonService.amazonS3.putObject(putObjectRequest);
-		}
+	public void setBucket(String bucket) {
+		this.bucket = bucket;
 	}
 
-	@Override
-	public boolean delete()
-	{
-		if (AmazonService.amazonS3 == null)
-		{
-			Logger.error("Could not delete because amazonS3 was null");
-			return false;
-		}
-		else
-		{
-			AmazonService.amazonS3.deleteObject(bucket, id.toString());
-			super.delete();
-			return true;
-		}
+	public File getFile() {
+		return file;
+	}
+
+	public void setFile(File file) {
+		this.file = file;
 	}
 }

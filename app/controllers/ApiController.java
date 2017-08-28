@@ -4,16 +4,14 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import controllers.repositories.SessionRepository;
 import controllers.repositories.UsersRepository;
-import controllers.utils.SessionsManager;
+import controllers.utils.FileUploadUtils;
+import controllers.utils.SessionsUtils;
 import controllers.utils.Utils;
 import io.ebean.Ebean;
 import io.ebean.text.PathProperties;
 import io.ebean.text.json.JsonWriteOptions;
-import models.S3File;
 import models.Session;
 import models.Users;
-import org.im4java.core.ConvertCmd;
-import org.im4java.core.IMOperation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -28,19 +26,19 @@ public class ApiController extends Controller
 {
 	private final UsersRepository usersRepository;
 	private final SessionRepository sessionRepository;
-	private final SessionsManager sessionsManager;
+	private final SessionsUtils sessionsUtils;
 	private final Utils utils;
+	private final FileUploadUtils fileUploadUtils;
 
 	@Inject
-	public ApiController(UsersRepository usersRepository,
-						 SessionRepository sessionRepository,
-						 SessionsManager sessionsManager,
-						 Utils utils)
+	public ApiController(UsersRepository usersRepository, SessionRepository sessionRepository,
+						 SessionsUtils sessionsUtils, Utils utils, FileUploadUtils fileUploadUtils)
 	{
 		this.usersRepository = usersRepository;
 		this.sessionRepository = sessionRepository;
-		this.sessionsManager = sessionsManager;
+		this.sessionsUtils = sessionsUtils;
 		this.utils = utils;
+		this.fileUploadUtils = fileUploadUtils;
 	}
 
 	public Result authorize(String email, String password)
@@ -71,7 +69,7 @@ public class ApiController extends Controller
 
 		if (errors.isEmpty())
 		{
-			String sessionToken = sessionsManager.registerSession(sessionsManager.AUTH_TYPE_API,
+			String sessionToken = sessionsUtils.registerSession(sessionsUtils.AUTH_TYPE_API,
 					foundedUser.getUserId());
 			return ok(Json.toJson(sessionToken));
 		}
@@ -92,7 +90,7 @@ public class ApiController extends Controller
 		}
 		if (errors.isEmpty())
 		{
-			sessionsManager.unregisterSession(sessionToken);
+			sessionsUtils.unregisterSession(sessionToken);
 			return ok("");
 		}
 		else
@@ -176,7 +174,8 @@ public class ApiController extends Controller
 	public Result editProfileAvatar(String sessionToken)
 	{
 		Multimap<String, String> errors = ArrayListMultimap.create();
-		Http.MultipartFormData.FilePart avatarFilePart = null;
+		Http.MultipartFormData.FilePart avatarFilePart;
+		String newAvatarUrl = null;
 
 		Session session = sessionRepository.findByToken(sessionToken);
 		if (session == null || session.isExpired())
@@ -190,18 +189,8 @@ public class ApiController extends Controller
 
 			if (avatarFilePart != null && ((File)avatarFilePart.getFile()).length() > 0)
 			{
-				try
-				{
-					ConvertCmd convertCmd = new ConvertCmd();
-					IMOperation imOperation = new IMOperation();
-					imOperation.addImage(((File) avatarFilePart.getFile()).getAbsolutePath());
-					imOperation.resize(100, 100, '^');
-					imOperation.gravity("Center");
-					imOperation.crop(100, 100, 0, 0);
-					imOperation.addImage(((File) avatarFilePart.getFile()).getAbsolutePath());
-					convertCmd.run(imOperation);
-				}
-				catch (Exception e)
+				newAvatarUrl = fileUploadUtils.uploadImageAndCropSquared((File)avatarFilePart.getFile(), 200);
+				if (newAvatarUrl == null)
 				{
 					errors.put("avatarFile", "Unable to read file as image.");
 				}
@@ -214,12 +203,8 @@ public class ApiController extends Controller
 
 		if (errors.isEmpty())
 		{
-			S3File s3File = new S3File();
-			s3File.file = (File) avatarFilePart.getFile();
-			s3File.save();
-
 			Users user = session.getUser();
-			user.setAvatarUrl(s3File.getUrl());
+			user.setAvatarUrl(newAvatarUrl);
 			user.save();
 
 			return ok("");

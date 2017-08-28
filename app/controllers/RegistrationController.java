@@ -2,8 +2,8 @@ package controllers;
 
 import controllers.actions.AuthorizationCheckAction;
 import controllers.repositories.UsersRepository;
-import controllers.utils.MailerService;
-import controllers.utils.SessionsManager;
+import controllers.utils.MailerUtils;
+import controllers.utils.SessionsUtils;
 import controllers.utils.Utils;
 import models.Users;
 import play.data.DynamicForm;
@@ -22,18 +22,18 @@ import java.util.concurrent.TimeUnit;
 @With(AuthorizationCheckAction.class)
 public class RegistrationController extends Controller {
 	private final FormFactory formFactory;
-	private final MailerService mailerService;
+	private final MailerUtils mailerUtils;
 	private final Utils utils;
-	private final SessionsManager sessionsManager;
+	private final SessionsUtils sessionsUtils;
 	private final UsersRepository usersRepository;
 
 	@Inject
-	public RegistrationController(FormFactory formFactory, MailerService mailerService, Utils utils,
-								  SessionsManager sessionsManager, UsersRepository usersRepository) {
+	public RegistrationController(FormFactory formFactory, MailerUtils mailerUtils, Utils utils,
+								  SessionsUtils sessionsUtils, UsersRepository usersRepository) {
 		this.formFactory = formFactory;
-		this.mailerService = mailerService;
+		this.mailerUtils = mailerUtils;
 		this.utils = utils;
-		this.sessionsManager = sessionsManager;
+		this.sessionsUtils = sessionsUtils;
 		this.usersRepository = usersRepository;
 	}
 
@@ -100,7 +100,7 @@ public class RegistrationController extends Controller {
 		try {
 			String confirmationBodyText = String.format(Utils.EMAIL_CONFIRMATION,
 					routes.RegistrationController.confirmEmail(confirmationKey).absoluteURL(request()));
-			mailerService.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
+			mailerUtils.sendEmail(user.getEmail(), "Registration confirmation.", confirmationBodyText);
 			flash().put("notification", "We'll send you an e-mail to confirm your registration.");
 		} catch (Exception e) {
 			return internalServerError(views.html.registration.render(registrationForm.withError("email", "Unable to send confirmation email.")));
@@ -121,9 +121,9 @@ public class RegistrationController extends Controller {
 
 			flash().put("notification", "You were successfully registered!");
 
-			String sessionToken = sessionsManager.registerSession(sessionsManager.AUTH_TYPE_PASSWORD, user.getUserId());
+			String sessionToken = sessionsUtils.registerSession(sessionsUtils.AUTH_TYPE_PASSWORD, user.getUserId());
 			response().setCookie(Http.Cookie.builder("session_token", sessionToken)
-					.withMaxAge(Duration.ofMillis(sessionsManager.TOKEN_LIFETIME)).build());
+					.withMaxAge(Duration.ofMillis(sessionsUtils.TOKEN_LIFETIME)).build());
 		}
 		return redirect(routes.HomeController.index());
 	}
